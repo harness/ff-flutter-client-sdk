@@ -128,7 +128,7 @@ class CfClient {
     _listenerSet.remove(listener);
   }
 
-  Future<void> destroy() async {
+  static Future<void> destroy() async {
     return _channel.invokeMethod('destroy');
   }
 }
