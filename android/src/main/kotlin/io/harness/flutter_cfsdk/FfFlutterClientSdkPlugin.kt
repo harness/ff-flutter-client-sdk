@@ -164,6 +164,10 @@ class FfFlutterClientSdkPlugin: FlutterPlugin, MethodCallHandler {
     return CfClient.getInstance().numberVariation(args.first, target, args.second as Int).toInt()
   }
 
+  private fun invokeDestroy(){
+    CfClient.getInstance().destroy()
+  }
+
   private fun invokeJsonEvaluation(@NonNull call: MethodCall): Map<String, Any?>? {
     val args = extractEvaluationArgs(call)
     return try {
@@ -238,23 +242,27 @@ class FfFlutterClientSdkPlugin: FlutterPlugin, MethodCallHandler {
     }
   }
 
-    override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
-        when(call.method) {
-            "initialize" -> invokeInitialize(call, result)
-            "stringVariation" -> result.success(invokeStringEvaluation(call))
-            "boolVariation" ->result.success(invokeBoolEvaluation(call))
-            "numberVariation" ->result.success(invokeNumberEvaluation(call))
-            "jsonVariation" -> {
-                val evaluation = invokeJsonEvaluation(call)
-                if (evaluation == null) result.notImplemented()
-                else result.success(evaluation)
-            }
-            "registerEventsListener" ->  if (listener == null) {
-                registerEventListener()
-                result.success(0)
-            }
-            else ->  result.notImplemented()
-        }
+  override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
+    when(call.method) {
+      "initialize" -> invokeInitialize(call, result)
+      "stringVariation" -> result.success(invokeStringEvaluation(call))
+      "boolVariation" ->result.success(invokeBoolEvaluation(call))
+      "numberVariation" ->result.success(invokeNumberEvaluation(call))
+      "jsonVariation" -> {
+        val evaluation = invokeJsonEvaluation(call)
+        if (evaluation == null) result.notImplemented()
+        else result.success(evaluation)
+      }
+      "registerEventsListener" ->  if (listener == null) {
+        registerEventListener()
+        result.success(0)
+      }
+      "destroy" -> {
+        invokeDestroy()
+        result.success(0)
+      }
+      else ->  result.notImplemented()
+    }
   }
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {

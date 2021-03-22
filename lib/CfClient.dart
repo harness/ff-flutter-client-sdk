@@ -48,7 +48,7 @@ class CfClient {
   static const MethodChannel _channel = const MethodChannel('ff_flutter_client_sdk');
   static const MethodChannel _hostChannel = const MethodChannel('cf_flutter_host');
 
-  static List<CfEventsListener> _listenerSet = [];
+  static Set<CfEventsListener> _listenerSet = {};
 
   static Future<void> _hostChannelHandler(MethodCall methodCall) async {
     if (methodCall.method == "start") {
@@ -62,7 +62,7 @@ class CfClient {
     } else if (methodCall.method == "evaluation_change") {
       String id = methodCall.arguments["evaluationId"];
       dynamic value = methodCall.arguments["evaluationValue"];
-      print('\nreceived event ' + id + "\n" + "$value");
+
       EvaluationResponse response = EvaluationResponse(id, value);
 
       _listenerSet.forEach((element) {
