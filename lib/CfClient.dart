@@ -48,20 +48,26 @@ class CfClient {
   static const MethodChannel _channel = const MethodChannel('ff_flutter_client_sdk');
   static const MethodChannel _hostChannel = const MethodChannel('cf_flutter_host');
 
-  static CfEventsListener _listenerSet;
+  static List<CfEventsListener> _listenerSet = [];
+
   static Future<void> _hostChannelHandler(MethodCall methodCall) async {
     if (methodCall.method == "start") {
-      if (_listenerSet != null) _listenerSet(null, EventType.START);
+      _listenerSet.forEach((element) {
+        element(null, EventType.START);
+      });
     } else if (methodCall.method == "end") {
-
-      if (_listenerSet != null) _listenerSet(null, EventType.END);
+      _listenerSet.forEach((element) {
+        element(null, EventType.END);
+      });
     } else if (methodCall.method == "evaluation_change") {
-        String id = methodCall.arguments["evaluationId"];
-        dynamic value = methodCall.arguments["evaluationValue"];
-        print('\nreceived event ' + id + "\n" + "$value");
-        EvaluationResponse response = EvaluationResponse(id, value);
+      String id = methodCall.arguments["evaluationId"];
+      dynamic value = methodCall.arguments["evaluationValue"];
+      print('\nreceived event ' + id + "\n" + "$value");
+      EvaluationResponse response = EvaluationResponse(id, value);
 
-      if (_listenerSet != null) _listenerSet(response, EventType.EVALUATION_CHANGE);
+      _listenerSet.forEach((element) {
+        element(response, EventType.EVALUATION_CHANGE);
+      });
     } else if (methodCall.method == "evaluation_polling") {
 
       List list = methodCall.arguments["evaluationData"] as List;
@@ -74,7 +80,10 @@ class CfClient {
         resultList.add(EvaluationResponse(id, value));
       });
 
-      if (_listenerSet != null) _listenerSet(resultList, EventType.EVALUATION_POLLING);
+
+      _listenerSet.forEach((element) {
+        element(resultList, EventType.EVALUATION_POLLING);
+      });
     }
   }
 
@@ -111,8 +120,12 @@ class CfClient {
   }
 
   static Future<void> registerEventsListener(CfEventsListener listener) async {
-    _listenerSet = listener;
+    _listenerSet.add(listener);
     return _channel.invokeMethod('registerEventsListener');
+  }
+  
+  static Future<void> unregisterEventsListener(CfEventsListener listener) async {
+    _listenerSet.remove(listener);
   }
 
   Future<void> destroy() async {
