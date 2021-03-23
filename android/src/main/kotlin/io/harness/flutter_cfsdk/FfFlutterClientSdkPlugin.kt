@@ -100,6 +100,7 @@ class FfFlutterClientSdkPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   private fun registerEventListener() {
+    if (listener != null) return
     listener = EventsListener {
       when (it.eventType) {
           StatusEvent.EVENT_TYPE.SSE_START -> {
@@ -161,7 +162,9 @@ class FfFlutterClientSdkPlugin: FlutterPlugin, MethodCallHandler {
 
   private fun invokeNumberEvaluation(@NonNull call: MethodCall) : Number{
     val args = extractEvaluationArgs(call)
-    return CfClient.getInstance().numberVariation(args.first, target, args.second as Int).toInt()
+    println("extracting number argument ${args.second ?: ""}");
+    val number: Number? = args.second as Number?
+    return CfClient.getInstance().numberVariation(args.first, target, number?.toInt() ?: 0)
   }
 
   private fun invokeDestroy(){
@@ -254,7 +257,7 @@ class FfFlutterClientSdkPlugin: FlutterPlugin, MethodCallHandler {
         if (evaluation == null) result.notImplemented()
         else result.success(evaluation)
       }
-      "registerEventsListener" ->  if (listener == null) {
+      "registerEventsListener" -> {
         registerEventListener()
         result.success(0)
       }
