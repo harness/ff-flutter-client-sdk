@@ -9,7 +9,7 @@ Harness CF Flutter SDK
 
 ## _Setup_
 
-To install SDK declare a dependency to project's `pubspec.yaml` file:
+To install SDK, declare a dependency to project's `pubspec.yaml` file:
 ```Dart
 ff_flutter_client_sdk: ^0.0.1
 ```
@@ -19,15 +19,15 @@ Then, you may import package to your project
 import 'package:ff_flutter_client_sdk/CfClient.dart';
 ```
 
-After this step, the SDK elements, primarily `CfClient` should be accessible in main application.
+After this step, the SDK elements, primarily `CfClient`, should be accessible in main application.
 
 ## **_Initialization_**
-`CfClient` is base class that provides all features of SDK.
+`CfClient` is base class that provides all thefeatures of SDK.
 
 ```Dart
 final conf = CfConfigurationBuilder()
-    .setStreamEnabled(false)
-    .setPollingInterval(20) //time in seconds
+    .setStreamEnabled(true)
+    .setPollingInterval(60) //time in seconds (minimum value is 60)
     .build();
 final target = CfTargetBuilder().setIdentifier(name).build();
 
@@ -56,7 +56,7 @@ The Public API exposes a few methods that you can utilize:
 
 * `static Future<void> unregisterEventsListener(CfEventsListener listener) `
 
-* ` Future<void> destroy()`
+* `static Future<void> destroy()`
 <br><br>
 
 
@@ -92,27 +92,37 @@ final jsonEvaluation = await CfClient.jsonVariation("demo_json_evaluation", {});
 This method provides a way to register a listener for different events that might be triggered by SDK, indicating specific change in SDK itself.
 
 ```Dart
-    CfClient.registerEventsListener((evaluationMap, eventType) {
+    CfClient.registerEventsListener((EvaluationResponse, EventType) {
      
     });
 
 ```
 
-Triggered event will have one of the following types:
+Triggered event will have one of the following types.
 
 ```Dart
 enum EventType {
-    START,
-    END,
+    SSE_START,
+    SSE_END,
     EVALUATION_POLLING,
     EVALUATION_CHANGE
 }
+```
+
+Each type will return a corresponding value as shown in the table below.
+```Dart
+| EventType          | Returns                  |
+| :----------------  | :-----------------------:|
+| SSE_START          | null                     |
+| SSE_END            | null                     |
+| EVALUATION_POLLING | List<EvaluationResponse> |
+| EVALUATION_CHANGE  | EvaluationResponse       |
 
 ```
 Visit documentation for complete list of possible types and values they provide.
 
 To avoid unexpected behaviour, when listener is not needed anymore, a caller should call 
-`CfClien.unregisterEventsListener(eventsListener)`
+`CfClient.unregisterEventsListener(eventsListener)`
 This way the sdk will remove desired listener from internal list.
 
 ## _Shutting down the SDK_
