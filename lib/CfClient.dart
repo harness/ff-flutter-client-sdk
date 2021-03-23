@@ -48,7 +48,7 @@ class CfClient {
   static const MethodChannel _channel = const MethodChannel('ff_flutter_client_sdk');
   static const MethodChannel _hostChannel = const MethodChannel('cf_flutter_host');
 
-  static Set<CfEventsListener> _listenerSet = {};
+  static Set<CfEventsListener> _listenerSet = new HashSet();
 
   static Future<void> _hostChannelHandler(MethodCall methodCall) async {
     if (methodCall.method == "start") {
@@ -129,6 +129,7 @@ class CfClient {
   }
 
   static Future<void> destroy() async {
+    _listenerSet.clear();
     return _channel.invokeMethod('destroy');
   }
 }

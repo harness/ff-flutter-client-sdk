@@ -165,6 +165,7 @@ class FfFlutterClientSdkPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   private fun invokeDestroy(){
+    listener = null
     CfClient.getInstance().destroy()
   }
 
