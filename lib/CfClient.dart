@@ -36,8 +36,8 @@ class EvaluationResponse {
 }
 
 enum EventType {
-  START,
-  END,
+  SSE_START,
+  SSE_END,
   EVALUATION_POLLING,
   EVALUATION_CHANGE
 }
@@ -53,11 +53,11 @@ class CfClient {
   static Future<void> _hostChannelHandler(MethodCall methodCall) async {
     if (methodCall.method == "start") {
       _listenerSet.forEach((element) {
-        element(null, EventType.START);
+        element(null, EventType.SSE_START);
       });
     } else if (methodCall.method == "end") {
       _listenerSet.forEach((element) {
-        element(null, EventType.END);
+        element(null, EventType.SSE_END);
       });
     } else if (methodCall.method == "evaluation_change") {
       String id = methodCall.arguments["evaluationId"];

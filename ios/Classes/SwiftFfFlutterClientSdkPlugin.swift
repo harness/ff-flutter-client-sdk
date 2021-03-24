@@ -98,7 +98,10 @@ public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
 			case .registerEventsListener:
 				CfClient.sharedInstance.registerEventsListener() { eventType in
 					switch eventType {
-						case .failure(let error): result(error)
+						case .failure(let error): 
+							DispatchQueue.main.async {
+								self.hostChannel.invokeMethod(EventTypeId.end.rawValue, arguments: nil);
+							}
 						case .success(let eventType):
 							switch eventType {
 								case .onOpen:

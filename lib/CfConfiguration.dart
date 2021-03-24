@@ -27,7 +27,7 @@ class CfConfiguration {
 
 class CfConfigurationBuilder {
   String _configUrl = "https://config.feature-flags.uat.harness.io/api/1.0";
-  String _eventUrl = "https://config.feature-flags.uat.harness.io/api/1.0";
+  String _eventUrl = "https://config.feature-flags.uat.harness.io/api/1.0/stream";
   bool _streamEnabled = false;
   bool _analyticsEnabled = true;
   int _pollingInterval = 60;
