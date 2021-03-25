@@ -15,6 +15,7 @@ import io.flutter.plugin.common.PluginRegistry.Registrar
 import io.harness.cfsdk.CfClient
 import io.harness.cfsdk.CfConfiguration
 import io.harness.cfsdk.cloud.core.model.Evaluation
+import io.harness.cfsdk.cloud.model.Target
 import io.harness.cfsdk.cloud.oksse.EventsListener
 import io.harness.cfsdk.cloud.oksse.model.StatusEvent
 import org.json.JSONArray
@@ -33,7 +34,6 @@ class FfFlutterClientSdkPlugin: FlutterPlugin, MethodCallHandler {
   private lateinit var hostChannel : MethodChannel
   private var listener: EventsListener? = null
   private val handler: Handler = Handler(Looper.myLooper()!!)
-  private var target: String? = null
 
   private fun postToMainThread(action: () -> Unit) {
     if (handler.looper == Looper.myLooper()) {
@@ -76,14 +76,14 @@ class FfFlutterClientSdkPlugin: FlutterPlugin, MethodCallHandler {
 
     if (config != null) {
 
-      target = targetMap?.get("identifier") as String?
+      val target = targetMap?.get("identifier") as String?
 
       val conf = configFromMap(config)
-              .target(target)
               .build()
 
+      val targetInstance = Target().identifier(target)
 
-      CfClient.getInstance().initialize(application, key, conf) { auth ->
+      CfClient.getInstance().initialize(application, key, conf, targetInstance) { auth ->
         postToMainThread {
           print(auth.environment)
           result.success(true)
@@ -152,19 +152,19 @@ class FfFlutterClientSdkPlugin: FlutterPlugin, MethodCallHandler {
 
     private fun invokeStringEvaluation(@NonNull call: MethodCall) : String{
     val args = extractEvaluationArgs(call)
-    return CfClient.getInstance().stringVariation(args.first, target, args.second as String)
+    return CfClient.getInstance().stringVariation(args.first, args.second as String)
   }
 
   private fun invokeBoolEvaluation(@NonNull call: MethodCall) : Boolean{
     val args = extractEvaluationArgs(call)
-    return CfClient.getInstance().boolVariation(args.first, target, args.second as Boolean)
+    return CfClient.getInstance().boolVariation(args.first, args.second as Boolean)
   }
 
   private fun invokeNumberEvaluation(@NonNull call: MethodCall) : Number{
     val args = extractEvaluationArgs(call)
     println("extracting number argument ${args.second ?: ""}");
     val number: Number? = args.second as Number?
-    return CfClient.getInstance().numberVariation(args.first, target, number?.toInt() ?: 0)
+    return CfClient.getInstance().numberVariation(args.first, number?.toDouble() ?: 0.0)
   }
 
   private fun invokeDestroy(){
@@ -179,7 +179,7 @@ class FfFlutterClientSdkPlugin: FlutterPlugin, MethodCallHandler {
       val defaultValue = jsonElementFromBridge(args.second as Map<String, Any>)
       println("\nreceived on native: $defaultValue")
 
-      val jsonObject= CfClient.getInstance().jsonVariation(args.first, target, defaultValue)
+      val jsonObject= CfClient.getInstance().jsonVariation(args.first, defaultValue)
       mutableMapOf(Pair(flag, jsonElementToBridge(jsonObject)))
     } catch (e: Exception) {
       e.printStackTrace()
