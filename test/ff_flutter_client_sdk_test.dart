@@ -9,7 +9,33 @@ void main() {
 
   setUp(() {
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
-      return '42';
+      switch(methodCall.method) {
+        case "initialize":
+          return true;
+        case "boolVariation":
+          Map<dynamic, dynamic> args = methodCall.arguments;
+          String evaluationId = args["evaluationId"];
+          switch (evaluationId) {
+            case "demo_first_bool_id":
+              return true;
+            case "demo_second_bool_id":
+              return false;
+          }
+          break;
+        case "stringVariation":
+          Map<dynamic, dynamic> args = methodCall.arguments;
+          String evaluationId = args["evaluationId"];
+          String defaultValue = args["defaultValue"];
+          switch (evaluationId) {
+            case "demo_first_id":
+              return "first_value";
+            case "demo_empty_id":
+              return "demo_value";
+            default:
+              return defaultValue;
+          }
+      }
+      return false;
     });
   });
 
@@ -17,7 +43,17 @@ void main() {
     channel.setMockMethodCallHandler(null);
   });
 
-  test('getPlatformVersion', () async {
-    // expect(await FfFlutterClientSdk.platformVersion, '42');
+  test('initializeMethod', () async {
+    expect((await CfClient.initialize("", CfConfigurationBuilder().build(), CfTargetBuilder().build())).success, true);
   });
+
+  test('stringVariation', () async {
+    expect((await CfClient.stringVariation("demo_first_id", "demo_value")), "first_value");
+    expect((await CfClient.stringVariation("demo_empty_id", "demo_value")), "demo_value");
+  });
+  test('boolVariation', () async {
+    expect((await CfClient.boolVariation("demo_first_bool_id", false)), true);
+    expect((await CfClient.boolVariation("demo_second_bool_id", false)), false);
+  });
+
 }
