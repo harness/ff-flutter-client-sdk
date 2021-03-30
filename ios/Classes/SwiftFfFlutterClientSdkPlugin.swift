@@ -98,7 +98,7 @@ public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
 			case .registerEventsListener:
 				CfClient.sharedInstance.registerEventsListener() { eventType in
 					switch eventType {
-						case .failure(let error): 
+						case .failure(_): 
 							DispatchQueue.main.async {
 								self.hostChannel.invokeMethod(EventTypeId.end.rawValue, arguments: nil);
 							}
@@ -185,15 +185,13 @@ public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
 			return ValueType.bool(value as! Bool)
 		} else if value is Int {
 			return ValueType.int(value as! Int)
-		} else if value is [String:Any] {
-			guard value != nil else {return ValueType.unsupported}
+		} else {
 			let subObj = value as! [String:Any]
 			let key = subObj.keys.first!
 			let subVal = subObj[key]
 			let valueType = determineType(subVal)
 			return ValueType.object([key:valueType])
 		}
-		return ValueType.unsupported
 	}
 		
 	func extractValue(_ valueType :ValueType) -> Any? {
@@ -202,7 +200,6 @@ public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
 			case .bool(let bool): return bool
 			case .int(let int): return int
 			case .object(let object): return object
-			case .unsupported: return nil
 		}
 	}
 	
