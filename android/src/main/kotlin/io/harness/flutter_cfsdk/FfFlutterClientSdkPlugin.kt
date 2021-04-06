@@ -94,8 +94,8 @@ class FfFlutterClientSdkPlugin: FlutterPlugin, MethodCallHandler {
 
   private fun evaluationToMap(evaluation: Evaluation) : Map<String, Any>{
     return mutableMapOf<String, Any>().apply {
-      this["evaluationId"] = evaluation.flag
-      this["evaluationValue"] = evaluation.getValue()
+      this["flag"] = evaluation.flag
+      this["value"] = evaluation.getValue()
     }
   }
 
@@ -145,9 +145,9 @@ class FfFlutterClientSdkPlugin: FlutterPlugin, MethodCallHandler {
 
 
     private fun extractEvaluationArgs(call: MethodCall) : Pair<String?, Any?> {
-        val evaluationId : String?= call.argument("evaluationId")
+        val flag : String?= call.argument("flag")
         val defaultValue: Any? = call.argument("defaultValue")
-        return Pair(evaluationId, defaultValue)
+        return Pair(flag, defaultValue)
     }
 
     private fun invokeStringEvaluation(@NonNull call: MethodCall) : String{

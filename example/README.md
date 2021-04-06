@@ -46,16 +46,16 @@ CfClient.registerEventsListener((responseData, eventType) {
         print("SSE Completed");
         break;
       case EventType.EVALUATION_CHANGE:
-        String key = (responseData as EvaluationResponse).evaluationId;
-        dynamic value = (responseData as EvaluationResponse).evaluationValue;
+        String flag = (responseData as EvaluationResponse).flag;
+        dynamic value = (responseData as EvaluationResponse).value;
 
         break;
       case EventType.EVALUATION_POLLING:
         List pollingResult = responseData;
 
         pollingResult.forEach((element) {
-          String key = (element as EvaluationResponse).evaluationId;
-          dynamic value = (element as EvaluationResponse).evaluationValue;
+          String flag = (element as EvaluationResponse).flag;
+          dynamic value = (element as EvaluationResponse).value;
 
         });
         break;
