@@ -117,7 +117,7 @@ public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
 									
 									let evaluationArray = evals.map { eval -> [String:Any] in
 										let value = self.extractValue(eval.value)
-										return ["evaluationId": eval.flag, "evaluationValue": value ?? ""]
+										return ["flag": eval.flag, "value": value ?? ""]
 									}
 
 									let content = ["evaluationData": evaluationArray]
@@ -130,7 +130,7 @@ public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
 									guard let eval = eval else { result(nil); return }
 									
 									let value = self.extractValue(eval.value)
-									let content = ["evaluationId": eval.flag, "evaluationValue": value ?? ""]
+									let content = ["flag": eval.flag, "value": value ?? ""]
 									
 									DispatchQueue.main.async {
 										self.hostChannel.invokeMethod(EventTypeId.evaluationChange.rawValue, arguments: content)
@@ -142,19 +142,19 @@ public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
 				}
 				
 			case .stringVariation:
-				CfClient.sharedInstance.stringVariation(evaluationId: args?["evaluationId"] as! String, defaultValue: args?["defaultValue"] as? String) { (evaluation) in
+				CfClient.sharedInstance.stringVariation(evaluationId: args?["flag"] as! String, defaultValue: args?["value"] as? String) { (evaluation) in
 					guard let evaluation = evaluation else {return}
 					result(evaluation.value.stringValue)
 				}
 				
 			case .boolVariation:
-				CfClient.sharedInstance.boolVariation(evaluationId: args?["evaluationId"] as! String, defaultValue: args?["defaultValue"] as? Bool) { (evaluation) in
+				CfClient.sharedInstance.boolVariation(evaluationId: args?["flag"] as! String, defaultValue: args?["value"] as? Bool) { (evaluation) in
 					guard let evaluation = evaluation else {return}
 					result(evaluation.value.boolValue)
 				}
 				
 			case .numberVariation:
-				CfClient.sharedInstance.numberVariation(evaluationId: args?["evaluationId"] as! String, defaultValue: args?["defaultValue"] as? Int) { (evaluation) in
+				CfClient.sharedInstance.numberVariation(evaluationId: args?["flag"] as! String, defaultValue: args?["value"] as? Int) { (evaluation) in
 					guard let evaluation = evaluation else {return}
 					result(Double(evaluation.value.intValue ?? 0))
 				}
@@ -166,7 +166,7 @@ public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
 				let value = defaultObject[key]
 				let valueType: ValueType = determineType(value)
 				
-				CfClient.sharedInstance.jsonVariation(evaluationId: args?["evaluationId"] as! String, defaultValue: [key:valueType]) { (evaluation) in
+				CfClient.sharedInstance.jsonVariation(evaluationId: args?["flag"] as! String, defaultValue: [key:valueType]) { (evaluation) in
 					guard let evaluation = evaluation else {return}
 					if let value = evaluation.value.stringValue {
 						result(self.parseJson(from: value))

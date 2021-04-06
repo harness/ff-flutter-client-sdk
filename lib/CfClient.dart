@@ -15,24 +15,24 @@ class InitializationResult {
 }
 
 class EvaluationRequest {
-  String evaluationId;
+  String flag;
   dynamic defaultValue;
 
-  EvaluationRequest(this.evaluationId, this.defaultValue);
+  EvaluationRequest(this.flag, this.defaultValue);
 
   Map<String, dynamic> toMap() {
-    return {"evaluationId": evaluationId, 'defaultValue': defaultValue};
+    return {"flag": flag, 'defaultValue': defaultValue};
   }
 }
 
 /// Class representing a single evaluation response. It carries information about
-/// changed evaluation's id and its value. The value type is dynamic and it is
+/// changed evaluation's flag and its value. The value type is dynamic and it is
 /// SDK's end-user responsibility to know what type is used for given id
 class EvaluationResponse {
-  String evaluationId;
-  dynamic evaluationValue;
+  String flag;
+  dynamic value;
 
-  EvaluationResponse(this.evaluationId, this.evaluationValue);
+  EvaluationResponse(this.flag, this.value);
 }
 
 /// Class used in [CfEventsListener] as possible event type that can be triggered by SDK.
@@ -90,10 +90,10 @@ class CfClient {
         element(null, EventType.SSE_END);
       });
     } else if (methodCall.method == "evaluation_change") {
-      String id = methodCall.arguments["evaluationId"];
-      dynamic value = methodCall.arguments["evaluationValue"];
+      String flag = methodCall.arguments["flag"];
+      dynamic value = methodCall.arguments["value"];
 
-      EvaluationResponse response = EvaluationResponse(id, value);
+      EvaluationResponse response = EvaluationResponse(flag, value);
 
       _listenerSet.forEach((element) {
         element(response, EventType.EVALUATION_CHANGE);
@@ -103,10 +103,10 @@ class CfClient {
       List<EvaluationResponse> resultList = [];
 
       list.forEach((element) {
-        String id = element["evaluationId"];
-        dynamic value = element["evaluationValue"];
+        String flag = element["flag"];
+        dynamic value = element["value"];
 
-        resultList.add(EvaluationResponse(id, value));
+        resultList.add(EvaluationResponse(flag, value));
       });
 
       _listenerSet.forEach((element) {
@@ -149,9 +149,9 @@ class CfClient {
   }
 
   static Future<Map<dynamic, dynamic>> jsonVariation(
-      String evaluationId, Map<dynamic, dynamic> defaultValue) async {
+      String flag, Map<dynamic, dynamic> defaultValue) async {
     return _sendMessage(
-        'jsonVariation', new EvaluationRequest(evaluationId, defaultValue));
+        'jsonVariation', new EvaluationRequest(flag, defaultValue));
   }
 
   static Future<T> _sendMessage<T>(
