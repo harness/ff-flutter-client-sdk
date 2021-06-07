@@ -70,6 +70,7 @@ class FfFlutterClientSdkPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   private fun invokeInitialize(@NonNull call: MethodCall, @NonNull result: Result) {
+
     val config : Map<String, Any>? = call.argument("configuration")
     val key: String? = call.argument("apiKey")
     val targetMap: Map<String, Any>? = call.argument("target")
@@ -83,10 +84,18 @@ class FfFlutterClientSdkPlugin: FlutterPlugin, MethodCallHandler {
 
       val targetInstance = Target().identifier(target)
 
-      CfClient.getInstance().initialize(application, key, conf, targetInstance) { auth ->
+      CfClient.getInstance().initialize(
+
+              application,
+              key,
+              conf,
+              targetInstance
+
+      ) { auth, execResult ->
+
         postToMainThread {
           print(auth.environment)
-          result.success(true)
+          result.success(execResult.isSuccess())
         }
       }
     }

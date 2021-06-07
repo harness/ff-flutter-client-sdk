@@ -3,7 +3,9 @@ library ff_flutter_client_sdk;
 import 'dart:async';
 import 'dart:collection';
 import 'package:flutter/services.dart';
+
 part 'CfTarget.dart';
+
 part 'CfConfiguration.dart';
 
 class InitializationResult {
