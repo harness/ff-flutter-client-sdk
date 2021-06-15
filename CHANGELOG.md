@@ -1,3 +1,13 @@
+## 1.0.0
+
+This release introduces the latest changes and fixes for Android and iOS platforms.
+Flutter SDK now targets FF production servers.  
+
+New changes:
+
+* Wrapped Android SDK version updated to 1.0.0
+* Wrapped iOS SDK version updated to 1.0.0.
+
 ## 0.0.2
 
 This release introduces the latest changes and fixes for Android and iOS platforms.
