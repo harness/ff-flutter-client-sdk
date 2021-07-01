@@ -1,3 +1,7 @@
+## 1.0.1
+
+Added support for FF metrics.
+
 ## 1.0.0
 
 This release introduces the latest changes and fixes for Android and iOS platforms.
