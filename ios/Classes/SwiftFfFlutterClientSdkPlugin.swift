@@ -1,27 +1,32 @@
 import Flutter
 import UIKit
+
 import ff_ios_client_sdk
 
 public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
+
 	private var channel : FlutterMethodChannel
 	private var hostChannel : FlutterMethodChannel
 
 	init(channel: FlutterMethodChannel, hostChannel: FlutterMethodChannel) {
+
 		self.channel = channel
 		self.hostChannel = hostChannel
 	}
 
 	public static func register(with registrar: FlutterPluginRegistrar) {
+
 		let channel = FlutterMethodChannel(name: "ff_flutter_client_sdk", binaryMessenger: registrar.messenger())
 		let hostChannel = FlutterMethodChannel(name: "cf_flutter_host", binaryMessenger: registrar.messenger())
 		let instance = SwiftFfFlutterClientSdkPlugin(channel: channel, hostChannel: hostChannel)
 		registrar.addMethodCallDelegate(instance, channel: channel)
 	}
 
-	//Extract CfConfiguration from dictionary
+	// Extract CfConfiguration from dictionary
 	func configFrom(dict: Dictionary<String, Any?>) -> CfConfiguration {
 
 		let configBuilder = CfConfiguration.builder()
+
 		if let configUrl = dict["configUrl"] as? String {
 			_ = configBuilder.setConfigUrl(configUrl)
 		}
@@ -43,7 +48,7 @@ public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
 		return configBuilder.build()
 	}
 
-	//Extract CfTarget from dictionary
+	// Extract CfTarget from dictionary
 	func targetFrom(dict: Dictionary<String, Any?>) -> CfTarget {
 		let targetBuilder = CfTarget.builder()
 		if let identifier = dict["identifier"] as? String {
@@ -62,6 +67,7 @@ public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
 	}
 
 	enum FlutterMethodCallIdentifiers: String {
+
 		case initialize
 		case registerEventsListener
 		case stringVariation
@@ -72,6 +78,7 @@ public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
 	}
 
 	enum EventTypeId: String {
+
 		case start
 		case end
 		case evaluationPolling = "evaluation_polling"
@@ -79,8 +86,10 @@ public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
 	}
 
 	public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+
 		let args = call.arguments as? Dictionary<String, Any>
 		guard let methodCallId = FlutterMethodCallIdentifiers(rawValue: call.method) else {
+
 			result(nil)
 			print("No such FlutterMethodCall exists, please check for typos.")
 			return
@@ -88,11 +97,13 @@ public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
 
 		switch  methodCallId {
 			case .initialize:
+
 				let apiKey = args?["apiKey"] as! String
 				let config = configFrom(dict: args?["configuration"] as! Dictionary<String, Any>)
 				let target = targetFrom(dict: args?["target"] as! Dictionary<String, Any>)
 
 				CfClient.sharedInstance.initialize(apiKey: apiKey, configuration: config, target: target) {res in
+
 					switch res {
 						case .failure(_): result(false)
 						case .success: result(true)
@@ -100,6 +111,7 @@ public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
 				}
 
 			case .registerEventsListener:
+
 				CfClient.sharedInstance.registerEventsListener() { eventType in
 					switch eventType {
 						case .failure(_):
