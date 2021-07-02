@@ -1,8 +1,9 @@
 part of ff_flutter_client_sdk;
 
 class CfTarget {
-  String identifier;
+
   String name;
+  String identifier;
   bool anonymous;
   Map<String, String> attributes;
 
@@ -13,6 +14,7 @@ class CfTarget {
         attributes = builder._attributes;
 
   Map<String, dynamic> _toCodecValue() {
+
     final Map<String, dynamic> result = <String, dynamic>{};
     result['identifier'] = identifier;
     result['name'] = name;

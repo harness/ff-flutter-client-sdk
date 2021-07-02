@@ -75,6 +75,7 @@ typedef void CfEventsListener(dynamic data, EventType eventType);
 ///
 ///```
 class CfClient {
+
   static const MethodChannel _channel =
       const MethodChannel('ff_flutter_client_sdk');
   static const MethodChannel _hostChannel =
