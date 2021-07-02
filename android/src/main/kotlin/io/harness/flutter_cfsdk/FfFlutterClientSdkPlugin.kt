@@ -66,6 +66,9 @@ class FfFlutterClientSdkPlugin: FlutterPlugin, MethodCallHandler {
     if (configMap["streamUrl"] != null) {
       builder.streamUrl(configMap["streamUrl"] as String)
     }
+    if (configMap["eventUrl"] != null) {
+      builder.eventUrl(configMap["eventUrl"] as String)
+    }
     return builder
   }
 

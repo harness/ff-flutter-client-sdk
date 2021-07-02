@@ -28,6 +28,9 @@ public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
 		if let streamUrl = dict["streamUrl"] as? String {
 			_ = configBuilder.setStreamUrl(streamUrl)
 		}
+		if let eventUrl = dict["eventUrl"] as? String {
+            _ = configBuilder.setEventUrl(eventUrl)
+        }
 		if let streamEnabled = dict["streamEnabled"] as? Bool {
 			_ = configBuilder.setStreamEnabled(streamEnabled)
 		}
