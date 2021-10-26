@@ -1,3 +1,10 @@
+## 1.0.2
+
+Changes:
+
+* Wrapped Android SDK version updated to 1.0.4.
+* Wrapped iOS SDK version updated to 1.0.2.
+
 ## 1.0.1
 
 Added support for FF metrics.
@@ -9,7 +16,7 @@ Flutter SDK now targets FF production servers.
 
 New changes:
 
-* Wrapped Android SDK version updated to 1.0.1
+* Wrapped Android SDK version updated to 1.0.1.
 * Wrapped iOS SDK version updated to 1.0.1.
 
 ## 0.0.2

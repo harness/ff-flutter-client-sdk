@@ -76,14 +76,16 @@ typedef void CfEventsListener(dynamic data, EventType eventType);
 ///```
 class CfClient {
 
-  static const MethodChannel _channel =
+  static CfClient _instance;
+
+  MethodChannel _channel =
       const MethodChannel('ff_flutter_client_sdk');
-  static const MethodChannel _hostChannel =
+  MethodChannel _hostChannel =
       const MethodChannel('cf_flutter_host');
 
-  static Set<CfEventsListener> _listenerSet = new HashSet();
+  Set<CfEventsListener> _listenerSet = new HashSet();
 
-  static Future<void> _hostChannelHandler(MethodCall methodCall) async {
+  Future<void> _hostChannelHandler(MethodCall methodCall) async {
     if (methodCall.method == "start") {
       _listenerSet.forEach((element) {
         element(null, EventType.SSE_START);
@@ -118,9 +120,18 @@ class CfClient {
     }
   }
 
+  static CfClient getInstance() {
+
+    if (_instance == null) {
+
+      _instance = CfClient();
+    }
+    return _instance;
+  }
+
   /// Initializes the SDK client with provided API key, configuration and target. Returns information if
   /// initialization succeeded or not
-  static Future<InitializationResult> initialize(
+  Future<InitializationResult> initialize(
       String apiKey, CfConfiguration configuration, CfTarget target) async {
     _hostChannel.setMethodCallHandler(_hostChannelHandler);
 
@@ -134,49 +145,49 @@ class CfClient {
   }
 
   /// Performs string evaluation for given evaluation id. If no such id is present, the default value will be returned.
-  static Future<String> stringVariation(String id, String defaultValue) async {
+  Future<String> stringVariation(String id, String defaultValue) async {
     return _sendMessage(
         'stringVariation', new EvaluationRequest(id, defaultValue));
   }
 
   /// Performs boolean evaluation for given evaluation id. If no such id is present, the default value will be returned.
-  static Future<bool> boolVariation(String id, bool defaultValue) async {
+  Future<bool> boolVariation(String id, bool defaultValue) async {
     return _sendMessage(
         'boolVariation', new EvaluationRequest(id, defaultValue));
   }
 
   /// Performs evaluation for given evaluation id with double value. If no such id is present, the default value will be returned.
-  static Future<double> numberVariation(String id, double defaultValue) async {
+  Future<double> numberVariation(String id, double defaultValue) async {
     return _sendMessage(
         'numberVariation', new EvaluationRequest(id, defaultValue));
   }
 
-  static Future<Map<dynamic, dynamic>> jsonVariation(
+  Future<Map<dynamic, dynamic>> jsonVariation(
       String flag, Map<dynamic, dynamic> defaultValue) async {
     return _sendMessage(
         'jsonVariation', new EvaluationRequest(flag, defaultValue));
   }
 
-  static Future<T> _sendMessage<T>(
+  Future<T> _sendMessage<T>(
       String messageType, EvaluationRequest evaluationRequest) async {
     return _channel.invokeMethod(messageType, evaluationRequest.toMap());
   }
 
   /// Register a listener for different types of events. Possible types are based on [EventType] class
-  static Future<void> registerEventsListener(CfEventsListener listener) async {
+  Future<void> registerEventsListener(CfEventsListener listener) async {
     _listenerSet.add(listener);
     return _channel.invokeMethod('registerEventsListener');
   }
 
   /// Removes a previously-registered listener from internal collection of listeners. From this point, provided
   /// listener will not receive any events triggered by SDK
-  static Future<void> unregisterEventsListener(
+  Future<void> unregisterEventsListener(
       CfEventsListener listener) async {
     _listenerSet.remove(listener);
   }
 
   /// Client's method to deregister and cleanup internal resources used by SDK
-  static Future<void> destroy() async {
+  Future<void> destroy() async {
     _listenerSet.clear();
     return _channel.invokeMethod('destroy');
   }
