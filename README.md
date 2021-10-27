@@ -11,7 +11,7 @@ Harness CF Flutter SDK
 
 To install SDK, declare a dependency to project's `pubspec.yaml` file:
 ```Dart
-ff_flutter_client_sdk: ^1.0.1
+ff_flutter_client_sdk: ^1.0.2
 ```
 
 Then, you may import package to your project
@@ -31,7 +31,7 @@ final conf = CfConfigurationBuilder()
     .build();
 final target = CfTargetBuilder().setIdentifier(name).build();
 
-final res = await CfClient.initialize(apiKey, conf, target);
+final res = await CfClient.getInstance().initialize(apiKey, conf, target);
 ```
 `target` represents a desired target for which we want features to be evaluated.
 
@@ -68,23 +68,23 @@ Use appropriate method to fetch the desired Evaluation of a certain type.
 
 ```Dart
 //get boolean evaluation
-final evaluation = await CfClient.boolVariation("demo_bool_evaluation", false);
+final evaluation = await CfClient.getInstance().boolVariation("demo_bool_evaluation", false);
 ```
 ### <u>_numberVariation(String evaluationId, double defaultValue)_</u>
 ```Dart
 //get number evaluation
-final numberEvaluation = await CfClient.numberVariation("demo_number_evaluation", 0);
+final numberEvaluation = await CfClient.getInstance().numberVariation("demo_number_evaluation", 0);
 ```
 
 ### <u>_stringVariation(String evaluationId, String defaultValue)_</u>
 ```Dart
 //get string evaluaation
-final stringEvaluation = await CfClient.stringVariation("demo_string_evaluation", "default");
+final stringEvaluation = await CfClient.getInstance().stringVariation("demo_string_evaluation", "default");
 ```
 ### <u>_jsonVariation(String evaluationId, Map<dynamic, dynamic> defaultValue)_</u>
 ```Dart
 //get json evaluation
-final jsonEvaluation = await CfClient.jsonVariation("demo_json_evaluation", {});
+final jsonEvaluation = await CfClient.getInstance().jsonVariation("demo_json_evaluation", {});
 
 ```
 
@@ -92,7 +92,7 @@ final jsonEvaluation = await CfClient.jsonVariation("demo_json_evaluation", {});
 This method provides a way to register a listener for different events that might be triggered by SDK, indicating specific change in SDK itself.
 
 ```Dart
-    CfClient.registerEventsListener((EvaluationResponse, EventType) {
+    CfClient.getInstance().registerEventsListener((EvaluationResponse, EventType) {
      
     });
 
@@ -122,11 +122,11 @@ Each type will return a corresponding value as shown in the table below.
 Visit documentation for complete list of possible types and values they provide.
 
 To avoid unexpected behaviour, when listener is not needed anymore, a caller should call 
-`CfClient.unregisterEventsListener(eventsListener)`
+`CfClient.getInstance().unregisterEventsListener(eventsListener)`
 This way the sdk will remove desired listener from internal list.
 
 ## _Shutting down the SDK_
 To avoid potential memory leak, when SDK is no longer needed (when the app is closed, for example), a caller should call this method
 ```Dart
-CfClient.destroy()
+CfClient.getInstance().destroy()
 ```
