@@ -43,6 +43,10 @@ void main() {
     channel.setMockMethodCallHandler(null);
   });
 
+  test('placeholder', () async {
+    expect(true, true);
+  });
+
   // FIXME:
   // test('initializeMethod', () async {
   //   expect((await CfClient.initialize("", CfConfigurationBuilder().build(), CfTargetBuilder().build())).success, true);
