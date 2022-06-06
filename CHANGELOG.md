@@ -1,3 +1,9 @@
+## 1.0.3
+
+Changes:
+
+* Wrapped Android SDK version updated to 1.0.9.
+
 ## 1.0.2
 
 Changes:
