@@ -9,7 +9,7 @@ Pod::Spec.new do |ff|
   ff.description      = <<-DESC
 Feature Flag Management platform from Harness. Flutter SDK can be used to integrate with the platform in your Flutter applications.
                        DESC
-  ff.homepage         = 'https://github.com/drone/ff-flutter-client-sdk'
+  ff.homepage         = 'https://github.com/harness/ff-flutter-client-sdk'
   ff.license          = { :type => "Apache License, Version 2.0", :file => "../LICENSE" }
   ff.author           = "Harness Inc"
   ff.source           = { :git => ff.homepage + '.git', :tag => ff.version }
