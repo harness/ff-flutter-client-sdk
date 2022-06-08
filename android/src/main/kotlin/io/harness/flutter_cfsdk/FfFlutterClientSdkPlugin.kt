@@ -21,6 +21,7 @@ import io.harness.cfsdk.cloud.oksse.model.StatusEvent
 import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.Exception
+import java.util.concurrent.*;
 
 /** FfFlutterClientSdkPlugin */
 class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
@@ -33,6 +34,7 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
     private lateinit var channel: MethodChannel
     private lateinit var hostChannel: MethodChannel
     private var listener: EventsListener? = null
+    private val executor = Executors.newFixedThreadPool(5)
     private val handler: Handler = Handler(Looper.myLooper()!!)
 
     private fun postToMainThread(action: () -> Unit) {
@@ -83,22 +85,26 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
             val target = targetMap?.get("identifier") as String?
 
             val conf = configFromMap(config)
-                    .build()
+                .build()
 
             val targetInstance = Target().identifier(target)
 
             CfClient.getInstance().initialize(
 
-                    application,
-                    key,
-                    conf,
-                    targetInstance
+                application,
+                key,
+                conf,
+                targetInstance
 
             ) { auth, execResult ->
 
                 postToMainThread {
                     print(auth.environment)
-                    result.success(execResult.isSuccess())
+
+                    Handler(Looper.getMainLooper()).post {
+
+                        result.success(execResult.isSuccess())
+                    }
                 }
             }
         }
@@ -185,15 +191,19 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
     }
 
     private fun invokeJsonEvaluation(@NonNull call: MethodCall): Map<String, Any?>? {
+
         val args = extractEvaluationArgs(call)
         return try {
+
             val flag = args.first!!
             val defaultValue = jsonElementFromBridge(args.second as Map<String, Any>)
             println("\nreceived on native: $defaultValue")
 
             val jsonObject = CfClient.getInstance().jsonVariation(args.first, defaultValue)
             mutableMapOf(Pair(flag, jsonElementToBridge(jsonObject)))
+
         } catch (e: Exception) {
+
             e.printStackTrace()
             null
         }
@@ -259,25 +269,81 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
     }
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
-        when (call.method) {
-            "initialize" -> invokeInitialize(call, result)
-            "stringVariation" -> result.success(invokeStringEvaluation(call))
-            "boolVariation" -> result.success(invokeBoolEvaluation(call))
-            "numberVariation" -> result.success(invokeNumberEvaluation(call))
-            "jsonVariation" -> {
-                val evaluation = invokeJsonEvaluation(call)
-                if (evaluation == null) result.notImplemented()
-                else result.success(evaluation)
+
+        executor.execute {
+
+            when (call.method) {
+
+                "initialize" -> invokeInitialize(call, result)
+
+                "stringVariation" -> {
+
+                    val value = invokeStringEvaluation(call)
+
+                    Handler(Looper.getMainLooper()).post {
+
+                        result.success(value)
+                    }
+                }
+
+                "boolVariation" -> {
+
+                    val value = invokeBoolEvaluation(call)
+
+                    Handler(Looper.getMainLooper()).post {
+
+                        result.success(value)
+                    }
+                }
+
+                "numberVariation" -> {
+
+                    val value = invokeNumberEvaluation(call)
+
+                    Handler(Looper.getMainLooper()).post {
+
+                        result.success(value)
+                    }
+                }
+
+                "jsonVariation" -> {
+
+                    val evaluation = invokeJsonEvaluation(call)
+                    if (evaluation == null) {
+
+                        result.notImplemented()
+
+                    } else {
+
+                        Handler(Looper.getMainLooper()).post {
+
+                            result.success(evaluation)
+                        }
+                    }
+                }
+
+                "registerEventsListener" -> {
+
+                    registerEventListener()
+
+                    Handler(Looper.getMainLooper()).post {
+
+                        result.success(0)
+                    }
+                }
+
+                "destroy" -> {
+
+                    invokeDestroy()
+
+                    Handler(Looper.getMainLooper()).post {
+
+                        result.success(0)
+                    }
+                }
+
+                else -> result.notImplemented()
             }
-            "registerEventsListener" -> {
-                registerEventListener()
-                result.success(0)
-            }
-            "destroy" -> {
-                invokeDestroy()
-                result.success(0)
-            }
-            else -> result.notImplemented()
         }
     }
 
