@@ -176,6 +176,8 @@ on a emulator
 ```shell
 cd examples/getting_started
 export FF_API_KEY=<your api key>
+
+flutter pub get
 flutter run --dart-define=FF_API_KEY=$FF_API_KEY -d <device id>
 ```
 
