@@ -1,3 +1,10 @@
+## 1.0.4
+
+Changes:
+
+* Wrapped Android SDK version updated to 1.0.10.
+* Wrapped iOS SDK version updated to 1.0.3.
+
 ## 1.0.3
 
 Changes:

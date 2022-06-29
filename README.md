@@ -11,7 +11,7 @@ Harness CF Flutter SDK
 
 To install SDK, declare a dependency to project's `pubspec.yaml` file:
 ```Dart
-ff_flutter_client_sdk: ^1.0.3
+ff_flutter_client_sdk: ^1.0.4
 ```
 
 Then, you may import package to your project
