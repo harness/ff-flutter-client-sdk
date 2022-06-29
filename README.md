@@ -39,7 +39,7 @@ This quickstart assumes you have followed the instructions to [setup a Feature F
 ### Install the SDK
 To add the SDK to your own project run
 ```Dart
-ff_flutter_client_sdk: ^1.0.2
+ff_flutter_client_sdk: ^1.0.4
 ```
 
 Then, you may import package to your project
