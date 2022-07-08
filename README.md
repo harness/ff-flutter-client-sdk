@@ -1,4 +1,4 @@
-Harness Feature Flag Flutter SDK
+Flutter SDK For Harness Feature Flags
 ========================
 
 ## Table of Contents
@@ -8,35 +8,30 @@ Harness Feature Flag Flutter SDK
 **[Further Reading](docs/further_reading.md)**<br>
 
 
-## Intro
-Harness Feature Flags (FF) is a feature management solution that enables users to change the software’s functionality, without deploying new code. FF uses feature flags to hide code or behaviours without having to ship new versions of the software. A feature flag is like a powerful if statement.
-* For more information, see https://harness.io/products/feature-flags/
-* To read more, see https://ngdocs.harness.io/category/vjolt35atg-feature-flags
-* To sign up, see https://app.harness.io/auth/#/signup/
+## Flutter SDK For Harness Feature Flags
+Use this README  to get started with our Feature Flags (FF) SDK for Flutter. This guide outlines the basics of getting started with the SDK and provides a full code sample for you to try out.
+
+This sample doesn't include configuration options, for in depth steps and configuring the SDK, for example, disabling streaming or using our Relay Proxy, see the [Flutter SDK Reference](https://docs.harness.io/article/mmf7cu2owg-flutter-sdk-reference).
 
 ![FeatureFlags](./docs/images/ff-gui.png)
 
 ## Requirements
-[Flutter SDK >= 2.10.4](https://docs.flutter.dev/get-started/install)
 
-For iOS Apps<br>
-[Xcode](https://docs.flutter.dev/get-started/install/macos#install-xcode)
-
-For Android Apps<br>
-[Android Studio](https://developer.android.com/studio?gclid=CjwKCAjwp7eUBhBeEiwAZbHwkRqdhQkk6wroJeWGu0uGWjW9Ue3hFXc4SuB6lwYU4LOZiZ-MQ4p57BoCvF0QAvD_BwE&gclsrc=aw.ds) or the [Android SDK](docs/dev_environment.md) for CLI only<br>
+To use this SDK, make sure you've:
+- Installed [Flutter SDK >= 2.10.4](https://docs.flutter.dev/get-started/install)
+- For iOS Apps [Xcode](https://docs.flutter.dev/get-started/install/macos#install-xcode)
+- For Android Apps<br> [Android Studio](https://developer.android.com/studio?gclid=CjwKCAjwp7eUBhBeEiwAZbHwkRqdhQkk6wroJeWGu0uGWjW9Ue3hFXc4SuB6lwYU4LOZiZ-MQ4p57BoCvF0QAvD_BwE&gclsrc=aw.ds) or the [Android SDK](docs/dev_environment.md) for CLI only<br>
 
 You can use Flutter doctor to verify you have the neccessary prerequisites
 ```shell
 flutter doctor
 ```
 
-## Quickstart
-The Feature Flag SDK provides a client that connects to the feature flag service, and fetches the value
-of feature flags.  The following section provides an example of how to install the SDK and initalize it from an application.
-This quickstart assumes you have followed the instructions to [setup a Feature Flag project and have created a flag called `harnessappdemodarkmode` and created a client API Key](https://ngdocs.harness.io/article/1j7pdkqh7j-create-a-feature-flag#step_1_create_a_project).
+To follow along with our test code sample, make sure you've:
+- [Created a Feature Flag on the Harness Platform](https://docs.harness.io/article/1j7pdkqh7j-create-a-feature-flag).
+- [Created a [server/client] SDK key and made a copy of it](https://docs.harness.io/article/1j7pdkqh7j-create-a-feature-flag#step_3_create_an_sdk_key)
 
-
-### Install the SDK
+## Installing the SDK
 To add the SDK to your own project run
 ```Dart
 ff_flutter_client_sdk: ^1.0.4
@@ -47,10 +42,13 @@ Then, you may import package to your project
 import 'package:ff_flutter_client_sdk/CfClient.dart';
 ```
 
-### A Simple Example
-Here is a complete [example](examples/getting_started/lib/main.dart) that will connect to the feature flag service and report the flag value.  An event listener is registered
-to receive flag change events.
-Any time a flag is toggled from the feature flag service you will receive the updated value.
+## Code Sample
+The following is a complete code example that you can use to test the harnessappdemodarkmode Flag you created on the Harness Platform. When you run the code it will:
+1. Connect to the FF service.
+2. Report the value of the Flag every 10 seconds until the connection is closed. Every time the `harnessappdemodarkmode` Flag is toggled on or off on the Harness Platform, the updated value is reported.
+3. Close the SDK.
+
+To use this sample, copy it into your project and enter your SDK key into the `FF_API_KEY` field.
 
 ```Dart
 // @dart=2.9
@@ -157,10 +155,10 @@ $ANDROID_SDK/emulator/emulator @Pixel_4.4_API_32
 or for iOS run
 
 ```shell
-open -a simulator 
+open -a simulator
 ```
 
-Confirm you have an ioS or android device with 
+Confirm you have an iOS or Android device with
 ```shell
 flutter devices
 2 connected devices:
@@ -186,17 +184,12 @@ The app should show the configured flags current value. As you toggle the flag i
 ![Alt Text](docs/images/flutter.gif)
 <br>
 
-### Additional Reading
+## Additional Reading
 
-Further examples and config options are in the further reading section:
+For further examples and config options, see the [Flutter SDK Reference](https://docs.harness.io/article/mmf7cu2owg-flutter-sdk-reference) and the [test Flutter project](https://github.com/harness/ff-flutter-client-sdk/blob/main/examples/getting_started/lib/main.dart).
 
 [Further Reading](docs/further_reading.md)<br>
 [Getting Started Example](examples/getting_started)<br>
 [Advanced Example](https://github.com/drone/ff-flutter-client-sample)
 
-
--------------------------
-[Harness](https://www.harness.io/) is a feature management platform that helps teams to build better software and to
-test features quicker.
-
--------------------------
+For more information about Feature Flags, see our [Feature Flags documentation](https://docs.harness.io/article/0a2u2ppp8s-getting-started-with-feature-flags).
