@@ -1,3 +1,8 @@
+## 1.0.5
+
+* Changed minimum Android API version to 19 
+* Wrapped Android SDK version updated to 1.0.16
+
 ## 1.0.4
 
 Changes:
