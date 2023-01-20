@@ -110,6 +110,9 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
 
                         }
                     }
+                    else {
+                        result.success(execResult.isSuccess)
+                    }
                 }
         }
     }
