@@ -89,24 +89,31 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
 
             val targetInstance = Target().identifier(target)
 
-            CfClient.getInstance().initialize(
 
-                application,
-                key,
-                conf,
-                targetInstance
+                CfClient.getInstance().initialize(
 
-            ) { auth, execResult ->
+                    application,
+                    key,
+                    conf,
+                    targetInstance
 
-                postToMainThread {
-                    print(auth.environment)
+                ) { auth, execResult ->
+                    if (execResult.error == null) {
 
-                    Handler(Looper.getMainLooper()).post {
+                        postToMainThread {
+                            print(auth.environment)
 
-                        result.success(execResult.isSuccess())
+                            Handler(Looper.getMainLooper()).post {
+
+                                result.success(execResult.isSuccess())
+                            }
+
+                        }
+                    }
+                    else {
+                        result.success(execResult.isSuccess)
                     }
                 }
-            }
         }
     }
 
