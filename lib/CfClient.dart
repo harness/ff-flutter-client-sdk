@@ -152,9 +152,10 @@ class CfClient {
     }); } on PlatformException catch(e) {
       // For now just log the error. In the future, we should add retry and backoff logic.
       log.severe(e.message + "" + e.details,);
-      return new Future(() => InitializationResult(initialized));
+      return new Future(() => InitializationResult(false));
     }
-}
+    return new Future(() => InitializationResult(initialized));
+  }
 
   /// Performs string evaluation for given evaluation id. If no such id is present, the default value will be returned.
   Future<String> stringVariation(String id, String defaultValue) async {
