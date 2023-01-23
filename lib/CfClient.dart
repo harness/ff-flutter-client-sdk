@@ -144,7 +144,6 @@ class CfClient {
     });
 
     return new Future(() => InitializationResult(initialized));
-  }
 }
 
   /// Performs string evaluation for given evaluation id. If no such id is present, the default value will be returned.
