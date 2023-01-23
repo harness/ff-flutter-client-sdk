@@ -7,7 +7,7 @@ Fixes:
 
 Changes:
 
-* Wrapped Android SDK version updated to 1.0.19
+* Wrapped Android SDK version updated to 1.0.18
 
 Known issues:
 
