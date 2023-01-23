@@ -8,7 +8,7 @@ The exception message will be returned to the application via the Client initial
 Changes:
 
 * Changed minimum Android API version to 19 
-* Wrapped Android SDK version updated to 1.0.16
+* Wrapped Android SDK version updated to 1.0.17
 
 ## 1.0.4
 
