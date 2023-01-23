@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'package:flutter/services.dart';
 
+
 part 'CfTarget.dart';
 
 part 'CfConfiguration.dart';
@@ -131,10 +132,11 @@ class CfClient {
 
   /// Initializes the SDK client with provided API key, configuration and target. Returns information if
   /// initialization succeeded or not
-  Future<InitializationResult> initialize(
-      String apiKey, CfConfiguration configuration, CfTarget target) async {
+  Future<InitializationResult> initialize(String apiKey,
+      CfConfiguration configuration, CfTarget target) async {
     _hostChannel.setMethodCallHandler(_hostChannelHandler);
 
+    // TODO - we need a try-catch here on PlatformException in order to retry.
     bool initialized = await _channel.invokeMethod('initialize', {
       'apiKey': apiKey,
       'configuration': configuration._toCodecValue(),
@@ -143,6 +145,7 @@ class CfClient {
 
     return new Future(() => InitializationResult(initialized));
   }
+}
 
   /// Performs string evaluation for given evaluation id. If no such id is present, the default value will be returned.
   Future<String> stringVariation(String id, String defaultValue) async {

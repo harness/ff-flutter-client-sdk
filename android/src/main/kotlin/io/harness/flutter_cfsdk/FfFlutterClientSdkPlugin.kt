@@ -111,7 +111,7 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
                         }
                     }
                     else {
-                        result.success(execResult.isSuccess)
+                        result.error("authError","Error when initializing SDK", execResult.error.localizedMessage )
                     }
                 }
         }
@@ -358,3 +358,4 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
         channel.setMethodCallHandler(null)
     }
 }
+
