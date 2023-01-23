@@ -5,7 +5,6 @@ Fixes:
 * Applications no longer crash due to API related exceptions caused by e.g. having no internet connectivity / bad API key etc. 
 The exception message will be returned to the application via the Client initialization auth callback. 
 
-
 Changes:
 
 * Changed minimum Android API version to 19 
