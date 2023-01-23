@@ -151,7 +151,7 @@ class CfClient {
       'target': target._toCodecValue()
     }); } on PlatformException catch(e) {
       // For now just log the error. In the future, we should add retry and backoff logic.
-      log.severe(e.message, [e.details]);
+      log.severe(e.message + "" + e.details,);
       return new Future(() => InitializationResult(initialized));
     }
 }
