@@ -1,3 +1,20 @@
+## 1.0.7
+
+Fixes:
+
+* Applications no longer crash due to API related exceptions caused by e.g. having no internet connectivity / bad API key etc.
+* Streaming now resumes if internet connectivity is lost
+
+Changes:
+
+* Wrapped Android SDK version updated to 1.0.19
+
+Known issues:
+
+* If internet connectivity is lost and a change in flag state has occurred during that period, you must
+disconnect and reconnect to the internet to cache latest changes. Any events streamed after losing connectivity are correctly cached.
+* SDK Client does not retry if initialization fails. To remediate in the short term, client init may be wrapped in an application's own retry logic.
+
 ## 1.0.6
 Changes:
 

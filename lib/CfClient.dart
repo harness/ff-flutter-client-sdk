@@ -2,11 +2,16 @@ library ff_flutter_client_sdk;
 
 import 'dart:async';
 import 'dart:collection';
+import 'package:logging/logging.dart';
 import 'package:flutter/services.dart';
+
 
 part 'CfTarget.dart';
 
 part 'CfConfiguration.dart';
+
+final log = Logger('CFClientLogger');
+
 
 class InitializationResult {
   InitializationResult(bool value) {
@@ -131,16 +136,24 @@ class CfClient {
 
   /// Initializes the SDK client with provided API key, configuration and target. Returns information if
   /// initialization succeeded or not
-  Future<InitializationResult> initialize(
-      String apiKey, CfConfiguration configuration, CfTarget target) async {
+  Future<InitializationResult> initialize(String apiKey,
+      CfConfiguration configuration, CfTarget target) async {
+    Logger.root.level = Level.SEVERE; // defaults to Level.INFO
+    Logger.root.onRecord.listen((record) {
+      print('${record.level.name}: ${record.time}: ${record.message}');
+    });
     _hostChannel.setMethodCallHandler(_hostChannelHandler);
-
-    bool initialized = await _channel.invokeMethod('initialize', {
+    bool initialized = false;
+    try {
+    initialized = await _channel.invokeMethod('initialize', {
       'apiKey': apiKey,
       'configuration': configuration._toCodecValue(),
       'target': target._toCodecValue()
-    });
-
+    }); } on PlatformException catch(e) {
+      // For now just log the error. In the future, we should add retry and backoff logic.
+      log.severe(e.message + "" + e.details,);
+      return new Future(() => InitializationResult(false));
+    }
     return new Future(() => InitializationResult(initialized));
   }
 
