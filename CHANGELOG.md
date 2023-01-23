@@ -1,3 +1,6 @@
+## 1.0.6
+* Update README instructions with the correct version to list in pubspec.yam;
+
 ## 1.0.5
 
 Fixes:
