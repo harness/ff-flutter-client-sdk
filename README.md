@@ -34,7 +34,7 @@ To follow along with our test code sample, make sure you've:
 ## Installing the SDK
 To add the SDK to your own project run
 ```Dart
-ff_flutter_client_sdk: ^1.0.4
+ff_flutter_client_sdk: ^1.0.6
 ```
 
 Then, you may import package to your project

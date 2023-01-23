@@ -1,3 +1,8 @@
+## 1.0.6
+Changes:
+
+* Update README instructions with the current version of the SDK to use
+
 ## 1.0.5
 
 Fixes:
