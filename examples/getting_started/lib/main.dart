@@ -69,6 +69,17 @@ class _FlagState extends State<FlagState> {
                         });
                     }
                     break;
+          // There's been an interruption in the SSE but which has since resumed, which means the
+          // cache will have been updated with the latest values, so we can call
+          // bool variation to get the most up to date evaluation value.
+            case EventType.SSE_RESUME:
+              CfClient.getInstance().boolVariation(flagName, false).then((value) {
+                print("$flagName: $value");
+                setState(() {
+                  _flagValue = value;
+                });
+              });
+              break;
           }
         });
       }
