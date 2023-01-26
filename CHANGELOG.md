@@ -1,3 +1,18 @@
+## 1.0.9
+
+Changes:
+
+* Adds new event SSE_RESUME event which fires if the application loses and regains internet. When fired this event does two things:
+  * Internally reloads all applications into cache.
+  * Applications can listen to this event to ensure event listeners don't miss any streamed events during periods of downtime. E.g. call a variation function to get latest evaluation result.
+* Wrapped Android SDK version updated to 1.0.19
+
+
+Known issues:
+
+* If internet connectivity is lost and regained, it can take up to 10 seconds for the SSE_RESUME event to fire and for latest evaluations to be reloaded into cache
+* SDK Client does not retry if initialization fails. To remediate in the short term, client init may be wrapped in an application's own retry logic.
+
 ## 1.0.8
 
 Fixes:
@@ -13,7 +28,7 @@ Known issues:
 
 * If internet connectivity is lost and a change in flag state has occurred during that period, you must
   disconnect and reconnect to the internet to cache latest changes. Any events streamed after losing connectivity are correctly cached.
-* SDK Client does not retry if initial
+* Streaming now resumes if internet connectivity is lost
 
 ## 1.0.7f
 
