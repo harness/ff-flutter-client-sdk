@@ -47,6 +47,9 @@ enum EventType {
   /// Indicates that realtime evaluation update monitor is started. Has no payload.
   SSE_START,
 
+  /// Indicates that realtime evaluation update monitor has restarted after recovering from network failure. Has no payload.
+  SSE_RESUME,
+
   /// Indicates that realtime evaluation update monitor is ended. Has no payload.
   SSE_END,
 
@@ -99,7 +102,12 @@ class CfClient {
       _listenerSet.forEach((element) {
         element(null, EventType.SSE_END);
       });
-    } else if (methodCall.method == "evaluation_change") {
+    } else if (methodCall.method == "resume") {
+      _listenerSet.forEach((element) {
+        element(null, EventType.SSE_RESUME);
+      });
+    }
+    else if (methodCall.method == "evaluation_change") {
       String flag = methodCall.arguments["flag"];
       dynamic value = methodCall.arguments["value"];
 

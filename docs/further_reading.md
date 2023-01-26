@@ -106,6 +106,7 @@ Triggered event will have one of the following types.
 ```Dart
 enum EventType {
     SSE_START,
+    SSE_RESUME
     SSE_END,
     EVALUATION_POLLING,
     EVALUATION_CHANGE
@@ -117,12 +118,13 @@ Each type will return a corresponding value as shown in the table below.
 | EventType          | Returns                  |
 | :----------------  | :-----------------------:|
 | SSE_START          | null                     |
+| SSE_RESUME         | null                     |
 | SSE_END            | null                     |
 | EVALUATION_POLLING | List<EvaluationResponse> |
 | EVALUATION_CHANGE  | EvaluationResponse       |
 
 ```
-Visit documentation for complete list of possible types and values they provide.
+Visit [Harness Feature Flags Android SDK](https://github.com/harness/ff-android-client-sdk/blob/main/docs/further_reading.md#further-reading) for a complete list of possible types and values they provide.
 
 To avoid unexpected behaviour, when listener is not needed anymore, a caller should call
 `CfClient.getInstance().unregisterEventsListener(eventsListener)`

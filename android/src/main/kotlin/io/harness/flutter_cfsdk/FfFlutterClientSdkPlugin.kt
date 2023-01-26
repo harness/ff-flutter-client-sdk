@@ -138,6 +138,11 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
                         hostChannel.invokeMethod("end", null)
                     }
                 }
+                StatusEvent.EVENT_TYPE.SSE_RESUME -> {
+                    postToMainThread {
+                        hostChannel.invokeMethod("resume", null)
+                    }
+                }
                 StatusEvent.EVENT_TYPE.EVALUATION_CHANGE -> {
 
                     val evaluation = it.extractPayload<Evaluation>()
