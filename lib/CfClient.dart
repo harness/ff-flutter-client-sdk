@@ -104,7 +104,7 @@ class CfClient {
       });
     } else if (methodCall.method == "resume") {
       _listenerSet.forEach((element) {
-        element(null, EventType.SSE_END);
+        element(null, EventType.SSE_RESUME);
       });
     }
     else if (methodCall.method == "evaluation_change") {
