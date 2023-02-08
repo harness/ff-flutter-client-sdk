@@ -1,3 +1,16 @@
+## 1.0.10
+
+Changes:
+
+* Wrapped Android SDK version updated to 1.0.20 - this release fixes excessive network calls when calling flag evaluation functions
+
+
+Known issues:
+
+* If internet connectivity is lost and regained, it can take up to 10 seconds for the SSE_RESUME event to fire and for latest evaluations to be reloaded into cache
+* SDK Client does not retry if initialization fails. To remediate in the short term, client init may be wrapped in an application's own retry logic.
+
+
 ## 1.0.9
 
 Changes:
