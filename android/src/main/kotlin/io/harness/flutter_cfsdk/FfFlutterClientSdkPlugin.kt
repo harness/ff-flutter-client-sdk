@@ -22,9 +22,11 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.Exception
 import java.util.concurrent.*;
+import io.harness.cfsdk.AndroidSdkVersion.ANDROID_SDK_VERSION;
 
 /** FfFlutterClientSdkPlugin */
 class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
+
     private lateinit var application: Application
 
     /// The MethodChannel that will the communication between Flutter and native Android
@@ -75,6 +77,8 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
     }
 
     private fun invokeInitialize(@NonNull call: MethodCall, @NonNull result: Result) {
+
+        println("Using Android SDK version ${ANDROID_SDK_VERSION}")
 
         val config: Map<String, Any>? = call.argument("configuration")
         val key: String? = call.argument("apiKey")
