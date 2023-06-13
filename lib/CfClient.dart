@@ -18,7 +18,7 @@ class InitializationResult {
     this.success = value;
   }
 
-  bool success;
+  bool success = false;
 }
 
 class EvaluationRequest {
@@ -153,16 +153,16 @@ class CfClient {
     _hostChannel.setMethodCallHandler(_hostChannelHandler);
     bool initialized = false;
     try {
-    initialized = await (_channel.invokeMethod('initialize', {
+    initialized = await _channel.invokeMethod('initialize', {
       'apiKey': apiKey,
       'configuration': configuration._toCodecValue(),
       'target': target._toCodecValue()
-    })); } on PlatformException catch(e) {
+    }); } on PlatformException catch(e) {
       // For now just log the error. In the future, we should add retry and backoff logic.
       log.severe(e.message ?? 'Error message was empty' + (e.details ?? 'Error details was empty').toString());
       return new Future(() => InitializationResult(false));
     }
-    return new Future(() => InitializationResult(initialized!));
+    return new Future(() => InitializationResult(initialized));
   }
 
   /// Performs string evaluation for given evaluation id. If no such id is present, the default value will be returned.
