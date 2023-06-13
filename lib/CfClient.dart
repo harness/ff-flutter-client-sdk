@@ -18,7 +18,7 @@ class InitializationResult {
     this.success = value;
   }
 
-  bool success = false;
+  bool success;
 }
 
 class EvaluationRequest {
