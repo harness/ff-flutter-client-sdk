@@ -157,7 +157,7 @@ class CfClient {
       'apiKey': apiKey,
       'configuration': configuration._toCodecValue(),
       'target': target._toCodecValue()
-    }) as FutureOr<bool>); } on PlatformException catch(e) {
+    })); } on PlatformException catch(e) {
       // For now just log the error. In the future, we should add retry and backoff logic.
       log.severe(e.message ?? 'Error message was empty' + (e.details ?? 'Error details was empty').toString());
       return new Future(() => InitializationResult(false));
@@ -191,7 +191,8 @@ class CfClient {
 
   Future<T> _sendMessage<T>(
       String messageType, EvaluationRequest evaluationRequest) async {
-    return _channel.invokeMethod(messageType, evaluationRequest.toMap()) as FutureOr<T>;
+    dynamic result = await _channel.invokeMethod(messageType, evaluationRequest.toMap());
+    return result as T;
   }
 
   /// Register a listener for different types of events. Possible types are based on [EventType] class
