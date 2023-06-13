@@ -14,7 +14,7 @@ void main() {
           return true;
         case "boolVariation":
           Map<dynamic, dynamic> args = methodCall.arguments;
-          String/*!*/ flag = args["flag"];
+          String flag = args["flag"];
           switch (flag) {
             case "demo_first_bool_id":
               return true;
@@ -24,8 +24,8 @@ void main() {
           break;
         case "stringVariation":
           Map<dynamic, dynamic> args = methodCall.arguments;
-          String/*!*/ flag = args["flag"];
-          String/*!*/ defaultValue = args["defaultValue"];
+          String flag = args["flag"];
+          String defaultValue = args["defaultValue"];
           switch (flag) {
             case "demo_first_id":
               return "first_value";
