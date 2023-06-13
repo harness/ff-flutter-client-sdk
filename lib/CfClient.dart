@@ -191,8 +191,8 @@ class CfClient {
 
   Future<T> _sendMessage<T>(
       String messageType, EvaluationRequest evaluationRequest) async {
-    dynamic result = await _channel.invokeMethod(messageType, evaluationRequest.toMap());
-    return result as T;
+    return _channel.invokeMethod(messageType, evaluationRequest.toMap())
+        .then((result) => result as T);
   }
 
   /// Register a listener for different types of events. Possible types are based on [EventType] class
