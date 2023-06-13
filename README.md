@@ -19,12 +19,13 @@ This sample doesn't include configuration options, for in depth steps and config
 
 To use version 2 of the SDK, make sure you've:
 - Installed [Flutter SDK >= 2.10.4](https://docs.flutter.dev/get-started/install)
-- Installed Dart 2.12.0 
+- Minimum Dart SDK is 2.12
 - For iOS Apps [Xcode](https://docs.flutter.dev/get-started/install/macos#install-xcode)
 - For Android Apps<br> [Android Studio](https://developer.android.com/studio?gclid=CjwKCAjwp7eUBhBeEiwAZbHwkRqdhQkk6wroJeWGu0uGWjW9Ue3hFXc4SuB6lwYU4LOZiZ-MQ4p57BoCvF0QAvD_BwE&gclsrc=aw.ds) or the [Android SDK](docs/dev_environment.md) for CLI only<br>
 
 To use version 1 of the SDK, make sure you've:
 - Installed [Flutter SDK >= 2.10.4](https://docs.flutter.dev/get-started/install) 
+- Minimum Dark SDK is 2.7
 - For iOS Apps [Xcode](https://docs.flutter.dev/get-started/install/macos#install-xcode)
 - For Android Apps<br> [Android Studio](https://developer.android.com/studio?gclid=CjwKCAjwp7eUBhBeEiwAZbHwkRqdhQkk6wroJeWGu0uGWjW9Ue3hFXc4SuB6lwYU4LOZiZ-MQ4p57BoCvF0QAvD_BwE&gclsrc=aw.ds) or the [Android SDK](docs/dev_environment.md) for CLI only<br>
 
