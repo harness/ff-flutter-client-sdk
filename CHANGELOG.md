@@ -1,3 +1,11 @@
+## 2.0.0
+
+Changes:
+*** Breaking ***
+* Updated code to use null safety - requires Flutter 2.0 and Dart 2.12 and newer 
+    * See https://dart.dev/null-safety
+
+
 ## 1.0.10
 
 Changes:

@@ -69,6 +69,8 @@ class _FlagState extends State<FlagState> {
                         });
                     }
                     break;
+
+
           // There's been an interruption in the SSE but which has since resumed, which means the
           // cache will have been updated with the latest values, so we can call
           // bool variation to get the most up to date evaluation value.
@@ -79,6 +81,9 @@ class _FlagState extends State<FlagState> {
                   _flagValue = value;
                 });
               });
+              break;
+
+            default:
               break;
           }
         });
