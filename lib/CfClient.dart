@@ -18,7 +18,7 @@ class InitializationResult {
     this.success = value;
   }
 
-  bool success;
+  bool success = false;
 }
 
 class EvaluationRequest {
@@ -84,7 +84,7 @@ typedef void CfEventsListener(dynamic data, EventType eventType);
 ///```
 class CfClient {
 
-  static CfClient _instance;
+  static CfClient? _instance;
 
   MethodChannel _channel =
       const MethodChannel('ff_flutter_client_sdk');
@@ -139,7 +139,7 @@ class CfClient {
 
       _instance = CfClient();
     }
-    return _instance;
+    return _instance!;
   }
 
   /// Initializes the SDK client with provided API key, configuration and target. Returns information if
@@ -159,7 +159,7 @@ class CfClient {
       'target': target._toCodecValue()
     }); } on PlatformException catch(e) {
       // For now just log the error. In the future, we should add retry and backoff logic.
-      log.severe(e.message + "" + e.details,);
+      log.severe(e.message ?? 'Error message was empty' + (e.details ?? 'Error details was empty').toString());
       return new Future(() => InitializationResult(false));
     }
     return new Future(() => InitializationResult(initialized));
@@ -191,7 +191,8 @@ class CfClient {
 
   Future<T> _sendMessage<T>(
       String messageType, EvaluationRequest evaluationRequest) async {
-    return _channel.invokeMethod(messageType, evaluationRequest.toMap());
+    return _channel.invokeMethod(messageType, evaluationRequest.toMap())
+        .then((result) => result as T);
   }
 
   /// Register a listener for different types of events. Possible types are based on [EventType] class

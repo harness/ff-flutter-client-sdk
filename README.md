@@ -17,10 +17,19 @@ This sample doesn't include configuration options, for in depth steps and config
 
 ## Requirements
 
-To use this SDK, make sure you've:
+To use version 2 of the SDK, make sure you've:
 - Installed [Flutter SDK >= 2.10.4](https://docs.flutter.dev/get-started/install)
+- Minimum Dart SDK is 2.12
 - For iOS Apps [Xcode](https://docs.flutter.dev/get-started/install/macos#install-xcode)
 - For Android Apps<br> [Android Studio](https://developer.android.com/studio?gclid=CjwKCAjwp7eUBhBeEiwAZbHwkRqdhQkk6wroJeWGu0uGWjW9Ue3hFXc4SuB6lwYU4LOZiZ-MQ4p57BoCvF0QAvD_BwE&gclsrc=aw.ds) or the [Android SDK](docs/dev_environment.md) for CLI only<br>
+
+To use version 1 of the SDK, make sure you've:
+- Installed [Flutter SDK >= 2.10.4](https://docs.flutter.dev/get-started/install) 
+- Minimum Dark SDK is 2.7
+- For iOS Apps [Xcode](https://docs.flutter.dev/get-started/install/macos#install-xcode)
+- For Android Apps<br> [Android Studio](https://developer.android.com/studio?gclid=CjwKCAjwp7eUBhBeEiwAZbHwkRqdhQkk6wroJeWGu0uGWjW9Ue3hFXc4SuB6lwYU4LOZiZ-MQ4p57BoCvF0QAvD_BwE&gclsrc=aw.ds) or the [Android SDK](docs/dev_environment.md) for CLI only<br>
+
+
 
 You can use Flutter doctor to verify you have the neccessary prerequisites
 ```shell
@@ -34,7 +43,7 @@ To follow along with our test code sample, make sure you've:
 ## Installing the SDK
 To add the SDK to your own project run
 ```Dart
-ff_flutter_client_sdk: ^1.0.10
+ff_flutter_client_sdk: ^2.0.0
 ```
 
 Then, you may import package to your project
@@ -51,7 +60,7 @@ The following is a complete code example that you can use to test the harnessapp
 To use this sample, copy it into your project and enter your SDK key into the `FF_API_KEY` field.
 
 ```Dart
-// @dart=2.9
+// @dart=2.12.0
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:ff_flutter_client_sdk/CfClient.dart';
