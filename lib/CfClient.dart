@@ -14,11 +14,11 @@ final log = Logger('CFClientLogger');
 
 
 class InitializationResult {
-  InitializationResult(bool value) {
+  InitializationResult(bool/*!*/ value) {
     this.success = value;
   }
 
-  bool success;
+  bool success = false;
 }
 
 class EvaluationRequest {
@@ -36,7 +36,7 @@ class EvaluationRequest {
 /// changed evaluation's flag and its value. The value type is dynamic and it is
 /// SDK's end-user responsibility to know what type is used for given id
 class EvaluationResponse {
-  String flag;
+  String/*!*/ flag;
   dynamic value;
 
   EvaluationResponse(this.flag, this.value);
@@ -84,7 +84,7 @@ typedef void CfEventsListener(dynamic data, EventType eventType);
 ///```
 class CfClient {
 
-  static CfClient _instance;
+  static CfClient/*?*/ _instance;
 
   MethodChannel _channel =
       const MethodChannel('ff_flutter_client_sdk');
@@ -133,13 +133,13 @@ class CfClient {
     }
   }
 
-  static CfClient getInstance() {
+  static CfClient/*!*/ getInstance() {
 
     if (_instance == null) {
 
       _instance = CfClient();
     }
-    return _instance;
+    return _instance/*!*/;
   }
 
   /// Initializes the SDK client with provided API key, configuration and target. Returns information if
@@ -151,7 +151,7 @@ class CfClient {
       print('${record.level.name}: ${record.time}: ${record.message}');
     });
     _hostChannel.setMethodCallHandler(_hostChannelHandler);
-    bool initialized = false;
+    bool/*!*/ initialized = false;
     try {
     initialized = await _channel.invokeMethod('initialize', {
       'apiKey': apiKey,
@@ -159,10 +159,10 @@ class CfClient {
       'target': target._toCodecValue()
     }); } on PlatformException catch(e) {
       // For now just log the error. In the future, we should add retry and backoff logic.
-      log.severe(e.message + "" + e.details,);
+      log.severe(e.message ?? 'Error message was empty' + (e.details ?? 'Error details was empty').toString());
       return new Future(() => InitializationResult(false));
     }
-    return new Future(() => InitializationResult(initialized));
+    return new Future(() => InitializationResult(initialized/*!*/));
   }
 
   /// Performs string evaluation for given evaluation id. If no such id is present, the default value will be returned.
@@ -189,7 +189,7 @@ class CfClient {
         'jsonVariation', new EvaluationRequest(flag, defaultValue));
   }
 
-  Future<T> _sendMessage<T>(
+  Future<T/*!*/> _sendMessage<T>(
       String messageType, EvaluationRequest evaluationRequest) async {
     return _channel.invokeMethod(messageType, evaluationRequest.toMap());
   }
