@@ -71,3 +71,11 @@ pubspec.lock
 
 .idea
 .idea/*
+.DS_Store
+
+# Web project
+node_modules/
+.snowpack
+examples/**/build
+yarn-error.log
+junit.xml
