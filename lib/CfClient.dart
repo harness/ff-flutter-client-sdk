@@ -194,10 +194,17 @@ class CfClient {
         'jsonVariation', new EvaluationRequest(flag, defaultValue));
   }
 
-  Future<T> _sendMessage<T>(
-      String messageType, EvaluationRequest evaluationRequest) async {
-    return _channel.invokeMethod(messageType, evaluationRequest.toMap())
-        .then((result) => result as T);
+  Future<T> _sendMessage<T>(String messageType, EvaluationRequest evaluationRequest) async {
+    // Web
+    if (kIsWeb) {
+      final methodArgs = js.JsArray();
+      methodArgs.add(messageType);
+      methodArgs.add(evaluationRequest.toMap());
+      return js.context.callMethod("sendMethodMessage", methodArgs);
+    } else {
+      // Handle non-web platforms
+      return _channel.invokeMethod(messageType, evaluationRequest.toMap()).then((result) => result as T);
+    }
   }
 
   /// Register a listener for different types of events. Possible types are based on [EventType] class
