@@ -148,23 +148,23 @@ class CfClient {
   /// initialization succeeded or not
   Future<InitializationResult> initialize(String apiKey,
       CfConfiguration configuration, CfTarget target) async {
-    Logger.root.level = Level.SEVERE; // defaults to Level.INFO
-    Logger.root.onRecord.listen((record) {
-      print('${record.level.name}: ${record.time}: ${record.message}');
-    });
-    _hostChannel.setMethodCallHandler(_hostChannelHandler);
-    bool initialized = false;
-    try {
-    initialized = await _channel.invokeMethod('initialize', {
-      'apiKey': apiKey,
-      'configuration': configuration._toCodecValue(),
-      'target': target._toCodecValue()
-    }); } on PlatformException catch(e) {
-      // For now just log the error. In the future, we should add retry and backoff logic.
-      log.severe(e.message ?? 'Error message was empty' + (e.details ?? 'Error details was empty').toString());
-      return new Future(() => InitializationResult(false));
-    }
-    return new Future(() => InitializationResult(initialized));
+    // Logger.root.level = Level.SEVERE; // defaults to Level.INFO
+    // Logger.root.onRecord.listen((record) {
+    //   print('${record.level.name}: ${record.time}: ${record.message}');
+    // });
+    // _hostChannel.setMethodCallHandler(_hostChannelHandler);
+    // bool initialized = false;
+    // try {
+    // initialized = await _channel.invokeMethod('initialize', {
+    //   'apiKey': apiKey,
+    //   'configuration': configuration._toCodecValue(),
+    //   'target': target._toCodecValue()
+    // }); } on PlatformException catch(e) {
+    //   // For now just log the error. In the future, we should add retry and backoff logic.
+    //   log.severe(e.message ?? 'Error message was empty' + (e.details ?? 'Error details was empty').toString());
+    //   return new Future(() => InitializationResult(false));
+    // }
+    return new Future(() => InitializationResult(true));
   }
 
   /// Performs string evaluation for given evaluation id. If no such id is present, the default value will be returned.
@@ -194,17 +194,10 @@ class CfClient {
         'jsonVariation', new EvaluationRequest(flag, defaultValue));
   }
 
-  Future<T> _sendMessage<T>(String messageType, EvaluationRequest evaluationRequest) async {
-    // Web
-    if (kIsWeb) {
-      final methodArgs = js.JsArray();
-      methodArgs.add(messageType);
-      methodArgs.add(evaluationRequest.toMap());
-      return js.context.callMethod("sendMethodMessage", methodArgs);
-    } else {
-      // Handle non-web platforms
-      return _channel.invokeMethod(messageType, evaluationRequest.toMap()).then((result) => result as T);
-    }
+  Future<T> _sendMessage<T>(
+      String messageType, EvaluationRequest evaluationRequest) async {
+    return _channel.invokeMethod(messageType, evaluationRequest.toMap())
+        .then((result) => result as T);
   }
 
   /// Register a listener for different types of events. Possible types are based on [EventType] class

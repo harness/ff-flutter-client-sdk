@@ -17,7 +17,7 @@ external dynamic jsInvokeMethod(String method, String? params);
 class FlutterPluginWeb {
   static void registerWith(Registrar registrar) {
     final MethodChannel channel = MethodChannel(
-      'flutter_plugin',
+      'ff_flutter_client_sdk',
       const StandardMethodCodec(),
       registrar,
     );
