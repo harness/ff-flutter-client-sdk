@@ -12,6 +12,8 @@ dependencies:
     sdk: flutter
   js: ^0.6.3
   logging: ^1.1.1
+  flutter_web_plugins:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
@@ -35,7 +37,7 @@ flutter:
         pluginClass: FfFlutterClientSdkPlugin
       web:
         pluginClass: FlutterPluginWeb
-        fileName: flutter_plugin_web.dart
+        fileName: FFWebPlugin.dart
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:
