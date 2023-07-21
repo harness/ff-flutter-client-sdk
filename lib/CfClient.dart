@@ -4,6 +4,8 @@ import 'dart:async';
 import 'dart:collection';
 import 'package:logging/logging.dart';
 import 'package:flutter/services.dart';
+import 'dart:js' as js;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 
 part 'CfTarget.dart';
@@ -167,8 +169,11 @@ class CfClient {
 
   /// Performs string evaluation for given evaluation id. If no such id is present, the default value will be returned.
   Future<String> stringVariation(String id, String defaultValue) async {
-    return _sendMessage(
-        'stringVariation', new EvaluationRequest(id, defaultValue));
+    if (kIsWeb) {
+      return js.context.callMethod('stringVariation', [id, defaultValue]);
+    } else {
+      return _sendMessage('stringVariation', new EvaluationRequest(id, defaultValue));
+    }
   }
 
   /// Performs boolean evaluation for given evaluation id. If no such id is present, the default value will be returned.
