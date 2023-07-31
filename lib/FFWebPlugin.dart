@@ -31,17 +31,27 @@ class FlutterPluginWeb {
     });
   }
 
+  /// Handles method calls over the [MethodChannel] of this plugin.
+  /// Note: Check the incoming method name to call your implementation accordingly.
   Future<dynamic> handleMethodCall(MethodCall call) async {
     switch (call.method) {
-      case 'sendMethodMessage':
-        return sendMethodMessage(call.method, call.arguments);
-      default:
-        throw PlatformException(
-          code: 'Unimplemented',
-          details:
-          'flutter_plugin for web doesn\'t implement \'${call.method}\'',
-        );
+      case 'initialize':
+        return initialize(call.arguments);
+      case 'boolVariation':
+        return boolVariation(call.arguments);
     }
+  }
+
+  Future<dynamic> initialize(Map<String, dynamic> arguments) async {
+    // TODO: Implement your web-specific logic here
+  }
+
+  Future<dynamic> boolVariation(Map<String, dynamic> arguments) async {
+    // TODO: Implement your web-specific logic here
+  }
+
+  Future<dynamic> stringVariation(Map<String, dynamic> arguments) async {
+    // TODO: Implement your web-specific logic here
   }
 
   Future<dynamic> sendMethodMessage(

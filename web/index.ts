@@ -10,6 +10,11 @@ var HarnessFFWeb = {
     // Do something with result if needed
   },
 
+  registerEvent: function(eventType, callback) {
+    if (!this.client) return;
+    this.client.on(eventType, callback);
+  },
+
   // More functions from the Harness SDK can be wrapped here
 };
 
