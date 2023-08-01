@@ -2,17 +2,20 @@
 library callable_function;
 
 import 'dart:async';
-
 import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:js/js.dart';
-import 'package:js/js_util.dart';
 
-@JS('jsOnEvent')
-external set _jsOnEvent(void Function(dynamic event) f);
+@JS('HarnessFFWeb')
+@staticInterop
+class HarnessFFWeb {
+  external factory HarnessFFWeb();
+}
 
-@JS()
-external dynamic initialize(String method, String? params);
+extension HarnessFFWebExtension on HarnessFFWeb {
+  external dynamic initialize(String apiKey, dynamic target, dynamic options);
+  external dynamic registerEvent(String eventType, Function callback);
+}
 
 class FlutterPluginWeb {
   static void registerWith(Registrar registrar) {
@@ -24,33 +27,21 @@ class FlutterPluginWeb {
 
     final pluginInstance = FlutterPluginWeb();
     channel.setMethodCallHandler(pluginInstance.handleMethodCall);
-
-    //Sets the call from JavaScript handler
-    _jsOnEvent = allowInterop((dynamic event) {
-      //Process JavaScript call here
-    });
   }
 
   /// Handles method calls over the [MethodChannel] of this plugin.
   /// Note: Check the incoming method name to call your implementation accordingly.
   Future<dynamic> handleMethodCall(MethodCall call) async {
+    HarnessFFWeb harness = HarnessFFWeb();
     switch (call.method) {
       case 'initialize':
-        return initialize(call.arguments);
-      case 'boolVariation':
-        return boolVariation(call.arguments);
+        return harness.initialize(call.arguments["apiKey"], call.arguments["target"], call.arguments["options"]);
+      case 'registerEvent':
+        return harness.registerEvent(call.arguments["eventType"], allowInterop((dynamic event) {
+          // Process JavaScript call here
+        }));
     }
   }
-
-  Future<dynamic> initialize(Map<String, dynamic> arguments) {
-    // Calls the 'initialize' function in the JavaScript SDK
-    // (You will need to replace 'jsObject' with a reference to your JavaScript SDK)
-    final result = callMethod(js.context['jsObject'], 'initialize', [arguments]);
-    sendMethodMessage()
-    // Convert the JavaScript Promise to a Dart Future
-    return promiseToFuture(result);
-  }
-
 
   Future<dynamic> boolVariation(Map<String, dynamic> arguments) async {
     // TODO: Implement your web-specific logic here
@@ -58,12 +49,5 @@ class FlutterPluginWeb {
 
   Future<dynamic> stringVariation(Map<String, dynamic> arguments) async {
     // TODO: Implement your web-specific logic here
-  }
-
-  Future<dynamic> sendMethodMessage(
-      String method, String? arguments) async {
-    final dynamic response =
-    await promiseToFuture(jsInvokeMethod(method, arguments));
-    //...
   }
 }
