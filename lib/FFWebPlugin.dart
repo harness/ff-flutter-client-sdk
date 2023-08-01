@@ -4,23 +4,23 @@ import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:js/js.dart';
 import 'package:logging/logging.dart';
 
-@JS('HarnessFFWeb')
+@JS('FFJavaScriptClientSDK')
 @staticInterop
-class HarnessFFWeb {
-  external factory HarnessFFWeb();
+class FFJavaScriptClientSDK {
+  external factory FFJavaScriptClientSDK();
 }
 
-final log = Logger('FFWebPluginLogger');
-
-extension HarnessFFWebExtension on HarnessFFWeb {
+extension FFJavaScriptClientSDKExtension on FFJavaScriptClientSDK {
   external dynamic initialize(String apiKey, dynamic target, dynamic options);
   external dynamic registerEvent(String eventType, Function callback);
 }
 
+final log = Logger('FFWebPluginLogger');
+
 class FlutterPluginWeb {
 
   // The instance of the wrapper around the JS SDK
-  static final harness = HarnessFFWeb();
+  static final harness = FFJavaScriptClientSDK();
 
   // This channel is used to send JavaScript SDK events to the Flutter
   // SDK Code.
@@ -40,7 +40,7 @@ class FlutterPluginWeb {
   /// Handles method calls over the [MethodChannel] of this plugin.
   /// Note: Check the incoming method name to call your implementation accordingly.
   Future<dynamic> handleMethodCall(MethodCall call) async {
-    HarnessFFWeb harness = HarnessFFWeb();
+    FFJavaScriptClientSDK harness = FFJavaScriptClientSDK();
     switch (call.method) {
       case 'initialize':
         return harness.initialize(call.arguments["apiKey"], call.arguments["target"], call.arguments["options"]);
