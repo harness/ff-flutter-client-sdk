@@ -5,7 +5,6 @@ import 'dart:collection';
 import 'package:logging/logging.dart';
 import 'package:flutter/services.dart';
 import 'dart:js' as js;
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 
 part 'CfTarget.dart';
@@ -148,32 +147,28 @@ class CfClient {
   /// initialization succeeded or not
   Future<InitializationResult> initialize(String apiKey,
       CfConfiguration configuration, CfTarget target) async {
-    // Logger.root.level = Level.SEVERE; // defaults to Level.INFO
-    // Logger.root.onRecord.listen((record) {
-    //   print('${record.level.name}: ${record.time}: ${record.message}');
-    // });
-    // _hostChannel.setMethodCallHandler(_hostChannelHandler);
-    // bool initialized = false;
-    // try {
-    // initialized = await _channel.invokeMethod('initialize', {
-    //   'apiKey': apiKey,
-    //   'configuration': configuration._toCodecValue(),
-    //   'target': target._toCodecValue()
-    // }); } on PlatformException catch(e) {
-    //   // For now just log the error. In the future, we should add retry and backoff logic.
-    //   log.severe(e.message ?? 'Error message was empty' + (e.details ?? 'Error details was empty').toString());
-    //   return new Future(() => InitializationResult(false));
-    // }
+    Logger.root.level = Level.SEVERE; // defaults to Level.INFO
+    Logger.root.onRecord.listen((record) {
+      print('${record.level.name}: ${record.time}: ${record.message}');
+    });
+    _hostChannel.setMethodCallHandler(_hostChannelHandler);
+    bool initialized = false;
+    try {
+    initialized = await _channel.invokeMethod('initialize', {
+      'apiKey': apiKey,
+      'configuration': configuration._toCodecValue(),
+      'target': target._toCodecValue()
+    }); } on PlatformException catch(e) {
+      // For now just log the error. In the future, we should add retry and backoff logic.
+      log.severe(e.message ?? 'Error message was empty' + (e.details ?? 'Error details was empty').toString());
+      return new Future(() => InitializationResult(false));
+    }
     return new Future(() => InitializationResult(true));
   }
 
   /// Performs string evaluation for given evaluation id. If no such id is present, the default value will be returned.
   Future<String> stringVariation(String id, String defaultValue) async {
-    if (kIsWeb) {
-      return js.context.callMethod('stringVariation', [id, defaultValue]);
-    } else {
       return _sendMessage('stringVariation', new EvaluationRequest(id, defaultValue));
-    }
   }
 
   /// Performs boolean evaluation for given evaluation id. If no such id is present, the default value will be returned.
