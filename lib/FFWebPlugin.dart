@@ -12,7 +12,7 @@ import 'package:js/js_util.dart';
 external set _jsOnEvent(void Function(dynamic event) f);
 
 @JS()
-external dynamic jsInvokeMethod(String method, String? params);
+external dynamic initialize(String method, String? params);
 
 class FlutterPluginWeb {
   static void registerWith(Registrar registrar) {
@@ -42,9 +42,15 @@ class FlutterPluginWeb {
     }
   }
 
-  Future<dynamic> initialize(Map<String, dynamic> arguments) async {
-    // TODO: Implement your web-specific logic here
+  Future<dynamic> initialize(Map<String, dynamic> arguments) {
+    // Calls the 'initialize' function in the JavaScript SDK
+    // (You will need to replace 'jsObject' with a reference to your JavaScript SDK)
+    final result = callMethod(js.context['jsObject'], 'initialize', [arguments]);
+    sendMethodMessage()
+    // Convert the JavaScript Promise to a Dart Future
+    return promiseToFuture(result);
   }
+
 
   Future<dynamic> boolVariation(Map<String, dynamic> arguments) async {
     // TODO: Implement your web-specific logic here
