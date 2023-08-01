@@ -1,6 +1,3 @@
-@JS()
-library callable_function;
-
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
