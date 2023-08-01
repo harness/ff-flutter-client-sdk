@@ -18,8 +18,9 @@ extension HarnessFFWebExtension on HarnessFFWeb {
 }
 
 class FlutterPluginWeb {
+
   // The instance of the wrapper around the JS SDK
-  static late HarnessFFWeb harness;
+  static final harness = HarnessFFWeb();
 
   // This channel is used to send JavaScript SDK events to the Flutter
   // SDK Code.
@@ -31,7 +32,7 @@ class FlutterPluginWeb {
       const StandardMethodCodec(),
       registrar,
     );
-    harness = HarnessFFWeb();
+
     final pluginInstance = FlutterPluginWeb();
     channel.setMethodCallHandler(pluginInstance.handleMethodCall);
   }
