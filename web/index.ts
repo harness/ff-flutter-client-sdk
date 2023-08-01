@@ -1,21 +1,23 @@
 import { initialize, Event } from '@harnessio/ff-javascript-client-sdk'
 
 declare global {
-  interface Window { HarnessFFWeb: any; }
+  interface Window { Client: any; }
 }
 
-var FFJavaScriptClientSDK = {
-  initialize: function(apiKey, target, options) {
-    var result = initialize(apiKey, target, options);
-    // Do something with result if needed
-  },
+class FFJavaScriptClientSDK {
+  client: any; // Specify a better type if known
 
-  registerEvent: function(eventType, callback) {
+  initialize(apiKey: string, target: any, options: any): void {
+    const result = initialize(apiKey, target, options);
+    // Do something with result if needed
+  }
+
+  registerEvent(eventType: string, callback: Function): void {
     if (!this.client) return;
     this.client.on(eventType, callback);
-  },
+  }
 
   // More functions from the Harness SDK can be wrapped here
-};
+}
 
-window.HarnessFFWeb = FFJavaScriptClientSDK;
+window.Client = new FFJavaScriptClientSDK();
