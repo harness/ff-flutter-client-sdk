@@ -7,23 +7,23 @@ import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:js/js.dart';
 import 'package:logging/logging.dart';
 
-@JS('FFJavaScriptClientSDK')
-@staticInterop
-class FFJavaScriptClientSDK {
-  external factory FFJavaScriptClientSDK();
-}
+// @JS('FFJavaScriptClientSDK')
+// @staticInterop
+// class FFJavaScriptClientSDK {
+//   external factory FFJavaScriptClientSDK();
+// }
+//
+// extension FFJavaScriptClientSDKExtension on FFJavaScriptClientSDK {
+//   external dynamic initialize(String apiKey, dynamic target, dynamic options);
+//   external dynamic registerEvent(String eventType, Function callback);
+// }
 
-extension FFJavaScriptClientSDKExtension on FFJavaScriptClientSDK {
-  external dynamic initialize(String apiKey, dynamic target, dynamic options);
-  external dynamic registerEvent(String eventType, Function callback);
-}
+final log = Logger('FfFlutterClientSdkWebPluginLogger');
 
-final log = Logger('FFWebPluginLogger');
-
-class FlutterPluginWeb {
+class FfFlutterClientSdkWebPlugin {
 
   // The instance of the wrapper around the JS SDK
-  static final harness = FFJavaScriptClientSDK();
+  // static final harness = FFJavaScriptClientSDK();
 
   // This channel is used to send JavaScript SDK events to the Flutter
   // SDK Code.
@@ -36,21 +36,21 @@ class FlutterPluginWeb {
       registrar,
     );
 
-    final pluginInstance = FlutterPluginWeb();
+    final pluginInstance = FfFlutterClientSdkWebPlugin();
     channel.setMethodCallHandler(pluginInstance.handleMethodCall);
   }
 
   /// Handles method calls over the [MethodChannel] of this plugin.
   /// Note: Check the incoming method name to call your implementation accordingly.
   Future<dynamic> handleMethodCall(MethodCall call) async {
-    FFJavaScriptClientSDK harness = FFJavaScriptClientSDK();
+    // FFJavaScriptClientSDK harness = FFJavaScriptClientSDK();
     switch (call.method) {
       case 'initialize':
-        return harness.initialize(call.arguments["apiKey"], call.arguments["target"], call.arguments["options"]);
-      case 'registerEvent':
-        return harness.registerEvent(call.arguments["eventType"], allowInterop((dynamic event) {
-          // Process JavaScript call here
-        }));
+        // return harness.initialize(call.arguments["apiKey"], call.arguments["target"], call.arguments["options"]);
+    //   case 'registerEvent':
+    //     return harness.registerEvent(call.arguments["eventType"], allowInterop((dynamic event) {
+    //       // Process JavaScript call here
+    //     }));
     }
   }
 

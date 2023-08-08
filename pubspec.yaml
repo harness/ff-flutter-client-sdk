@@ -37,7 +37,7 @@ flutter:
         pluginClass: FfFlutterClientSdkPlugin
       web:
         pluginClass: FlutterPluginWeb
-        fileName: FFWebPlugin.dart
+        fileName: FfFlutterClientSDKWebPlugin.dart
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:
