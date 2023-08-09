@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:js/js.dart';
 import 'package:logging/logging.dart';
-import 'web_plugin_internal//FfJavascriptSDKInterop.dart' as ffJsSDK;
+import 'web_plugin_internal//FfJavascriptSDKInterop.dart' as ffJsSDKInterop;
 
 @JS('window')
 external dynamic get window;
@@ -49,8 +49,8 @@ class FfFlutterClientSdkWebPlugin {
         Map<String, dynamic> options =
             Map<String, dynamic>.from(call.arguments['configuration']);
         try {
-          final response = ffJsSDK.initialize(apiKey, target, options);
-          setProperty(window, ffJsSDK.clientWindowReference, response);
+          final response = ffJsSDKInterop.initialize(apiKey, target, options);
+          setProperty(window, ffJsSDKInterop.JavaScriptSDK.windowReference, response);
           // var propertyValue = getProperty(response, ffJsSDK.ClientFunctions.on);
           // print(propertyValue);
         } catch (error) {}
