@@ -21,10 +21,17 @@ class JavaScriptSDKClient {
   static const close = 'close';
 }
 
+class Event {
+  static const READY = 'READY';
+  static const FLAGS_LOADED = 'FLAGS_LOADED';
+  static const ERROR_AUTH = 'ERROR_AUTH';
+  static const ERROR_FETCH_FLAG = 'ERROR_FETCH_FLAG';
+  static const ERROR_FETCH_FLAGS = 'ERROR_FETCH_FLAGS';
+}
+
 @JS("${JavaScriptSDK.windowReference}.${JavaScriptSDK.initialize}")
 external dynamic initialize(
     String apiKey, Map<String, dynamic> target, Map<String, dynamic> options);
 
 @JS('${JavaScriptSDKClient.windowReference}.${JavaScriptSDKClient.on}')
-external dynamic on(
-    String apiKey, Map<String, dynamic> target, Map<String, dynamic> options);
+external dynamic on(dynamic EventType);
