@@ -59,7 +59,7 @@ class FfFlutterClientSdkWebPlugin {
         try {
           final response = ffJsSDK.initialize(apiKey, target, options);
           setProperty(window, ffJsSDK.clientWindowReference, response);
-          var propertyValue = getProperty(response, 'on');
+          var propertyValue = getProperty(response, ffJsSDK.ClientFunctions.on);
           print(propertyValue);
         } catch (error) {}
         return true;

@@ -7,6 +7,13 @@ import 'package:js/js.dart';
 // this reference
 const clientWindowReference = "cfClient";
 
+enum ClientFunctions {
+  on,
+  off,
+  variation,
+  close,
+}
+
 // HarnessFFSDK is the global name that the JavaScript SDK sets in its iife distribution, which
 // we ask users to import.
 @JS("HarnessFFSDK.initialize")
