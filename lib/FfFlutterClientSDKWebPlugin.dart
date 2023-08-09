@@ -15,7 +15,6 @@ external dynamic get window;
 final log = Logger('FfFlutterClientSdkWebPluginLogger');
 
 class FfFlutterClientSdkWebPlugin {
-
   static const initializeMethodCall = 'initialize';
   static const variationMethodCall = 'variation';
 
@@ -50,7 +49,8 @@ class FfFlutterClientSdkWebPlugin {
             Map<String, dynamic>.from(call.arguments['configuration']);
         try {
           final response = ffJsSDKInterop.initialize(apiKey, target, options);
-          setProperty(window, ffJsSDKInterop.JavaScriptSDK.windowReference, response);
+          setProperty(
+              window, ffJsSDKInterop.JavaScriptSDK.windowReference, response);
           // var propertyValue = getProperty(response, ffJsSDK.ClientFunctions.on);
           // print(propertyValue);
         } catch (error) {}

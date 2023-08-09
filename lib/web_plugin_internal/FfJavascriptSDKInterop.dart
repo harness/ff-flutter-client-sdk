@@ -3,17 +3,17 @@ library harness_javascript_sdk.js;
 
 import 'package:js/js.dart';
 
-// The window reference to the JavaScript SDK, which we use before it's
-// initialized.
+// Represents the window object exposed by the JavaScript SDK
 class JavaScriptSDK {
   static const windowReference = 'HarnessFFSDK';
   static const initialize = 'initialize';
   static const event = 'Event';
 }
 
+// Represents the Client instance
 class JavaScriptSDKClient {
   // Once we've initialized the Client, we set it as a property on the window using
-// this reference
+  // this reference
   static const windowReference = 'cfClient';
   static const on = 'on';
   static const off = 'off';
