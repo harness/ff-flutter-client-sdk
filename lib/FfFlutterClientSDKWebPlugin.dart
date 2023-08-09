@@ -25,7 +25,6 @@ external dynamic get window;
 
 final log = Logger('FfFlutterClientSdkWebPluginLogger');
 
-final clientWindowReference = "cfclient";
 
 class FfFlutterClientSdkWebPlugin {
   // The instance of the wrapper around the JS SDK
@@ -59,7 +58,7 @@ class FfFlutterClientSdkWebPlugin {
             Map<String, dynamic>.from(call.arguments['configuration']);
         try {
           final response = ffJsSDK.initialize(apiKey, target, options);
-          setProperty(window, clientWindowReference, response);
+          setProperty(window, ffJsSDK.clientWindowReference, response);
           var propertyValue = getProperty(response, 'on');
           print(propertyValue);
         } catch (error) {}
