@@ -22,17 +22,24 @@ class JavaScriptSDKClient {
 }
 
 class Event {
-  static const READY = 'READY';
-  static const FLAGS_LOADED = 'FLAGS_LOADED';
-  static const ERROR_AUTH = 'ERROR_AUTH';
-  static const ERROR_FETCH_FLAG = 'ERROR_FETCH_FLAG';
-  static const ERROR_FETCH_FLAGS = 'ERROR_FETCH_FLAGS';
+  static const ready = 'ready';
+  static const connected = 'connected';
+  static const disconnected = 'disconnected';
+  static const flagsLoaded = 'flags loaded';
+  static const cacheLoaded = 'cache loaded';
+  static const changed = 'changed';
+  static const error = 'error';
+  static const errorAuth = 'auth error';
+  static const errorMetrics = 'metrics error';
+  static const errorFetchFlags = 'fetch flags error';
+  static const errorFetchFlag = 'fetch flag error';
+  static const errorStream = 'stream error';
 }
+
 
 @JS("${JavaScriptSDK.windowReference}.${JavaScriptSDK.initialize}")
 external dynamic initialize(
     String apiKey, Map<String, dynamic> target, Map<String, dynamic> options);
 
-// @JS('${JavaScriptSDKClient.windowReference}.${JavaScriptSDKClient.on}')
-@JS('cfClient.on')
+@JS('${JavaScriptSDKClient.windowReference}.${JavaScriptSDKClient.on}')
 external dynamic on(dynamic eventType, Function callback);

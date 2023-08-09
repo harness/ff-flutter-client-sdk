@@ -56,7 +56,7 @@ class FfFlutterClientSdkWebPlugin {
           setProperty(
               window, ffJsSDKInterop.JavaScriptSDKClient.windowReference, response);
 
-          setupEventListener(ffJsSDKInterop.Event.ERROR_AUTH);
+          setupEventListener(ffJsSDKInterop.Event.errorAuth);
           // var propertyValue = getProperty(response, ffJsSDK.ClientFunctions.on);
           // print(propertyValue);
         } catch (error) {}
@@ -69,7 +69,7 @@ class FfFlutterClientSdkWebPlugin {
   }
 
   void handleError(dynamic error) {
-    print("Received JS event ERROR with data");
+    print("Received JS event ERROR with data $error");
     // Handle the event in Dart, similar to how you'd handle it in JS
   }
 
