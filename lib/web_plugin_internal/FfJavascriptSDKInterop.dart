@@ -33,5 +33,6 @@ class Event {
 external dynamic initialize(
     String apiKey, Map<String, dynamic> target, Map<String, dynamic> options);
 
-@JS('${JavaScriptSDKClient.windowReference}.${JavaScriptSDKClient.on}')
-external dynamic on(dynamic EventType);
+// @JS('${JavaScriptSDKClient.windowReference}.${JavaScriptSDKClient.on}')
+@JS('cfClient.on')
+external dynamic on(dynamic eventType, Function callback);

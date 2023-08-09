@@ -49,15 +49,28 @@ class FfFlutterClientSdkWebPlugin {
             Map<String, dynamic>.from(call.arguments['configuration']);
         try {
           final response = ffJsSDKInterop.initialize(apiKey, target, options);
+          // The JavaScript SDK returns the client instance, whether or not
+          // the initialization was successful. We set a reference to it on
+          // the global window, and then we can listen if initialization was
+          // successful or not.
           setProperty(
               window, ffJsSDKInterop.JavaScriptSDKClient.windowReference, response);
 
-
+          setupEventListener(ffJsSDKInterop.Event.ERROR_AUTH);
           // var propertyValue = getProperty(response, ffJsSDK.ClientFunctions.on);
           // print(propertyValue);
         } catch (error) {}
         return true;
     }
+  }
+
+  void setupEventListener(String event) {
+    ffJsSDKInterop.on(event, allowInterop(handleError));
+  }
+
+  void handleError(dynamic error) {
+    print("Received JS event ERROR with data");
+    // Handle the event in Dart, similar to how you'd handle it in JS
   }
 
   // Future<dynamic> boolVariation(Map<String, dynamic> arguments) async {
