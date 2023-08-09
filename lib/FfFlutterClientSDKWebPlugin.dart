@@ -20,7 +20,12 @@ import 'web_plugin_internal//FfJavascriptSDKInterop.dart' as ffJsSDK;
 //   external dynamic registerEvent(String eventType, Function callback);
 // }
 
+@JS('window')
+external dynamic get window;
+
 final log = Logger('FfFlutterClientSdkWebPluginLogger');
+
+final clientWindowReference = "cfclient";
 
 class FfFlutterClientSdkWebPlugin {
   // The instance of the wrapper around the JS SDK
@@ -45,31 +50,28 @@ class FfFlutterClientSdkWebPlugin {
   /// Handles method calls over the [MethodChannel] of this plugin.
   /// Note: Check the incoming method name to call your implementation accordingly.
   Future<dynamic> handleMethodCall(MethodCall call) async {
-    // FFJavaScriptClientSDK harness = FFJavaScriptClientSDK();
     switch (call.method) {
       case 'initialize':
-        // return harness.initialize(call.arguments["apiKey"], call.arguments["target"], call.arguments["options"]);
-        //   case 'registerEvent':
-        //     return harness.registerEvent(call.arguments["eventType"], allowInterop((dynamic event) {
-        //       // Process JavaScript call here
-        //     }));
         final String apiKey = call.arguments['apiKey'];
-        Map<String, dynamic> target = Map<String, dynamic>.from(call.arguments['target']);
-        Map<String, dynamic> options = Map<String, dynamic>.from(call.arguments['configuration']);
-        // final target = call.arguments['target'] ;
-        // final options = call.arguments['configuration'] as Map<dynamic, dynamic>;
-
-        final response = ffJsSDK.initialize(apiKey, target, options);
-        var propertyValue = getProperty(response, 'on');
+        Map<String, dynamic> target =
+            Map<String, dynamic>.from(call.arguments['target']);
+        Map<String, dynamic> options =
+            Map<String, dynamic>.from(call.arguments['configuration']);
+        try {
+          final response = ffJsSDK.initialize(apiKey, target, options);
+          setProperty(window, clientWindowReference, response);
+          var propertyValue = getProperty(response, 'on');
+          print(propertyValue);
+        } catch (error) {}
         return true;
     }
   }
 
-  Future<dynamic> boolVariation(Map<String, dynamic> arguments) async {
-    // TODO: Implement your web-specific logic here
-  }
-
-  Future<dynamic> stringVariation(Map<String, dynamic> arguments) async {
-    // TODO: Implement your web-specific logic here
-  }
+  // Future<dynamic> boolVariation(Map<String, dynamic> arguments) async {
+  //   // TODO: Implement your web-specific logic here
+  // }
+  //
+  // Future<dynamic> stringVariation(Map<String, dynamic> arguments) async {
+  //   // TODO: Implement your web-specific logic here
+  // }
 }
