@@ -9,24 +9,18 @@ import 'package:js/js.dart';
 import 'package:logging/logging.dart';
 import 'web_plugin_internal//FfJavascriptSDKInterop.dart' as ffJsSDK;
 
-// @JS('FFJavaScriptClientSDK')
-// @staticInterop
-// class FFJavaScriptClientSDK {
-//   external factory FFJavaScriptClientSDK();
-// }
-//
-// extension FFJavaScriptClientSDKExtension on FFJavaScriptClientSDK {
-//   external dynamic initialize(String apiKey, dynamic target, dynamic options);
-//   external dynamic registerEvent(String eventType, Function callback);
-// }
-
 @JS('window')
 external dynamic get window;
 
 final log = Logger('FfFlutterClientSdkWebPluginLogger');
 
-
 class FfFlutterClientSdkWebPlugin {
+
+
+
+  static const initializeMethodCall = 'initialize';
+  static const variationMethodCall = 'variation';
+
   // The instance of the wrapper around the JS SDK
   // static final harness = FFJavaScriptClientSDK();
 
@@ -50,7 +44,7 @@ class FfFlutterClientSdkWebPlugin {
   /// Note: Check the incoming method name to call your implementation accordingly.
   Future<dynamic> handleMethodCall(MethodCall call) async {
     switch (call.method) {
-      case 'initialize':
+      case initializeMethodCall:
         final String apiKey = call.arguments['apiKey'];
         Map<String, dynamic> target =
             Map<String, dynamic>.from(call.arguments['target']);
@@ -59,7 +53,7 @@ class FfFlutterClientSdkWebPlugin {
         try {
           final response = ffJsSDK.initialize(apiKey, target, options);
           setProperty(window, ffJsSDK.clientWindowReference, response);
-          var propertyValue = getProperty(response, ffJsSDK.ClientFunctions.on);
+          // var propertyValue = getProperty(response, ffJsSDK.ClientFunctions.on);
           print(propertyValue);
         } catch (error) {}
         return true;

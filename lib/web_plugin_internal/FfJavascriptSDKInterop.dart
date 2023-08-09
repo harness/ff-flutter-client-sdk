@@ -7,17 +7,18 @@ import 'package:js/js.dart';
 // this reference
 const clientWindowReference = "cfClient";
 
-enum ClientFunctions {
-  on,
-  off,
-  variation,
-  close,
-}
+// Constants for functions exposed by the initialized client instance
+const clientOn = 'on';
+const clientOff = 'off';
+const clientVariation = 'variation';
+const clientClose = 'close';
 
 // HarnessFFSDK is the global name that the JavaScript SDK sets in its iife distribution, which
 // we ask users to import.
 @JS("HarnessFFSDK.initialize")
-external dynamic initialize(String apiKey, Map<String, dynamic> target, Map<String, dynamic> options);
+external dynamic initialize(
+    String apiKey, Map<String, dynamic> target, Map<String, dynamic> options);
 
-@JS('$clientWindowReference.on')
-external dynamic on(String apiKey, Map<String, dynamic> target, Map<String, dynamic> options);
+@JS('$clientWindowReference.$clientOn')
+external dynamic on(
+    String apiKey, Map<String, dynamic> target, Map<String, dynamic> options);
