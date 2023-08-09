@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:js/js.dart';
 import 'package:logging/logging.dart';
-import 'web_plugin_internal//FfJavascriptSDKInterop.dart' as webJs;
+import 'web_plugin_internal//FfJavascriptSDKInterop.dart' as ffJsSDK;
 
 // @JS('FFJavaScriptClientSDK')
 // @staticInterop
@@ -53,15 +53,14 @@ class FfFlutterClientSdkWebPlugin {
         //     return harness.registerEvent(call.arguments["eventType"], allowInterop((dynamic event) {
         //       // Process JavaScript call here
         //     }));
-        final response =
-            webJs.initialize("2809ada1-73ae-4008-9c75-f0b9e7sedd797", {
-          'name': 'Sample Name',
-          'identifier': 12345,
-          'isAnonymous': false,
-          'attributes': {'key1': 'value1', 'key2': 'value2'}
-        }, {});
+        final String apiKey = call.arguments['apiKey'];
+        Map<String, dynamic> target = Map<String, dynamic>.from(call.arguments['target']);
+        Map<String, dynamic> options = Map<String, dynamic>.from(call.arguments['configuration']);
+        // final target = call.arguments['target'] ;
+        // final options = call.arguments['configuration'] as Map<dynamic, dynamic>;
+
+        final response = ffJsSDK.initialize(apiKey, target, options);
         var propertyValue = getProperty(response, 'on');
-        print(propertyValue);
         return true;
     }
   }
