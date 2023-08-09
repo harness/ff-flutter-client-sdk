@@ -21,6 +21,7 @@ class JavaScriptSDKClient {
   static const close = 'close';
 }
 
+// Represents the events that the JavaScript SDK can emit
 class Event {
   static const ready = 'ready';
   static const connected = 'connected';
