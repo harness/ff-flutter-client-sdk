@@ -4,7 +4,7 @@ library harness_javascript_sdk.js;
 import 'package:js/js.dart';
 
 // Represents the JavaScript SDK global object set by the iife distribution.
-@JS('HarnessFFSDK')
+@JS(JavaScriptSDK.windowReference)
 class JavaScriptSDK {
   static const windowReference = 'HarnessFFSDK';
   static const initializeFunction = 'initialize';
@@ -15,7 +15,7 @@ class JavaScriptSDK {
 
 // Represents the JavaScript SDK Client instance. Once we've initialized the
 // Client, we set it as a property on the window using this reference.
-@JS('cfClient')
+@JS(JavaScriptSDKClient.windowReference)
 class JavaScriptSDKClient {
   static const windowReference = 'cfClient';
   static const onFunction = 'on';
