@@ -42,7 +42,7 @@ class FfFlutterClientSdkWebPlugin {
   Future<dynamic> handleMethodCall(MethodCall call) async {
     switch (call.method) {
       case initializeMethodCall:
-        return invokeInitialize(call);
+        return await invokeInitialize(call);
     }
   }
 
@@ -53,19 +53,27 @@ class FfFlutterClientSdkWebPlugin {
     Map<String, dynamic> options =
         Map<String, dynamic>.from(call.arguments['configuration']);
     final response = JavaScriptSDK.initialize(apiKey, target, options);
+
     // The JavaScript SDK returns the client instance, whether or not
     // the initialization was successful. We set a reference to it on
     // the global window, and then we can listen if initialization was
     // successful or not.
-    // TODO handle cleanup of event listeners we've registered if init fails,
-    // and remove the reference.
     setProperty(window, JavaScriptSDKClient.windowReference, response);
+
+    // Used to return a the result of initialized when the JavaScript SDK
+    // emits either a READY or ERROR event.
     final completer = Completer<bool>();
 
     void errorCallback(dynamic error) {
       log.severe(error ?? 'Auth error was empty');
+      removeJsSDKEventListener(Event.ERROR);
+      removeJsSDKEventListener(Event.READY);
+      // While we shouldn't attempt to complete this completer more than once,
+      // this is a defensive check and log if it is attempted.
       if (!completer.isCompleted) {
         completer.complete(false);
+      } else {
+        log.info('SDK response already handled. Ignoring subsequent response.');
       }
     }
 
@@ -77,18 +85,6 @@ class FfFlutterClientSdkWebPlugin {
 
     registerJsSDKEventListener(Event.ERROR_AUTH, errorCallback);
     registerJsSDKEventListener(Event.READY, readyCallback);
-
-    return completer.future;
-  }
-
-  Future<bool> setupEventListener() {
-    Completer<bool> completer = Completer<bool>();
-
-    void callbackWrapper(dynamic error) {
-      completer.complete(authErrorCallback(error));
-    }
-
-    registerJsSDKEventListener(Event.ERROR_AUTH, callbackWrapper);
 
     return completer.future;
   }
