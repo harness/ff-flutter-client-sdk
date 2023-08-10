@@ -23,18 +23,18 @@ class JavaScriptSDKClient {
 
 // Represents the events that the JavaScript SDK can emit
 class Event {
-  static const ready = 'ready';
-  static const connected = 'connected';
-  static const disconnected = 'disconnected';
-  static const flagsLoaded = 'flags loaded';
-  static const cacheLoaded = 'cache loaded';
-  static const changed = 'changed';
-  static const error = 'error';
-  static const errorAuth = 'auth error';
-  static const errorMetrics = 'metrics error';
-  static const errorFetchFlags = 'fetch flags error';
-  static const errorFetchFlag = 'fetch flag error';
-  static const errorStream = 'stream error';
+  static const READY = 'ready';
+  static const CONNECTED = 'connected';
+  static const DISCONNECTED = 'disconnected';
+  static const FLAG_LOADED = 'flags loaded';
+  static const CACHE_LOADED = 'cache loaded';
+  static const CHANGED = 'changed';
+  static const ERROR = 'error';
+  static const ERROR_AUTH = 'auth error';
+  static const ERROR_METRICS = 'metrics error';
+  static const ERROR_FETCH_FLAGS = 'fetch flags error';
+  static const ERROR_FETCH_FLAG = 'fetch flag error';
+  static const ERROR_STREAM = 'stream error';
 }
 
 

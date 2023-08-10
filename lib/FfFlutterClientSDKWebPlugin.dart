@@ -56,7 +56,7 @@ class FfFlutterClientSdkWebPlugin {
           setProperty(
               window, ffJsSDKInterop.JavaScriptSDKClient.windowReference, response);
 
-          setupEventListener(ffJsSDKInterop.Event.errorAuth);
+          setupEventListener(ffJsSDKInterop.Event.ERROR_AUTH);
           // var propertyValue = getProperty(response, ffJsSDK.ClientFunctions.on);
           // print(propertyValue);
         } catch (error) {}
