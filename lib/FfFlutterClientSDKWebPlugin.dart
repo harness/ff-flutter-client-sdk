@@ -42,26 +42,30 @@ class FfFlutterClientSdkWebPlugin {
   Future<dynamic> handleMethodCall(MethodCall call) async {
     switch (call.method) {
       case initializeMethodCall:
-        final String apiKey = call.arguments['apiKey'];
-        Map<String, dynamic> target =
-            Map<String, dynamic>.from(call.arguments['target']);
-        Map<String, dynamic> options =
-            Map<String, dynamic>.from(call.arguments['configuration']);
-        try {
-          final response = ffJsSDKInterop.initialize(apiKey, target, options);
-          // The JavaScript SDK returns the client instance, whether or not
-          // the initialization was successful. We set a reference to it on
-          // the global window, and then we can listen if initialization was
-          // successful or not.
-          setProperty(
-              window, ffJsSDKInterop.JavaScriptSDKClient.windowReference, response);
-
-          setupEventListener(ffJsSDKInterop.Event.ERROR_AUTH);
-          // var propertyValue = getProperty(response, ffJsSDK.ClientFunctions.on);
-          // print(propertyValue);
-        } catch (error) {}
-        return true;
+        return invokeInitialize(call);
     }
+  }
+
+  bool invokeInitialize(MethodCall call) {
+    final String apiKey = call.arguments['apiKey'];
+    Map<String, dynamic> target =
+        Map<String, dynamic>.from(call.arguments['target']);
+    Map<String, dynamic> options =
+        Map<String, dynamic>.from(call.arguments['configuration']);
+    try {
+      final response = ffJsSDKInterop.initialize(apiKey, target, options);
+      // The JavaScript SDK returns the client instance, whether or not
+      // the initialization was successful. We set a reference to it on
+      // the global window, and then we can listen if initialization was
+      // successful or not.
+      setProperty(
+          window, ffJsSDKInterop.JavaScriptSDKClient.windowReference, response);
+
+      setupEventListener(ffJsSDKInterop.Event.ERROR_AUTH);
+      // var propertyValue = getProperty(response, ffJsSDK.ClientFunctions.on);
+      // print(propertyValue);
+    } catch (error) {}
+    return true;
   }
 
   void setupEventListener(String event) {
