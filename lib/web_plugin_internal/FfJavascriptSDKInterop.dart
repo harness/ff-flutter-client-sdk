@@ -8,7 +8,6 @@ import 'package:js/js.dart';
 class JavaScriptSDK {
   static const windowReference = 'HarnessFFSDK';
   static const initializeFunction = 'initialize';
-  static const event = 'Event';
 
   external static dynamic initialize(
       String apiKey, Map<String, dynamic> target, Map<String, dynamic> options);
@@ -18,7 +17,6 @@ class JavaScriptSDK {
 // Client, we set it as a property on the window using this reference.
 @JS('cfClient')
 class JavaScriptSDKClient {
-
   static const windowReference = 'cfClient';
   static const onFunction = 'on';
   static const offFunction = 'off';
@@ -26,7 +24,6 @@ class JavaScriptSDKClient {
   static const close = 'close';
 
   external static dynamic on(dynamic eventType, Function callback);
-
   external static dynamic off(dynamic eventType, Function callback);
 }
 
