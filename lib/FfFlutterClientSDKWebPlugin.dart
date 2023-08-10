@@ -58,14 +58,14 @@ class FfFlutterClientSdkWebPlugin {
 
     // Used to return the result of initialize after the JavaScript SDK
     // emits either a READY or ERROR event.
-    final initializationCompleter = Completer<bool>();
+    final initializationResult = Completer<bool>();
 
     // Callback for the JavaScript SDK's READY event
     void readyCallback([_]) {
       // While we shouldn't attempt to complete this completer more than once,
       // this is a defensive check and log if it is attempted.
-      if (!initializationCompleter.isCompleted) {
-        initializationCompleter.complete(true);
+      if (!initializationResult.isCompleted) {
+        initializationResult.complete(true);
       } else {
         log.info('JavaScript SDK success response already handled. Ignoring subsequent response.');
       }
@@ -77,8 +77,8 @@ class FfFlutterClientSdkWebPlugin {
       removeJsSDKEventListener(Event.ERROR);
       removeJsSDKEventListener(Event.READY);
       // Same as above, defensive check.
-      if (!initializationCompleter.isCompleted) {
-        initializationCompleter.complete(false);
+      if (!initializationResult.isCompleted) {
+        initializationResult.complete(false);
       } else {
         log.info('JavaScript SDK failed response already handled. Ignoring subsequent response.');
       }
@@ -87,7 +87,7 @@ class FfFlutterClientSdkWebPlugin {
     registerJsSDKEventListener(Event.READY, readyCallback);
     registerJsSDKEventListener(Event.ERROR_AUTH, initErrorCallback);
 
-    return initializationCompleter.future;
+    return initializationResult.future;
   }
 
   void registerJsSDKEventListener(String event, Function callback) {
