@@ -58,6 +58,8 @@ class FfFlutterClientSdkWebPlugin {
       // the initialization was successful. We set a reference to it on
       // the global window, and then we can listen if initialization was
       // successful or not.
+      // TODO handle cleanup of event listeners we've registered if init fails,
+      // and remove the reference.
       setProperty(
           window, ffJsSDKInterop.JavaScriptSDKClient.windowReference, response);
 
