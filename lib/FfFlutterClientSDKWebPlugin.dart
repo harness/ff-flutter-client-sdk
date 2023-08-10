@@ -63,15 +63,15 @@ class FfFlutterClientSdkWebPlugin {
       setProperty(
           window, ffJsSDKInterop.JavaScriptSDKClient.windowReference, response);
 
-      setupEventListener(ffJsSDKInterop.Event.ERROR_AUTH);
+      setupJsSDKEventListener(ffJsSDKInterop.Event.ERROR_AUTH);
       // var propertyValue = getProperty(response, ffJsSDK.ClientFunctions.on);
       // print(propertyValue);
     } catch (error) {}
     return true;
   }
 
-  void setupEventListener(String event) {
-    ffJsSDKInterop.on(event, allowInterop(handleError));
+  void setupJsSDKEventListener(String event) {
+    ffJsSDKInterop.JavaScriptSDKClient.on(event, allowInterop(handleError));
   }
 
   void handleError(dynamic error) {
