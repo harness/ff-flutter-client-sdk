@@ -163,7 +163,7 @@ class CfClient {
       log.severe(e.message ?? 'Error message was empty' + (e.details ?? 'Error details was empty').toString());
       return new Future(() => InitializationResult(false));
     }
-    return new Future(() => InitializationResult(true));
+    return new Future(() => InitializationResult(initialized));
   }
 
   /// Performs string evaluation for given evaluation id. If no such id is present, the default value will be returned.

@@ -46,13 +46,12 @@ class FfFlutterClientSdkWebPlugin {
     }
   }
 
-  bool invokeInitialize(MethodCall call) {
+  Future<bool> invokeInitialize(MethodCall call) async {
     final String apiKey = call.arguments['apiKey'];
     Map<String, dynamic> target =
         Map<String, dynamic>.from(call.arguments['target']);
     Map<String, dynamic> options =
         Map<String, dynamic>.from(call.arguments['configuration']);
-    try {
       final response = JavaScriptSDK.initialize(apiKey, target, options);
       // The JavaScript SDK returns the client instance, whether or not
       // the initialization was successful. We set a reference to it on
@@ -62,12 +61,42 @@ class FfFlutterClientSdkWebPlugin {
       // and remove the reference.
       setProperty(
           window, JavaScriptSDKClient.windowReference, response);
+    final completer = Completer<bool>();
 
-      registerJsSDKEventListener(Event.ERROR_AUTH, authErrorCallback);
+    void errorCallback(dynamic error) {
+      log.severe(error ?? 'Auth error was empty');
+      if (!completer.isCompleted) {
+        completer.complete(false);
+      }
+    }
+
+    void readyCallback([_]) {
+      if (!completer.isCompleted) {
+        completer.complete(true);
+      }
+    }
+
+    registerJsSDKEventListener(Event.ERROR_AUTH, errorCallback);
+    registerJsSDKEventListener(Event.READY, readyCallback);
+
+    return completer.future;
+      // registerJsSDKEventListener(Event.ERROR_AUTH, authErrorCallback);
+    // bool result = await setupEventListener();
       // var propertyValue = getProperty(response, ffJsSDK.ClientFunctions.on);
       // print(propertyValue);
-    } catch (error) {}
-    return true;
+    // return result;
+  }
+
+  Future<bool> setupEventListener() {
+    Completer<bool> completer = Completer<bool>();
+
+    void callbackWrapper(dynamic error) {
+      completer.complete(authErrorCallback(error));
+    }
+
+    registerJsSDKEventListener(Event.ERROR_AUTH, callbackWrapper);
+
+    return completer.future;
   }
 
   void registerJsSDKEventListener(String event, Function callback) {
@@ -78,10 +107,9 @@ class FfFlutterClientSdkWebPlugin {
   //   JavaScriptSDKClient.off(event, allowInterop(authErrorCallback));
   // }
 
-  void authErrorCallback(dynamic error) {
+  bool authErrorCallback(dynamic error) {
     log.severe(error ?? 'Auth error was empty');
-    // throw error;
-    // Handle the event in Dart, similar to how you'd handle it in JS
+    return false;
   }
 
   // Future<dynamic> boolVariation(Map<String, dynamic> arguments) async {
