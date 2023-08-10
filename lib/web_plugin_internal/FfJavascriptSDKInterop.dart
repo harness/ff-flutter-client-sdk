@@ -3,29 +3,31 @@ library harness_javascript_sdk.js;
 
 import 'package:js/js.dart';
 
-// Represents the object exposed by the JavaScript SDK
+// Represents the JavaScript SDK global object set by the iife distribution.
+@JS('HarnessFFSDK')
 class JavaScriptSDK {
   static const windowReference = 'HarnessFFSDK';
   static const initializeFunction = 'initialize';
   static const event = 'Event';
 
-  @JS("${JavaScriptSDK.windowReference}.${JavaScriptSDK.initializeFunction}")
   external static dynamic initialize(
       String apiKey, Map<String, dynamic> target, Map<String, dynamic> options);
 }
 
-// Represents the Client instance
+// Represents the JavaScript SDK Client instance. Once we've initialized the
+// Client, we set it as a property on the window using this reference.
+@JS('cfClient')
 class JavaScriptSDKClient {
-  // Once we've initialized the Client, we set it as a property on the window using
-  // this reference
+
   static const windowReference = 'cfClient';
   static const onFunction = 'on';
-  static const off = 'off';
+  static const offFunction = 'off';
   static const variation = 'variation';
   static const close = 'close';
 
-  @JS('${JavaScriptSDKClient.windowReference}.${JavaScriptSDKClient.onFunction}')
   external static dynamic on(dynamic eventType, Function callback);
+
+  external static dynamic off(dynamic eventType, Function callback);
 }
 
 // Represents the events that the JavaScript SDK Client can emit
@@ -43,11 +45,3 @@ class Event {
   static const ERROR_FETCH_FLAG = 'fetch flag error';
   static const ERROR_STREAM = 'stream error';
 }
-
-
-// @JS("${JavaScriptSDK.windowReference}.${JavaScriptSDK.initialize}")
-// external dynamic initialize(
-//     String apiKey, Map<String, dynamic> target, Map<String, dynamic> options);
-//
-// @JS('${JavaScriptSDKClient.windowReference}.${JavaScriptSDKClient.on}')
-// external dynamic on(dynamic eventType, Function callback);
