@@ -1,5 +1,5 @@
 @JS()
-library static_interop;
+library ff_web_plugin;
 
 import 'dart:async';
 import 'dart:js_util';
@@ -18,9 +18,6 @@ class FfFlutterClientSdkWebPlugin {
   static const initializeMethodCall = 'initialize';
   static const variationMethodCall = 'variation';
 
-  // The instance of the wrapper around the JS SDK
-  // static final harness = FFJavaScriptClientSDK();
-
   // This channel is used to send JavaScript SDK events to the Flutter
   // SDK Code.
   static const MethodChannel _hostChannel =
@@ -37,8 +34,7 @@ class FfFlutterClientSdkWebPlugin {
     channel.setMethodCallHandler(pluginInstance.handleMethodCall);
   }
 
-  /// Handles method calls over the [MethodChannel] of this plugin.
-  /// Note: Check the incoming method name to call your implementation accordingly.
+  /// Handles method calls over the [MethodChannel] for this plugin
   Future<dynamic> handleMethodCall(MethodCall call) async {
     switch (call.method) {
       case initializeMethodCall:
@@ -60,31 +56,36 @@ class FfFlutterClientSdkWebPlugin {
     // successful or not.
     setProperty(window, JavaScriptSDKClient.windowReference, response);
 
-    // Used to return a the result of initialized when the JavaScript SDK
+    // Used to return a the result of initialize after the JavaScript SDK
     // emits either a READY or ERROR event.
     final completer = Completer<bool>();
 
-    void errorCallback(dynamic error) {
-      log.severe(error ?? 'Auth error was empty');
-      removeJsSDKEventListener(Event.ERROR);
-      removeJsSDKEventListener(Event.READY);
+    // Callback for the JavaScript SDK's READY event
+    void readyCallback([_]) {
       // While we shouldn't attempt to complete this completer more than once,
       // this is a defensive check and log if it is attempted.
       if (!completer.isCompleted) {
+        completer.complete(true);
+      } else {
+        log.info('JavaScript SDK success response already handled. Ignoring subsequent response.');
+      }
+    }
+
+    // Callback to handle errors that can occur when initializing.
+    void initErrorCallback(dynamic error) {
+      log.severe(error ?? 'Auth error was empty');
+      removeJsSDKEventListener(Event.ERROR);
+      removeJsSDKEventListener(Event.READY);
+      // Same as above, defensive check.
+      if (!completer.isCompleted) {
         completer.complete(false);
       } else {
-        log.info('SDK response already handled. Ignoring subsequent response.');
+        log.info('JavaScript SDK failed response already handled. Ignoring subsequent response.');
       }
     }
 
-    void readyCallback([_]) {
-      if (!completer.isCompleted) {
-        completer.complete(true);
-      }
-    }
-
-    registerJsSDKEventListener(Event.ERROR_AUTH, errorCallback);
     registerJsSDKEventListener(Event.READY, readyCallback);
+    registerJsSDKEventListener(Event.ERROR_AUTH, initErrorCallback);
 
     return completer.future;
   }
@@ -94,19 +95,14 @@ class FfFlutterClientSdkWebPlugin {
   }
 
   void removeJsSDKEventListener(String event) {
-    JavaScriptSDKClient.off(event, allowInterop(authErrorCallback));
+    JavaScriptSDKClient.off(event, allowInterop((dynamic error) {
+      log.severe('Error removing event listener: ' + (error ?? 'Auth error was empty'));
+      return false;
+    }));
   }
 
-  bool authErrorCallback(dynamic error) {
-    log.severe(error ?? 'Auth error was empty');
-    return false;
+  // Callback used for logging errors that have been emitted by the JS SDK
+  void errorCallback(String logString, dynamic error) {
+    log.severe('$logString ' + (error ?? 'Auth error was empty'));
   }
-
-  // Future<dynamic> boolVariation(Map<String, dynamic> arguments) async {
-  //   // TODO: Implement your web-specific logic here
-  // }
-  //
-  // Future<dynamic> stringVariation(Map<String, dynamic> arguments) async {
-  //   // TODO: Implement your web-specific logic here
-  // }
 }

@@ -4,7 +4,6 @@ import 'dart:async';
 import 'dart:collection';
 import 'package:logging/logging.dart';
 import 'package:flutter/services.dart';
-import 'dart:js' as js;
 
 
 part 'CfTarget.dart';
