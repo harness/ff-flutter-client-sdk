@@ -71,8 +71,8 @@ class FfFlutterClientSdkWebPlugin {
       if (!initializationResult.isCompleted) {
         // Start listening for the required events emitted by the JavaScript SDK
         registerJsSDKEventListener(Event.CHANGED, eventChangedCallBack);
-        registerJsSDKEventListener(Event.CONNECTED, eventChangedCallBack);
-        registerJsSDKEventListener(Event.DISCONNECTED, eventChangedCallBack);
+        registerJsSDKEventListener(Event.CONNECTED, eventConnectedCallBack);
+        registerJsSDKEventListener(Event.DISCONNECTED, eventDisconnectedCallBack);
 
         initializationResult.complete(true);
       } else {
@@ -103,6 +103,16 @@ class FfFlutterClientSdkWebPlugin {
 
   /// Callback to handle the JavaScript SDK's [Event.CHANGED] event
   void eventChangedCallBack() {
+
+  }
+
+  /// Callback to handle the JavaScript SDK's [Event.CONNECTED] event
+  void eventConnectedCallBack() {
+
+  }
+
+  /// Callback to handle the JavaScript SDK's [Event.DISCONNECTED] event
+  void eventDisconnectedCallBack() {
 
   }
 
