@@ -18,6 +18,12 @@ class FfFlutterClientSdkWebPlugin {
   static const initializeMethodCall = 'initialize';
   static const variationMethodCall = 'variation';
 
+  // Keep track of unique events we are listening to from the JavaScript SDK
+  // Registering a listener doesn't return a reference we can keep track of,
+  // instead we just update this set with the event type.
+  // This prevents the accidental registering of more than one event type.
+  static Set<String> registeredListeners = {};
+
   // This channel is used to send JavaScript SDK events to the Flutter
   // SDK Code.
   static const MethodChannel _hostChannel =
@@ -63,9 +69,12 @@ class FfFlutterClientSdkWebPlugin {
       // While we shouldn't attempt to complete this completer more than once,
       // this is a defensive check and log if it is attempted.
       if (!initializationResult.isCompleted) {
+        // Start listening for the required events emitted by the JavaScript SDK
+
         initializationResult.complete(true);
       } else {
-        log.info('JavaScript SDK success response already handled. Ignoring subsequent response.');
+        log.info(
+            'JavaScript SDK success response already handled. Ignoring subsequent response.');
       }
     }
 
@@ -78,7 +87,8 @@ class FfFlutterClientSdkWebPlugin {
       if (!initializationResult.isCompleted) {
         initializationResult.complete(false);
       } else {
-        log.info('JavaScript SDK failed response already handled. Ignoring subsequent response.');
+        log.info(
+            'JavaScript SDK failed response already handled. Ignoring subsequent response.');
       }
     }
 
@@ -89,24 +99,32 @@ class FfFlutterClientSdkWebPlugin {
   }
 
   void registerJsSDKEventListener(String event, Function callback) {
+    if (registeredListeners.contains(event)) {
+      log.info(
+          'Listener for $event already registered. Skipping subsequent registration.');
+      return;
+    }
     JavaScriptSDKClient.on(event, allowInterop(callback));
   }
 
   void removeJsSDKEventListener(String event) {
     JavaScriptSDKClient.off(event, allowInterop((dynamic error) {
-      log.severe('Error removing event listener: ' + (error ?? 'Auth error was empty'));
+      log.severe('Error removing event listener: ' +
+          (error ?? 'Auth error was empty'));
       return false;
     }));
   }
 
+  void registerHostEventListener() {}
+
   // Callback used for logging errors that have been emitted by the JS SDK
   void errorCallback(String logString, dynamic error) {
-    log.severe('$logString ' + (error ?? 'Auth error was empty'));
+    log.severe('$logString ' + (error ?? 'Error was empty'));
   }
 
   // Helper function to turn a map into an object, which is the required
   // type for interop with JavaScript objects
-  Object mapToJsObject(Map map){
+  Object mapToJsObject(Map map) {
     var object = newObject();
     map.forEach((k, v) {
       if (v is Map) {
