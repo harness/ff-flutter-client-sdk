@@ -70,7 +70,7 @@ class FfFlutterClientSdkWebPlugin {
       // this is a defensive check and log if it is attempted.
       if (!initializationResult.isCompleted) {
         // Start listening for the required events emitted by the JavaScript SDK
-
+        registerJsSDKEventListener(Event.CHANGED, eventChangedCallBack);
         initializationResult.complete(true);
       } else {
         log.info(
@@ -96,6 +96,11 @@ class FfFlutterClientSdkWebPlugin {
     registerJsSDKEventListener(Event.ERROR_AUTH, initErrorCallback);
 
     return initializationResult.future;
+  }
+
+  /// Callback to handle the JavaScript SDK's [Event.CHANGED] event
+  void eventChangedCallBack() {
+
   }
 
   void registerJsSDKEventListener(String event, Function callback) {
