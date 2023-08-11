@@ -10,7 +10,7 @@ class JavaScriptSDK {
   static const initializeFunction = 'initialize';
 
   external static dynamic initialize(
-      String apiKey, Map<String, dynamic> target, Map<String, dynamic> options);
+      String apiKey, Object target, Object options);
 }
 
 // Represents the JavaScript SDK Client instance. Once we've initialized the
