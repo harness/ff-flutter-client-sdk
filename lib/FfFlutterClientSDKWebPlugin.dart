@@ -70,6 +70,7 @@ class FfFlutterClientSdkWebPlugin {
       // this is a defensive check and log if it is attempted.
       if (!initializationResult.isCompleted) {
         // Start listening for the required events emitted by the JavaScript SDK
+        // TODO I think these should be registered onDemand, as `registerEventListener` is invoked by Flutter core sdk
         registerJsSDKEventListener(Event.CHANGED, eventChangedCallBack);
         registerJsSDKEventListener(Event.CONNECTED, eventConnectedCallBack);
         registerJsSDKEventListener(Event.DISCONNECTED, eventDisconnectedCallBack);
