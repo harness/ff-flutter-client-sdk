@@ -71,6 +71,9 @@ class FfFlutterClientSdkWebPlugin {
       if (!initializationResult.isCompleted) {
         // Start listening for the required events emitted by the JavaScript SDK
         registerJsSDKEventListener(Event.CHANGED, eventChangedCallBack);
+        registerJsSDKEventListener(Event.CONNECTED, eventChangedCallBack);
+        registerJsSDKEventListener(Event.DISCONNECTED, eventChangedCallBack);
+
         initializationResult.complete(true);
       } else {
         log.info(
