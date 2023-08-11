@@ -44,10 +44,8 @@ class FfFlutterClientSdkWebPlugin {
 
   Future<bool> invokeInitialize(MethodCall call) async {
     final String apiKey = call.arguments['apiKey'];
-    Map<String, dynamic> target =
-        Map<String, dynamic>.from(call.arguments['target']);
-    Map<String, dynamic> options =
-        Map<String, dynamic>.from(call.arguments['configuration']);
+    final Object target = mapToJsObject(call.arguments['target']);
+    final Object options = mapToJsObject(call.arguments['configuration']);
     final response = JavaScriptSDK.initialize(apiKey, target, options);
 
     // The JavaScript SDK returns the client instance, whether or not
@@ -104,5 +102,19 @@ class FfFlutterClientSdkWebPlugin {
   // Callback used for logging errors that have been emitted by the JS SDK
   void errorCallback(String logString, dynamic error) {
     log.severe('$logString ' + (error ?? 'Auth error was empty'));
+  }
+
+  // Helper function to turn a map into an object, which is the required
+  // type for interop with JavaScript objects
+  Object mapToJsObject(Map map){
+    var object = newObject();
+    map.forEach((k, v) {
+      if (v is Map) {
+        setProperty(object, k, mapToJsObject(v));
+      } else {
+        setProperty(object, k, v);
+      }
+    });
+    return object;
   }
 }
