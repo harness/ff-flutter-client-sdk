@@ -105,6 +105,7 @@ class FfFlutterClientSdkWebPlugin {
       return;
     }
     JavaScriptSDKClient.on(event, allowInterop(callback));
+    registeredListeners.add(event);
   }
 
   void removeJsSDKEventListener(String event) {
