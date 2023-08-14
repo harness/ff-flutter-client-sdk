@@ -80,8 +80,6 @@ class FfFlutterClientSdkWebPlugin {
   }
 
   Future<bool> _waitForInitializationResult() {
-    // Used to return the result of initialize after the JavaScript SDK
-    // emits either a READY or ERROR event.
     final _initializationResult = Completer<bool>();
 
     // Callback for the JavaScript SDK's READY event. It returns a list of
