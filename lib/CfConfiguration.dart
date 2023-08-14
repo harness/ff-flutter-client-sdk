@@ -8,6 +8,8 @@ class CfConfiguration {
   bool streamEnabled;
   bool analyticsEnabled;
   int pollingInterval;
+  // We use logLevel in CfClient.dart only, so no need to get a codec value
+  Level logLevel;
 
   CfConfiguration._builder(CfConfigurationBuilder builder)
       : configUrl = builder._configUrl,
@@ -15,7 +17,8 @@ class CfConfiguration {
         eventUrl  = builder._eventUrl,
         streamEnabled = builder._streamEnabled,
         analyticsEnabled = builder._analyticsEnabled,
-        pollingInterval = builder._pollingInterval;
+        pollingInterval = builder._pollingInterval,
+        logLevel = builder._logLevel;
 
   Map<String, dynamic> _toCodecValue() {
 
@@ -38,6 +41,7 @@ class CfConfigurationBuilder {
   bool _streamEnabled = true;
   bool _analyticsEnabled = true;
   int _pollingInterval = 60;
+  Level _logLevel = Level.SEVERE;
 
   CfConfigurationBuilder setConfigUri(String configUrl) {
 
@@ -72,6 +76,12 @@ class CfConfigurationBuilder {
   CfConfigurationBuilder setPollingInterval(int pollingInterval) {
 
     this._pollingInterval = pollingInterval;
+    return this;
+  }
+
+  CfConfigurationBuilder setLogLevel(Level logLevel) {
+
+    this._logLevel = logLevel;
     return this;
   }
 

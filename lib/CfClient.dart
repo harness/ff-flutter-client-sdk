@@ -146,7 +146,7 @@ class CfClient {
   /// initialization succeeded or not
   Future<InitializationResult> initialize(String apiKey,
       CfConfiguration configuration, CfTarget target) async {
-    Logger.root.level = Level.SEVERE; // defaults to Level.INFO
+    Logger.root.level = configuration.logLevel; // defaults to Level.INFO
     Logger.root.onRecord.listen((record) {
       print('${record.level.name}: ${record.time}: ${record.message}');
     });

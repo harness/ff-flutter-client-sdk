@@ -53,6 +53,7 @@ class FfFlutterClientSdkWebPlugin {
   }
 
   Future<bool> invokeInitialize(MethodCall call) async {
+    log.info("message");
     final String apiKey = call.arguments['apiKey'];
     final Object target = mapToJsObject(call.arguments['target']);
     final Object options = mapToJsObject(call.arguments['configuration']);
@@ -75,11 +76,11 @@ class FfFlutterClientSdkWebPlugin {
       if (!initializationResult.isCompleted) {
         // Start listening for the required events emitted by the JavaScript SDK
         // TODO I think these should be registered onDemand, as `registerEventListener` is invoked by Flutter core sdk
-        registerJsSDKEventListener(Event.CHANGED, eventChangedCallBack);
-        registerJsSDKEventListener(Event.CONNECTED, eventConnectedCallBack);
-        registerJsSDKEventListener(
-            Event.DISCONNECTED, eventDisconnectedCallBack);
-
+        // registerJsSDKEventListener(Event.CHANGED, eventChangedCallBack);
+        // registerJsSDKEventListener(Event.CONNECTED, eventConnectedCallBack);
+        // registerJsSDKEventListener(
+        //     Event.DISCONNECTED, eventDisconnectedCallBack);
+        registerJsSDKStreamListeners();
         initializationResult.complete(true);
       } else {
         log.info(
@@ -155,20 +156,24 @@ class FfFlutterClientSdkWebPlugin {
         //   break;
         // ... handle other events
         case EventType.SSE_START:
-          _hostChannel.invokeMethod('start');
+          // _hostChannel.invokeMethod('start');
+          log.info('Internal event received SSE_START');
+
           break;
         case EventType.SSE_END:
-          _hostChannel.invokeMethod('end');
+          // _hostChannel.invokeMethod('end');
+          log.info('Internal event received SSE_START');
+
           break;
         case EventType.SSE_RESUME:
-          log.fine('Internal event received');
+          log.info('Internal event received SSE_RESUME');
 
           break;
         case EventType.EVALUATION_POLLING:
           // TODO: Handle this case.
           break;
         case EventType.EVALUATION_CHANGE:
-          // TODO: Handle this case.
+          log.info('Internal event received EVALUATION_CHANGE');
           break;
       }
     });
@@ -202,5 +207,20 @@ class FfFlutterClientSdkWebPlugin {
       }
     });
     return object;
+  }
+
+  Level logLevelFromName(String levelName) {
+    // Assuming you're using the 'logging' package for Level
+    switch (levelName) {
+      case 'SEVERE':
+        return Level.SEVERE;
+      case 'WARNING':
+        return Level.WARNING;
+      case 'INFO':
+        return Level.INFO;
+      // ... handle other levels
+      default:
+        return Level.SEVERE;
+    }
   }
 }
