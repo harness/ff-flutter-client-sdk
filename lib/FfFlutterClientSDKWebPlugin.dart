@@ -19,8 +19,8 @@ class FfFlutterClientSdkWebPlugin {
   static const _initializeMethodCall = 'initialize';
   static const _variationMethodCall = 'variation';
 
-  final StreamController<Map<String, dynamic>> _eventController = StreamController.broadcast();
-
+  final StreamController<Map<String, dynamic>> _eventController =
+      StreamController.broadcast();
 
   // Keep track of unique events we are listening to from the JavaScript SDK
   // Registering a listener doesn't return a reference we can keep track of,
@@ -77,7 +77,8 @@ class FfFlutterClientSdkWebPlugin {
         // TODO I think these should be registered onDemand, as `registerEventListener` is invoked by Flutter core sdk
         registerJsSDKEventListener(Event.CHANGED, eventChangedCallBack);
         registerJsSDKEventListener(Event.CONNECTED, eventConnectedCallBack);
-        registerJsSDKEventListener(Event.DISCONNECTED, eventDisconnectedCallBack);
+        registerJsSDKEventListener(
+            Event.DISCONNECTED, eventDisconnectedCallBack);
 
         initializationResult.complete(true);
       } else {
@@ -107,19 +108,13 @@ class FfFlutterClientSdkWebPlugin {
   }
 
   /// Callback to handle the JavaScript SDK's [Event.CHANGED] event
-  void eventChangedCallBack() {
-
-  }
+  void eventChangedCallBack() {}
 
   /// Callback to handle the JavaScript SDK's [Event.CONNECTED] event
-  void eventConnectedCallBack() {
-
-  }
+  void eventConnectedCallBack() {}
 
   /// Callback to handle the JavaScript SDK's [Event.DISCONNECTED] event
-  void eventDisconnectedCallBack() {
-
-  }
+  void eventDisconnectedCallBack() {}
 
   void registerJsSDKEventListener(String event, Function callback) {
     if (_registeredListeners.contains(event)) {
@@ -130,7 +125,6 @@ class FfFlutterClientSdkWebPlugin {
     JavaScriptSDKClient.on(event, allowInterop(callback));
     _registeredListeners.add(event);
   }
-
 
   void registerJsSDKStreamListeners() {
     JavaScriptSDKClient.on(Event.CONNECTED, allowInterop((_) {
@@ -144,10 +138,9 @@ class FfFlutterClientSdkWebPlugin {
     JavaScriptSDKClient.on(Event.CHANGED, allowInterop((flagInfo) {
       _eventController.add({
         'event': EventType.EVALUATION_CHANGE,
-        'data': flagInfo  // assuming flagInfo is some data you've retrieved
-      });    }));
-
-
+        'data': flagInfo // assuming flagInfo is some data you've retrieved
+      });
+    }));
 
     // Add more listeners as needed...
 
@@ -160,7 +153,7 @@ class FfFlutterClientSdkWebPlugin {
         // case 'end':
         //   _hostChannel.invokeMethod('end');
         //   break;
-      // ... handle other events
+        // ... handle other events
         case EventType.SSE_START:
           _hostChannel.invokeMethod('start');
           break;
