@@ -72,7 +72,8 @@ class FfFlutterClientSdkWebPlugin {
     // emits either a READY or ERROR event.
     final _initializationResult = Completer<bool>();
 
-    // Callback for the JavaScript SDK's READY event
+    // Callback for the JavaScript SDK's READY event. It returns a list of
+    // evaluations, but we don't need them in this plugin.
     final readyCallback = ([_]) {
       // While we shouldn't attempt to complete this completer more than once,
       // this is a defensive check and log if it is attempted.
