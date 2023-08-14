@@ -128,15 +128,17 @@ class FfFlutterClientSdkWebPlugin {
   /// Registers the underlying JavaScript SDK event listeners, and emits events
   /// back to the core Flutter SDK using the plugin's host MethodChannel
   void _registerJsSDKStreamListeners() {
-    JavaScriptSDKClient.on(Event.CONNECTED, allowInterop((_) {
+    final streamStartCallBack = (_) {
       _eventController.add({'event': EventType.SSE_START});
-    }));
+    };
+    _registerAndStoreJSEventListener(Event.CONNECTED, streamStartCallBack);
 
-    JavaScriptSDKClient.on(Event.DISCONNECTED, allowInterop((_) {
+    final streamDisconnectedCallBack = (_) {
       _eventController.add({'event': EventType.SSE_END});
-    }));
+    };
+    _registerAndStoreJSEventListener(Event.DISCONNECTED, streamDisconnectedCallBack);
 
-    JavaScriptSDKClient.on(Event.CHANGED, allowInterop((changeInfo) {
+    final streamEvaluationChangeCallBack = (changeInfo) {
       FlagChange flagChange = changeInfo;
       Map<String, dynamic> evaluationResponse = {
         "flag": flagChange.flag,
@@ -147,7 +149,8 @@ class FfFlutterClientSdkWebPlugin {
         'data':
             evaluationResponse // assuming flagInfo is some data you've retrieved
       });
-    }));
+    };
+    _registerAndStoreJSEventListener(Event.CHANGED, streamEvaluationChangeCallBack);
 
     _eventController.stream.listen((event) {
       switch (event['event']) {
