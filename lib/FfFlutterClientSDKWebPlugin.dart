@@ -15,9 +15,12 @@ external dynamic get window;
 
 class FfFlutterClientSdkWebPlugin {
   final log = Logger('FfFlutterClientSdkWebPluginLogger');
+  // The method calls that the core Flutter SDK can make
   static const _initializeMethodCall = 'initialize';
+  static const _registerEventsListenerMethodCall = 'registerEventsListener';
   static const _variationMethodCall = 'variation';
 
+  // Used to emit JavaScript SDK events to the host MethodChannel
   final StreamController<Map<String, dynamic>> _eventController =
       StreamController.broadcast();
 
@@ -145,21 +148,18 @@ class FfFlutterClientSdkWebPlugin {
     _eventController.stream.listen((event) {
       switch (event['event']) {
         case EventType.SSE_START:
+          log.fine('Internal event received: SSE_START');
           _hostChannel.invokeMethod('start');
-          log.fine('Internal event received SSE_START');
-
           break;
         case EventType.SSE_END:
+          log.fine('Internal event received: SSE_END');
           _hostChannel.invokeMethod('end');
-          log.fine('Internal event received SSE_START');
-
           break;
         case EventType.SSE_RESUME:
-          log.fine('Internal event received SSE_RESUME');
-
+          log.fine('Internal event received: SSE_RESUME');
           break;
         case EventType.EVALUATION_POLLING:
-          // TODO: Handle this case.
+          // TODO: The JavaScript SDK currently does not implement polling.
           break;
         case EventType.EVALUATION_CHANGE:
           log.fine('Internal event received EVALUATION_CHANGE');
