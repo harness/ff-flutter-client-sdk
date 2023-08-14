@@ -56,6 +56,9 @@ class FfFlutterClientSdkWebPlugin {
     switch (call.method) {
       case _initializeMethodCall:
         return await _invokeInitialize(call);
+      case _registerEventsListenerMethodCall:
+        _registerJsSDKStreamListeners();
+        break;
     }
   }
 
@@ -73,6 +76,12 @@ class FfFlutterClientSdkWebPlugin {
 
     // Used to return the result of initialize after the JavaScript SDK
     // emits either a READY or ERROR event.
+    return _waitForInitializationResult();
+  }
+
+  Future<bool> _waitForInitializationResult() {
+    // Used to return the result of initialize after the JavaScript SDK
+    // emits either a READY or ERROR event.
     final _initializationResult = Completer<bool>();
 
     // Callback for the JavaScript SDK's READY event. It returns a list of
@@ -81,16 +90,13 @@ class FfFlutterClientSdkWebPlugin {
       // While we shouldn't attempt to complete this completer more than once,
       // this is a defensive check and log if it is attempted.
       if (!_initializationResult.isCompleted) {
-        // Start listening for the required events emitted by the JavaScript SDK
-        // TODO I think this should be registered onDemand, as `registerEventListener` is invoked by Flutter core sdk
-        _registerJsSDKStreamListeners();
         _initializationResult.complete(true);
       } else {
         log.info(
             'JavaScript SDK success response already handled. Ignoring subsequent response.');
       }
     };
-    
+
     // Callback to handle errors that can occur when initializing.
     final initErrorCallback = (dynamic error) {
       log.severe(error ?? 'Auth error was empty');
@@ -105,8 +111,8 @@ class FfFlutterClientSdkWebPlugin {
       }
     };
 
-    _registerJsSDKEventListener(Event.READY, readyCallback);
-    _registerJsSDKEventListener(Event.ERROR_AUTH, initErrorCallback);
+    JavaScriptSDKClient.on(Event.READY, allowInterop(readyCallback));
+    JavaScriptSDKClient.on(Event.ERROR_AUTH, allowInterop(initErrorCallback));
 
     return _initializationResult.future;
   }
