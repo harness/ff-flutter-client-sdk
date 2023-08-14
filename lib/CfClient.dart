@@ -167,8 +167,7 @@ class CfClient {
 
   /// Performs string evaluation for given evaluation id. If no such id is present, the default value will be returned.
   Future<String> stringVariation(String id, String defaultValue) async {
-    return _sendMessage(
-        'stringVariation', new EvaluationRequest(id, defaultValue));
+      return _sendMessage('stringVariation', new EvaluationRequest(id, defaultValue));
   }
 
   /// Performs boolean evaluation for given evaluation id. If no such id is present, the default value will be returned.

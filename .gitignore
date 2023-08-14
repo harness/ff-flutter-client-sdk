@@ -71,3 +71,4 @@ pubspec.lock
 
 .idea
 .idea/*
+.DS_Store
