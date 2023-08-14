@@ -24,12 +24,22 @@ class FfFlutterClientSdkWebPlugin {
   final StreamController<Map<String, dynamic>> _eventController =
       StreamController.broadcast();
 
-  // Keep track of unique events we are listening to from the JavaScript SDK
-  // Registering a listener doesn't return a reference we can keep track of,
-  // instead we just update this set with the event type.
-  // This prevents the accidental registering of more than one event type.
-  static Set<String> _registeredListeners = {};
-
+  // Store registered events and their function references, so that they can
+  // be removed later.
+  static Map<String, List<Function>> _registeredEventListeners = {
+    Event.READY: [],
+    Event.CONNECTED: [],
+    Event.DISCONNECTED: [],
+    Event.FLAG_LOADED: [],
+    Event.CACHE_LOADED: [],
+    Event.CHANGED: [],
+    Event.ERROR: [],
+    Event.ERROR_AUTH: [],
+    Event.ERROR_METRICS: [],
+    Event.ERROR_FETCH_FLAGS: [],
+    Event.ERROR_FETCH_FLAG: [],
+    Event.ERROR_STREAM: []
+  };
   // Used to send JavaScript SDK events to the Flutter
   // SDK Code.
   static late MethodChannel _hostChannel;
@@ -109,20 +119,10 @@ class FfFlutterClientSdkWebPlugin {
       }
     };
 
-    JavaScriptSDKClient.on(Event.READY, allowInterop(readyCallback));
-    JavaScriptSDKClient.on(Event.ERROR_AUTH, allowInterop(initErrorCallback));
+    _registerAndStoreJSEventListener(Event.READY, readyCallback);
+    _registerAndStoreJSEventListener(Event.ERROR_AUTH, initErrorCallback);
 
     return _initializationResult.future;
-  }
-
-  void _registerJsSDKEventListener(String event, Function callback) {
-    if (_registeredListeners.contains(event)) {
-      log.info(
-          'Listener for $event already registered. Skipping subsequent registration.');
-      return;
-    }
-    JavaScriptSDKClient.on(event, allowInterop(callback));
-    _registeredListeners.add(event);
   }
 
   /// Registers the underlying JavaScript SDK event listeners, and emits events
@@ -172,6 +172,13 @@ class FfFlutterClientSdkWebPlugin {
           break;
       }
     });
+  }
+
+  /// Helper function to register JavaScript SDK event listeners and store the
+  /// function callback reference so they can be removed when requried.
+  void _registerAndStoreJSEventListener(String event, Function callback) {
+    JavaScriptSDKClient.on(event, allowInterop(callback));
+    _registeredEventListeners[event]!.add(callback);
   }
 
   // TODO, `off` needs the original cb function reference. Fix.
