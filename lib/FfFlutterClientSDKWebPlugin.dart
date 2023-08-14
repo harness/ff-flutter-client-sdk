@@ -146,7 +146,7 @@ class FfFlutterClientSdkWebPlugin {
     _eventController.stream.listen((event) {
       switch (event['event']) {
         case EventType.SSE_START:
-          _hostChannel.invokeMethod('start', null);
+          _hostChannel.invokeMethod('start');
           log.fine('Internal event received SSE_START');
 
           break;
@@ -164,6 +164,7 @@ class FfFlutterClientSdkWebPlugin {
           break;
         case EventType.EVALUATION_CHANGE:
           log.fine('Internal event received EVALUATION_CHANGE');
+          _hostChannel.invokeMethod('evaluation_change', jsObjectToMap(event['data']));
           break;
       }
     });
@@ -198,4 +199,32 @@ class FfFlutterClientSdkWebPlugin {
     });
     return object;
   }
+
+  // Helper function to turn a JavaScript object into a map, for sending change
+  // event data back to the core Flutter SDK code
+  Map jsObjectToMap(dynamic jsObject) {
+    Map result = {};
+    List keys = _objectKeys(jsObject);
+    for (dynamic key in keys) {
+      dynamic value = getProperty(jsObject, key);
+      List ?nestedKeys = objectKeys(value);
+      if ((nestedKeys ?? []).isNotEmpty) {
+        //nested property
+        result[key] = jsObjectToMap(value);
+      } else {
+        result[key] = value;
+      }
+    }
+    return result;
+  }
+
+  List<String>? objectKeys(dynamic jsObject) {
+    if (jsObject == null || jsObject is String || jsObject is num || jsObject is bool) return null;
+    return _objectKeys(jsObject);
+  }
+
+
 }
+
+@JS('Object.keys')
+external List<String> _objectKeys(jsObject);
