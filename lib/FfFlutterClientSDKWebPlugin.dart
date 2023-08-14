@@ -146,7 +146,7 @@ class FfFlutterClientSdkWebPlugin {
 
     // Flutter code can listen for these events and act accordingly.
     _eventController.stream.listen((event) {
-      switch (EventType.SSE_START) {
+      switch (event['event']) {
         // case 'start':
         //   _hostChannel.invokeMethod('start');
         //   break;
@@ -161,7 +161,8 @@ class FfFlutterClientSdkWebPlugin {
           _hostChannel.invokeMethod('end');
           break;
         case EventType.SSE_RESUME:
-          // TODO: Handle this case.
+          log.fine('Internal event received');
+
           break;
         case EventType.EVALUATION_POLLING:
           // TODO: Handle this case.
