@@ -30,12 +30,17 @@ class FfFlutterClientSdkWebPlugin {
 
   // This channel is used to send JavaScript SDK events to the Flutter
   // SDK Code.
-  static const MethodChannel _hostChannel =
-      const MethodChannel('cf_flutter_host');
+  static late MethodChannel _hostChannel;
 
   static void registerWith(Registrar registrar) {
     final MethodChannel channel = MethodChannel(
       'ff_flutter_client_sdk',
+      const StandardMethodCodec(),
+      registrar,
+    );
+
+    _hostChannel = MethodChannel(
+      'cf_flutter_host',
       const StandardMethodCodec(),
       registrar,
     );
@@ -53,7 +58,6 @@ class FfFlutterClientSdkWebPlugin {
   }
 
   Future<bool> invokeInitialize(MethodCall call) async {
-    log.info("message");
     final String apiKey = call.arguments['apiKey'];
     final Object target = mapToJsObject(call.arguments['target']);
     final Object options = mapToJsObject(call.arguments['configuration']);
@@ -75,11 +79,7 @@ class FfFlutterClientSdkWebPlugin {
       // this is a defensive check and log if it is attempted.
       if (!initializationResult.isCompleted) {
         // Start listening for the required events emitted by the JavaScript SDK
-        // TODO I think these should be registered onDemand, as `registerEventListener` is invoked by Flutter core sdk
-        // registerJsSDKEventListener(Event.CHANGED, eventChangedCallBack);
-        // registerJsSDKEventListener(Event.CONNECTED, eventConnectedCallBack);
-        // registerJsSDKEventListener(
-        //     Event.DISCONNECTED, eventDisconnectedCallBack);
+        // TODO I think this should be registered onDemand, as `registerEventListener` is invoked by Flutter core sdk
         registerJsSDKStreamListeners();
         initializationResult.complete(true);
       } else {
@@ -143,28 +143,27 @@ class FfFlutterClientSdkWebPlugin {
       });
     }));
 
-
     _eventController.stream.listen((event) {
       switch (event['event']) {
         case EventType.SSE_START:
-          // _hostChannel.invokeMethod('start');
-          log.info('Internal event received SSE_START');
+          _hostChannel.invokeMethod('start', null);
+          log.fine('Internal event received SSE_START');
 
           break;
         case EventType.SSE_END:
-          // _hostChannel.invokeMethod('end');
-          log.info('Internal event received SSE_START');
+          _hostChannel.invokeMethod('end');
+          log.fine('Internal event received SSE_START');
 
           break;
         case EventType.SSE_RESUME:
-          log.info('Internal event received SSE_RESUME');
+          log.fine('Internal event received SSE_RESUME');
 
           break;
         case EventType.EVALUATION_POLLING:
           // TODO: Handle this case.
           break;
         case EventType.EVALUATION_CHANGE:
-          log.info('Internal event received EVALUATION_CHANGE');
+          log.fine('Internal event received EVALUATION_CHANGE');
           break;
       }
     });
