@@ -73,7 +73,7 @@ class FfFlutterClientSdkWebPlugin {
     final _initializationResult = Completer<bool>();
 
     // Callback for the JavaScript SDK's READY event
-    void readyCallback([_]) {
+    final readyCallback = ([_]) {
       // While we shouldn't attempt to complete this completer more than once,
       // this is a defensive check and log if it is attempted.
       if (!_initializationResult.isCompleted) {
@@ -85,10 +85,10 @@ class FfFlutterClientSdkWebPlugin {
         log.info(
             'JavaScript SDK success response already handled. Ignoring subsequent response.');
       }
-    }
-
+    };
+    
     // Callback to handle errors that can occur when initializing.
-    void initErrorCallback(dynamic error) {
+    final initErrorCallback = (dynamic error) {
       log.severe(error ?? 'Auth error was empty');
       _removeJsSDKEventListener(Event.ERROR);
       _removeJsSDKEventListener(Event.READY);
@@ -99,22 +99,13 @@ class FfFlutterClientSdkWebPlugin {
         log.info(
             'JavaScript SDK failed response already handled. Ignoring subsequent response.');
       }
-    }
+    };
 
     _registerJsSDKEventListener(Event.READY, readyCallback);
     _registerJsSDKEventListener(Event.ERROR_AUTH, initErrorCallback);
 
     return _initializationResult.future;
   }
-
-  /// Callback to handle the JavaScript SDK's [Event.CHANGED] event
-  void _eventChangedCallBack() {}
-
-  /// Callback to handle the JavaScript SDK's [Event.CONNECTED] event
-  void _eventConnectedCallBack() {}
-
-  /// Callback to handle the JavaScript SDK's [Event.DISCONNECTED] event
-  void _eventDisconnectedCallBack() {}
 
   void _registerJsSDKEventListener(String event, Function callback) {
     if (_registeredListeners.contains(event)) {
@@ -126,6 +117,8 @@ class FfFlutterClientSdkWebPlugin {
     _registeredListeners.add(event);
   }
 
+  /// Registers the underlying JavaScript SDK event listeners, and emits events
+  /// back to the core Flutter SDK using the plugin's host MethodChannel
   void _registerJsSDKStreamListeners() {
     JavaScriptSDKClient.on(Event.CONNECTED, allowInterop((_) {
       _eventController.add({'event': EventType.SSE_START});
@@ -143,7 +136,8 @@ class FfFlutterClientSdkWebPlugin {
       };
       _eventController.add({
         'event': EventType.EVALUATION_CHANGE,
-        'data': evaluationResponse // assuming flagInfo is some data you've retrieved
+        'data':
+            evaluationResponse // assuming flagInfo is some data you've retrieved
       });
     }));
 
@@ -184,13 +178,13 @@ class FfFlutterClientSdkWebPlugin {
     }));
   }
 
-  // Callback used for logging errors that have been emitted by the JS SDK
+  /// Callback used for logging errors that have been emitted by the JS SDK
   void _errorCallback(String logString, dynamic error) {
     log.severe('$logString ' + (error ?? 'Error was empty'));
   }
 
-  // Helper function to turn a map into an object, which is the required
-  // type for interop with JavaScript objects
+  /// Helper function to turn a map into an object, which is the required
+  /// type for interop with JavaScript objects
   Object _mapToJsObject(Map map) {
     var object = newObject();
     map.forEach((k, v) {
