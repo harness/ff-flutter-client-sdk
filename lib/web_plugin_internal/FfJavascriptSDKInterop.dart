@@ -42,3 +42,12 @@ class Event {
   static const ERROR_FETCH_FLAG = 'fetch flag error';
   static const ERROR_STREAM = 'stream error';
 }
+
+@JS()
+@anonymous
+class ChangeEvent {
+  external String get flag;
+  external String get identifier;
+  external String get value;
+  external String get kind;
+}

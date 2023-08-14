@@ -13,6 +13,9 @@ import 'web_plugin_internal//FfJavascriptSDKInterop.dart';
 @JS('window')
 external dynamic get window;
 
+@JS('Object.keys')
+external List<String> _objectKeys(jsObject);
+
 final log = Logger('FfFlutterClientSdkWebPluginLogger');
 
 class FfFlutterClientSdkWebPlugin {
@@ -137,9 +140,10 @@ class FfFlutterClientSdkWebPlugin {
     }));
 
     JavaScriptSDKClient.on(Event.CHANGED, allowInterop((flagInfo) {
+      ChangeEvent flag = flagInfo;
       _eventController.add({
         'event': EventType.EVALUATION_CHANGE,
-        'data': flagInfo // assuming flagInfo is some data you've retrieved
+        'data': flag // assuming flagInfo is some data you've retrieved
       });
     }));
 
@@ -164,7 +168,10 @@ class FfFlutterClientSdkWebPlugin {
           break;
         case EventType.EVALUATION_CHANGE:
           log.fine('Internal event received EVALUATION_CHANGE');
-          _hostChannel.invokeMethod('evaluation_change', jsObjectToMap(event['data']));
+          var data = event['data'];
+          ChangeEvent flag = data;
+          Map<String, dynamic> eventMap = {"flag": flag.flag, "value": flag.value};
+          _hostChannel.invokeMethod('evaluation_change', eventMap);
           break;
       }
     });
@@ -226,5 +233,4 @@ class FfFlutterClientSdkWebPlugin {
 
 }
 
-@JS('Object.keys')
-external List<String> _objectKeys(jsObject);
+
