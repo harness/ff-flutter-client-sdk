@@ -15,14 +15,17 @@ external dynamic get window;
 final log = Logger('FfFlutterClientSdkWebPluginLogger');
 
 class FfFlutterClientSdkWebPlugin {
-  static const initializeMethodCall = 'initialize';
-  static const variationMethodCall = 'variation';
+  static const _initializeMethodCall = 'initialize';
+  static const _variationMethodCall = 'variation';
+
+  final StreamController<Map<String, dynamic>> _eventController = StreamController.broadcast();
+
 
   // Keep track of unique events we are listening to from the JavaScript SDK
   // Registering a listener doesn't return a reference we can keep track of,
   // instead we just update this set with the event type.
   // This prevents the accidental registering of more than one event type.
-  static Set<String> registeredListeners = {};
+  static Set<String> _registeredListeners = {};
 
   // This channel is used to send JavaScript SDK events to the Flutter
   // SDK Code.
@@ -43,7 +46,7 @@ class FfFlutterClientSdkWebPlugin {
   /// Handles method calls over the [MethodChannel] for this plugin
   Future<dynamic> handleMethodCall(MethodCall call) async {
     switch (call.method) {
-      case initializeMethodCall:
+      case _initializeMethodCall:
         return await invokeInitialize(call);
     }
   }
@@ -118,13 +121,13 @@ class FfFlutterClientSdkWebPlugin {
   }
 
   void registerJsSDKEventListener(String event, Function callback) {
-    if (registeredListeners.contains(event)) {
+    if (_registeredListeners.contains(event)) {
       log.info(
           'Listener for $event already registered. Skipping subsequent registration.');
       return;
     }
     JavaScriptSDKClient.on(event, allowInterop(callback));
-    registeredListeners.add(event);
+    _registeredListeners.add(event);
   }
 
   // TODO - "off" currently not working correctly in the JS SDK. See: https://harness.atlassian.net/browse/FFM-8996
