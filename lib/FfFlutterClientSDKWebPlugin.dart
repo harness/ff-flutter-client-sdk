@@ -187,7 +187,7 @@ class FfFlutterClientSdkWebPlugin {
   /// Helper function to turn a map into an object, which is the required
   /// type for interop with JavaScript objects
   Object _mapToJsObject(Map map) {
-    var object = newObject();
+    final object = newObject();
     map.forEach((k, v) {
       if (v is Map) {
         setProperty(object, k, _mapToJsObject(v));
