@@ -133,30 +133,42 @@ class FfFlutterClientSdkWebPlugin {
 
 
   void registerJsSDKStreamListeners() {
-    JavaScriptSDKClient.on(EventType.SSE_START, allowInterop((_) {
-      _eventController.add({'event': 'start'});
+    JavaScriptSDKClient.on(Event.CONNECTED, allowInterop((_) {
+      _eventController.add({'event': EventType.SSE_START});
     }));
+
+    JavaScriptSDKClient.on(Event.DISCONNECTED, allowInterop((_) {
+      _eventController.add({'event': EventType.SSE_END});
+    }));
+
+    JavaScriptSDKClient.on(Event.CHANGED, allowInterop((flagInfo) {
+      _eventController.add({
+        'event': EventType.EVALUATION_CHANGE,
+        'data': flagInfo  // assuming flagInfo is some data you've retrieved
+      });    }));
+
+
 
     // Add more listeners as needed...
 
     // Flutter code can listen for these events and act accordingly.
     _eventController.stream.listen((event) {
       switch (EventType.SSE_START) {
-        case 'start':
-          _hostChannel.invokeMethod('start');
-          break;
-        case 'end':
-          _hostChannel.invokeMethod('end');
-          break;
+        // case 'start':
+        //   _hostChannel.invokeMethod('start');
+        //   break;
+        // case 'end':
+        //   _hostChannel.invokeMethod('end');
+        //   break;
       // ... handle other events
         case EventType.SSE_START:
           _hostChannel.invokeMethod('start');
           break;
-        case EventType.SSE_RESUME:
-          // TODO: Handle this case.
-          break;
         case EventType.SSE_END:
           _hostChannel.invokeMethod('end');
+          break;
+        case EventType.SSE_RESUME:
+          // TODO: Handle this case.
           break;
         case EventType.EVALUATION_POLLING:
           // TODO: Handle this case.
