@@ -208,19 +208,4 @@ class FfFlutterClientSdkWebPlugin {
     });
     return object;
   }
-
-  Level logLevelFromName(String levelName) {
-    // Assuming you're using the 'logging' package for Level
-    switch (levelName) {
-      case 'SEVERE':
-        return Level.SEVERE;
-      case 'WARNING':
-        return Level.WARNING;
-      case 'INFO':
-        return Level.INFO;
-      // ... handle other levels
-      default:
-        return Level.SEVERE;
-    }
-  }
 }
