@@ -180,7 +180,7 @@ class FfFlutterClientSdkWebPlugin {
     });
   }
 
-  // TODO - "off" currently not working correctly in the JS SDK. See: https://harness.atlassian.net/browse/FFM-8996
+  // TODO, `off` needs the original cb function reference. Fix.
   void removeJsSDKEventListener(String event) {
     JavaScriptSDKClient.off(event, allowInterop((dynamic error) {
       log.severe('Error removing event listener: ' +
