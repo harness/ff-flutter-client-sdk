@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:js/js.dart';
 import 'package:logging/logging.dart';
+import 'CfClient.dart';
 import 'web_plugin_internal//FfJavascriptSDKInterop.dart';
 
 @JS('window')
@@ -128,6 +129,43 @@ class FfFlutterClientSdkWebPlugin {
     }
     JavaScriptSDKClient.on(event, allowInterop(callback));
     _registeredListeners.add(event);
+  }
+
+
+  void registerJsSDKStreamListeners() {
+    JavaScriptSDKClient.on(EventType.SSE_START, allowInterop((_) {
+      _eventController.add({'event': 'start'});
+    }));
+
+    // Add more listeners as needed...
+
+    // Flutter code can listen for these events and act accordingly.
+    _eventController.stream.listen((event) {
+      switch (EventType.SSE_START) {
+        case 'start':
+          _hostChannel.invokeMethod('start');
+          break;
+        case 'end':
+          _hostChannel.invokeMethod('end');
+          break;
+      // ... handle other events
+        case EventType.SSE_START:
+          _hostChannel.invokeMethod('start');
+          break;
+        case EventType.SSE_RESUME:
+          // TODO: Handle this case.
+          break;
+        case EventType.SSE_END:
+          _hostChannel.invokeMethod('end');
+          break;
+        case EventType.EVALUATION_POLLING:
+          // TODO: Handle this case.
+          break;
+        case EventType.EVALUATION_CHANGE:
+          // TODO: Handle this case.
+          break;
+      }
+    });
   }
 
   // TODO - "off" currently not working correctly in the JS SDK. See: https://harness.atlassian.net/browse/FFM-8996
