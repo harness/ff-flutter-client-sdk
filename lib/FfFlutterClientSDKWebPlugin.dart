@@ -22,12 +22,10 @@ class FfFlutterClientSdkWebPlugin {
   final StreamController<Map<String, dynamic>> _eventController =
       StreamController.broadcast();
 
-  // Because the JavaScript SDK is a global window object, we need to keep track
-  // on this side of the event listeners we are registering, to avoid duplicate
-  // listeners being registered by this plugin. // TODO, so far I've only
-  // observed duplicate listeners being registered during development, when a hot
-  // reload initializes the client but the browser context is unaffected, so the window
-  // state remains.
+  // Keep track of unique events we are listening to from the JavaScript SDK
+  // Registering a listener doesn't return a reference we can keep track of,
+  // instead we just update this set with the event type.
+  // This prevents the accidental registering of more than one event type.
   static Set<String> _registeredListeners = {};
 
   // This channel is used to send JavaScript SDK events to the Flutter
