@@ -135,11 +135,15 @@ class FfFlutterClientSdkWebPlugin {
       _eventController.add({'event': EventType.SSE_END});
     }));
 
-    JavaScriptSDKClient.on(Event.CHANGED, allowInterop((flagInfo) {
-      ChangeEvent flag = flagInfo;
+    JavaScriptSDKClient.on(Event.CHANGED, allowInterop((changeInfo) {
+      FlagChange flagChange = changeInfo;
+      Map<String, dynamic> evaluationResponse = {
+        "flag": flagChange.flag,
+        "value": flagChange.value
+      };
       _eventController.add({
         'event': EventType.EVALUATION_CHANGE,
-        'data': flag // assuming flagInfo is some data you've retrieved
+        'data': evaluationResponse // assuming flagInfo is some data you've retrieved
       });
     }));
 
@@ -164,13 +168,8 @@ class FfFlutterClientSdkWebPlugin {
           break;
         case EventType.EVALUATION_CHANGE:
           log.fine('Internal event received EVALUATION_CHANGE');
-          var data = event['data'];
-          ChangeEvent flag = data;
-          Map<String, dynamic> eventMap = {
-            "flag": flag.flag,
-            "value": flag.value
-          };
-          _hostChannel.invokeMethod('evaluation_change', eventMap);
+          var evaluationResponse = event['data'];
+          _hostChannel.invokeMethod('evaluation_change', evaluationResponse);
           break;
       }
     });
