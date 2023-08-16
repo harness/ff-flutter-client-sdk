@@ -147,7 +147,7 @@ class FfFlutterClientSdkWebPlugin {
       _eventController.add({
         'event': EventType.EVALUATION_CHANGE,
         'data':
-            evaluationResponse // assuming flagInfo is some data you've retrieved
+            evaluationResponse
       });
     };
     _registerAndStoreJSEventListener(Event.CHANGED, streamEvaluationChangeCallBack);

@@ -45,7 +45,7 @@ class Event {
 
 @JS()
 @anonymous
-/// The payload for [Event.CHANGED].
+/// The payload from [Event.CHANGED].
 class FlagChange {
   external String get flag;
   external String get identifier;
