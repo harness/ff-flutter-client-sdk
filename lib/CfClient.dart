@@ -2,6 +2,7 @@ library ff_flutter_client_sdk;
 
 import 'dart:async';
 import 'dart:collection';
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:flutter/services.dart';
 
@@ -197,6 +198,12 @@ class CfClient {
   /// Register a listener for different types of events. Possible types are based on [EventType] class
   Future<void> registerEventsListener(CfEventsListener listener) async {
     _listenerSet.add(listener);
+    // For the web platform, pass the listener reference so that it can be removed
+    // later, so that the JavaScript SDK can stop emitting events when not needed.
+    // TODO, needs implemented for Android/iOS, but for now, those platforms have destroy.
+    if (kIsWeb) {
+      return _channel.invokeMethod('registerEventsListener', listener);
+    }
     return _channel.invokeMethod('registerEventsListener');
   }
 
@@ -205,6 +212,13 @@ class CfClient {
   Future<void> unregisterEventsListener(
       CfEventsListener listener) async {
     _listenerSet.remove(listener);
+    // For the web platform, ensure the JavaScript SDK stops emitting
+    // events when it is not needed. TODO, for iOS and Android, needs an
+    // unregisterEventsListener implemented. For now, those platforms have
+    // destroy.
+    if (kIsWeb) {
+      return _channel.invokeMethod('unregisterEventsListener', listener);
+    }
   }
 
   /// Client's method to deregister and cleanup internal resources used by SDK
