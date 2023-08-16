@@ -18,6 +18,7 @@ class FfFlutterClientSdkWebPlugin {
   // The method calls that the core Flutter SDK can make
   static const _initializeMethodCall = 'initialize';
   static const _registerEventsListenerMethodCall = 'registerEventsListener';
+  static const _unRegisterEventsListenerMethodCall = 'unRegisterEventsListener';
   static const _variationMethodCall = 'variation';
 
   // Used to emit JavaScript SDK events to the host MethodChannel
@@ -68,6 +69,9 @@ class FfFlutterClientSdkWebPlugin {
         return await _invokeInitialize(call);
       case _registerEventsListenerMethodCall:
         _registerJsSDKStreamListeners();
+        break;
+      case _unRegisterEventsListenerMethodCall:
+        log.fine("test");
         break;
     }
   }

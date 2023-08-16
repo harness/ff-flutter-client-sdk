@@ -5,7 +5,7 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:flutter/services.dart';
-
+import 'package:uuid/uuid.dart';
 
 part 'CfTarget.dart';
 
@@ -86,6 +86,11 @@ typedef void CfEventsListener(dynamic data, EventType eventType);
 class CfClient {
 
   static CfClient? _instance;
+
+  // A map to hold UUID against the CfEventsListener references
+  final Map<CfEventsListener, String> _listenerUuidMap = {};
+
+  final _uuid = Uuid();
 
   MethodChannel _channel =
       const MethodChannel('ff_flutter_client_sdk');
@@ -200,7 +205,8 @@ class CfClient {
     _listenerSet.add(listener);
     // For the web platform, pass the listener reference so that it can be removed
     // later, so that the JavaScript SDK can stop emitting events when not needed.
-    // TODO, needs implemented for Android/iOS, but for now, those platforms have destroy.
+    // TODO, registerEventsListener with a function reference
+    //  needs implemented for Android/iOS, but for now, those platforms have destroy.
     if (kIsWeb) {
       return _channel.invokeMethod('registerEventsListener', listener);
     }
