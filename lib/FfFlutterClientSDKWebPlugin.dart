@@ -135,8 +135,8 @@ class FfFlutterClientSdkWebPlugin {
     // After READY or ERROR_AUTH has been emitted and we have a result,
     // then unregister these listeners from the JavaScript SDK as we don't
     // need them anymore.
-    _removeJsSDKEventListener(Event.READY, readyCallback);
-    _removeJsSDKEventListener(Event.ERROR_AUTH, initErrorCallback);
+    JavaScriptSDKClient.off(Event.READY, allowInterop(readyCallback));
+    JavaScriptSDKClient.off(Event.ERROR_AUTH, allowInterop(initErrorCallback));
 
     return result;
   }
