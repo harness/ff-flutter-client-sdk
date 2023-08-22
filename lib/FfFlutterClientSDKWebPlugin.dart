@@ -18,7 +18,7 @@ class FfFlutterClientSdkWebPlugin {
   // The method calls that the core Flutter SDK can make
   static const _initializeMethodCall = 'initialize';
   static const _registerEventsListenerMethodCall = 'registerEventsListener';
-  static const _unRegisterEventsListenerMethodCall = 'unRegisterEventsListener';
+  static const _unRegisterEventsListenerMethodCall = 'unregisterEventsListener';
   static const _variationMethodCall = 'variation';
 
   // Used to emit JavaScript SDK events to the host MethodChannel
@@ -72,6 +72,7 @@ class FfFlutterClientSdkWebPlugin {
         break;
       case _unRegisterEventsListenerMethodCall:
         log.fine("test");
+        _unregisterJsSDKEventListener();
         break;
     }
   }
@@ -94,15 +95,15 @@ class FfFlutterClientSdkWebPlugin {
   }
 
   Future<bool> _waitForInitializationResult() async {
-    final _initializationResult = Completer<bool>();
+    final initializationResult = Completer<bool>();
 
     // Callback for the JavaScript SDK's READY event. It returns a list of
     // evaluations, but we don't need them in this plugin.
     final readyCallback = ([_]) {
       // While we shouldn't attempt to complete this completer more than once,
       // this is a defensive check and log if it is attempted.
-      if (!_initializationResult.isCompleted) {
-        _initializationResult.complete(true);
+      if (!initializationResult.isCompleted) {
+        initializationResult.complete(true);
       } else {
         log.fine(
             'JavaScript SDK success response already handled. Ignoring subsequent response.');
@@ -112,9 +113,9 @@ class FfFlutterClientSdkWebPlugin {
     // Callback to handle errors that can occur when initializing.
     final initErrorCallback = (dynamic error) {
       // Same as above, defensive check.
-      if (!_initializationResult.isCompleted) {
+      if (!initializationResult.isCompleted) {
         log.severe("FF SDK failed to initialize: " + (error?.toString() ?? 'Auth error was empty'));
-        _initializationResult.complete(false);
+        initializationResult.complete(false);
       } else {
         log.fine(
             'JavaScript SDK failed response already handled. Ignoring subsequent response.');
@@ -125,7 +126,7 @@ class FfFlutterClientSdkWebPlugin {
     _registerAndStoreJSEventListener(Event.READY, readyCallback);
     _registerAndStoreJSEventListener(Event.ERROR_AUTH, initErrorCallback);
 
-    final result = await _initializationResult.future;
+    final result = await initializationResult.future;
 
     // After READY or ERROR_AUTH has been emitted and we have a result,
     // then unregister these listeners from the JavaScript SDK as we don't
@@ -193,6 +194,10 @@ class FfFlutterClientSdkWebPlugin {
   void _registerAndStoreJSEventListener(String event, Function callback) {
     JavaScriptSDKClient.on(event, allowInterop(callback));
     _registeredEventListeners[event]!.add(callback);
+  }
+
+  void _unregisterJsSDKEventListener() {
+
   }
 
   // TODO, `off` needs the original cb function reference. Fix.
