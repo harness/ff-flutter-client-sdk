@@ -113,7 +113,7 @@ class FfFlutterClientSdkWebPlugin {
     final initErrorCallback = (dynamic error) {
       // Same as above, defensive check.
       if (!_initializationResult.isCompleted) {
-        log.severe("Failed to initialize: " + (error?.toString() ?? 'Auth error was empty'));
+        log.severe("FF SDK failed to initialize: " + (error?.toString() ?? 'Auth error was empty'));
         _initializationResult.complete(false);
       } else {
         log.fine(
