@@ -67,7 +67,8 @@ class FfFlutterClientSdkWebPlugin {
       case _initializeMethodCall:
         return await _invokeInitialize(call);
       case _registerEventsListenerMethodCall:
-        _registerJsSDKStreamListeners(call);
+        final uuid = call.arguments['uuid'];
+        _registerJsSDKStreamListeners(uuid);
         break;
       case _unRegisterEventsListenerMethodCall:
         log.fine("test");
@@ -138,7 +139,8 @@ class FfFlutterClientSdkWebPlugin {
 
   /// Registers the underlying JavaScript SDK event listeners, and emits events
   /// back to the core Flutter SDK using the plugin's host MethodChannel
-  void _registerJsSDKStreamListeners(MethodCall call) {
+  void _registerJsSDKStreamListeners(uuid) {
+
     final streamStartCallBack = (_) {
       _eventController.add({'event': EventType.SSE_START});
     };
