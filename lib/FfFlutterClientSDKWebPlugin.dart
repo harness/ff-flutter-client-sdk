@@ -13,6 +13,15 @@ import 'web_plugin_internal//FfJavascriptSDKInterop.dart';
 @JS('window')
 external dynamic get window;
 
+// Type used to group the event and callback function used when registering
+// events with the JavaScript SDK
+class JsSDKEventListener {
+  final String event;
+  final Function function;
+
+  JsSDKEventListener(this.event, this.function);
+}
+
 class FfFlutterClientSdkWebPlugin {
   final log = Logger('FfFlutterClientSdkWebPluginLogger');
   // The method calls that the core Flutter SDK can make
@@ -25,22 +34,11 @@ class FfFlutterClientSdkWebPlugin {
   final StreamController<Map<String, dynamic>> _eventController =
       StreamController.broadcast();
 
-  // Store registered events and their function references, so that they can
-  // be removed later.
-  static Map<String, List<Function>> _registeredEventListeners = {
-    Event.READY: [],
-    Event.CONNECTED: [],
-    Event.DISCONNECTED: [],
-    Event.FLAG_LOADED: [],
-    Event.CACHE_LOADED: [],
-    Event.CHANGED: [],
-    Event.ERROR: [],
-    Event.ERROR_AUTH: [],
-    Event.ERROR_METRICS: [],
-    Event.ERROR_FETCH_FLAGS: [],
-    Event.ERROR_FETCH_FLAG: [],
-    Event.ERROR_STREAM: []
-  };
+  // The core Flutter SDK passes uuids over the method channel for each
+  // listener that has been registered. This maps the UUID to the event and function callback
+  // we pass to the JavaScript SDK, so they can be unregistered by users later.
+  Map<String, JsSDKEventListener> uuidToEventListenerMap = {};
+
   // Used to send JavaScript SDK events to the Flutter
   // SDK Code.
   static late MethodChannel _hostChannel;
@@ -224,3 +222,6 @@ class FfFlutterClientSdkWebPlugin {
     return object;
   }
 }
+
+
+
