@@ -122,8 +122,8 @@ class FfFlutterClientSdkWebPlugin {
     };
 
     // Listen for the JavaScript SDK READY / ERROR_AUTH events to be emitted
-    _registerAndStoreJSEventListener(Event.READY, readyCallback);
-    _registerAndStoreJSEventListener(Event.ERROR_AUTH, initErrorCallback);
+    _registerJSEventListener(Event.READY, readyCallback);
+    _registerJSEventListener(Event.ERROR_AUTH, initErrorCallback);
 
     final result = await initializationResult.future;
 
@@ -193,8 +193,13 @@ class FfFlutterClientSdkWebPlugin {
   void _registerAndStoreJSEventListener(String listenerUUID, String event, Function callback) {
     JavaScriptSDKClient.on(event, allowInterop(callback));
     _uuidToEventListenerMap[listenerUUID] = JsSDKEventListener(event, callback);
+  }
 
-    _registeredEventListeners[event]!.add(callback);
+  /// Helper function to simply register JavaScript SDK event listeners. This is
+  /// for READY and AUTH_ERROR where we remove them in the same scope that they've
+  /// been registered, so no need to store them.
+  void _registerJSEventListener(String event, Function callback) {
+    JavaScriptSDKClient.on(event, allowInterop(callback));
   }
 
   void _unregisterJsSDKEventListener() {
