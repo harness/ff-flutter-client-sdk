@@ -21,7 +21,8 @@ class JsSDKStreamCallbackFunctions {
   final Function changedFunction;
   final Function disconnectedFunction;
 
-  JsSDKStreamCallbackFunctions(this.connectedFunction, this.disconnectedFunction, this.changedFunction);
+  JsSDKStreamCallbackFunctions(
+      this.connectedFunction, this.disconnectedFunction, this.changedFunction);
 }
 
 class FfFlutterClientSdkWebPlugin {
@@ -116,7 +117,8 @@ class FfFlutterClientSdkWebPlugin {
     final initErrorCallback = (dynamic error) {
       // Same as above, defensive check.
       if (!initializationResult.isCompleted) {
-        log.severe("FF SDK failed to initialize: " + (error?.toString() ?? 'Auth error was empty'));
+        log.severe("FF SDK failed to initialize: " +
+            (error?.toString() ?? 'Auth error was empty'));
         initializationResult.complete(false);
       } else {
         log.fine(
@@ -156,17 +158,19 @@ class FfFlutterClientSdkWebPlugin {
         "flag": flagChange.flag,
         "value": flagChange.value
       };
-      _eventController.add({
-        'event': EventType.EVALUATION_CHANGE,
-        'data':
-            evaluationResponse
-      });
+      _eventController.add(
+          {'event': EventType.EVALUATION_CHANGE, 'data': evaluationResponse});
     };
     JavaScriptSDKClient.on(Event.CONNECTED, allowInterop(streamStartCallBack));
-    JavaScriptSDKClient.on(Event.DISCONNECTED, allowInterop(streamDisconnectedCallBack));
-    JavaScriptSDKClient.on(Event.CHANGED, allowInterop(streamEvaluationChangeCallBack));
+    JavaScriptSDKClient.on(
+        Event.DISCONNECTED, allowInterop(streamDisconnectedCallBack));
+    JavaScriptSDKClient.on(
+        Event.CHANGED, allowInterop(streamEvaluationChangeCallBack));
 
-    _uuidToEventListenerMap[uuid] = JsSDKStreamCallbackFunctions(streamStartCallBack, streamDisconnectedCallBack, streamEvaluationChangeCallBack);
+    _uuidToEventListenerMap[uuid] = JsSDKStreamCallbackFunctions(
+        streamStartCallBack,
+        streamDisconnectedCallBack,
+        streamEvaluationChangeCallBack);
 
     _eventController.stream.listen((event) {
       switch (event['event']) {
@@ -195,20 +199,18 @@ class FfFlutterClientSdkWebPlugin {
 
   void _registerJsSDKStreamListeners(String uuid) {
     final callbacks = {
-      Event.CONNECTED: (_) => _eventController.add({'event': EventType.SSE_START}),
-
-      Event.DISCONNECTED: (_) => _eventController.add({'event': EventType.SSE_END}),
-
+      Event.CONNECTED: (_) =>
+          _eventController.add({'event': EventType.SSE_START}),
+      Event.DISCONNECTED: (_) =>
+          _eventController.add({'event': EventType.SSE_END}),
       Event.CHANGED: (changeInfo) {
         FlagChange flagChange = changeInfo;
         Map<String, dynamic> evaluationResponse = {
           "flag": flagChange.flag,
           "value": flagChange.value
         };
-        _eventController.add({
-          'event': EventType.EVALUATION_CHANGE,
-          'data': evaluationResponse
-        });
+        _eventController.add(
+            {'event': EventType.EVALUATION_CHANGE, 'data': evaluationResponse});
       }
     };
 
@@ -217,11 +219,10 @@ class FfFlutterClientSdkWebPlugin {
       JavaScriptSDKClient.on(event, allowInterop(callback!));
     }
 
-      _uuidToEventListenerMap[uuid] = JsSDKStreamCallbackFunctions(
-          callbacks[Event.CONNECTED]!,
-          callbacks[Event.DISCONNECTED]!,
-          callbacks[Event.CHANGED]!
-      );
+    _uuidToEventListenerMap[uuid] = JsSDKStreamCallbackFunctions(
+        callbacks[Event.CONNECTED]!,
+        callbacks[Event.DISCONNECTED]!,
+        callbacks[Event.CHANGED]!);
 
     _eventController.stream.listen((event) {
       switch (event['event']) {
@@ -237,7 +238,7 @@ class FfFlutterClientSdkWebPlugin {
           log.fine('Internal event received: SSE_RESUME');
           break;
         case EventType.EVALUATION_POLLING:
-        // TODO: The JavaScript SDK currently does not implement polling.
+          // TODO: The JavaScript SDK currently does not implement polling.
           break;
         case EventType.EVALUATION_CHANGE:
           log.fine('Internal event received EVALUATION_CHANGE');
@@ -246,16 +247,19 @@ class FfFlutterClientSdkWebPlugin {
           break;
       }
     });
-
   }
 
   void _unregisterJsSDKStreamListeners(String uuid) {
-    JsSDKStreamCallbackFunctions? registeredEvent = _uuidToEventListenerMap[uuid];
+    JsSDKStreamCallbackFunctions? registeredEvent =
+        _uuidToEventListenerMap[uuid];
     if (registeredEvent != null) {
       print("register: gonna unregister func on plugin side");
-      JavaScriptSDKClient.off(Event.CONNECTED, allowInterop(registeredEvent.connectedFunction));
-      JavaScriptSDKClient.off(Event.DISCONNECTED, allowInterop(registeredEvent.disconnectedFunction));
-      JavaScriptSDKClient.off(Event.CHANGED, allowInterop(registeredEvent.changedFunction));
+      JavaScriptSDKClient.off(
+          Event.CONNECTED, allowInterop(registeredEvent.connectedFunction));
+      JavaScriptSDKClient.off(Event.DISCONNECTED,
+          allowInterop(registeredEvent.disconnectedFunction));
+      JavaScriptSDKClient.off(
+          Event.CHANGED, allowInterop(registeredEvent.changedFunction));
     } else {
       log.warning("Attempted to unregister event listener, but the"
           "requested event listener was not found.");
@@ -286,6 +290,3 @@ class FfFlutterClientSdkWebPlugin {
     return object;
   }
 }
-
-
-
