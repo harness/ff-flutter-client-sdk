@@ -28,7 +28,7 @@ class FfFlutterClientSdkWebPlugin {
   // The method calls that the core Flutter SDK can make
   static const _initializeMethodCall = 'initialize';
   static const _registerEventsListenerMethodCall = 'registerEventsListener';
-  static const _unRegisterEventsListenerMethodCall = 'unregisterEventsListener';
+  static const _unregisterEventsListenerMethodCall = 'unregisterEventsListener';
   static const _variationMethodCall = 'variation';
 
   // Used to emit JavaScript SDK events to the host MethodChannel
@@ -70,9 +70,10 @@ class FfFlutterClientSdkWebPlugin {
         final uuid = call.arguments['uuid'];
         _registerJsSDKStreamListeners(uuid);
         break;
-      case _unRegisterEventsListenerMethodCall:
+      case _unregisterEventsListenerMethodCall:
+        final uuid = call.arguments['uuid'];
         log.fine("test");
-        _unregisterJsSDKEventListener();
+        _unregisterJsSDKStreamListeners(uuid);
         break;
     }
   }
@@ -203,8 +204,15 @@ class FfFlutterClientSdkWebPlugin {
     JavaScriptSDKClient.on(event, allowInterop(callback));
   }
 
-  void _unregisterJsSDKEventListener() {
-
+  void _unregisterJsSDKStreamListeners(String uuid) {
+    JsSDKEventListener? registeredEvent = _uuidToEventListenerMap[uuid];
+    if (registeredEvent != null) {
+      print("register: gonna unregister func on plugin side");
+      _removeJsSDKEventListener(registeredEvent.event, registeredEvent.function);
+    } else {
+      log.warning("Attempted to unregister event listener, but the"
+          "requested event listener was not found.");
+    }
   }
 
   // TODO, `off` needs the original cb function reference. Fix.

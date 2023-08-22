@@ -223,7 +223,7 @@ class CfClient {
     // unregisterEventsListener implemented. For now, those platforms have
     // destroy.
     if (kIsWeb && _listenerUuidMap[listener] != null) {
-      return _channel.invokeMethod('unRegisterEventsListener', _listenerUuidMap[listener]);
+      return _channel.invokeMethod('unregisterEventsListener', {'uuid': _listenerUuidMap[listener]});
     }
   }
 
