@@ -37,7 +37,7 @@ class FfFlutterClientSdkWebPlugin {
   // The core Flutter SDK passes uuids over the method channel for each
   // listener that has been registered. This maps the UUID to the event and function callback
   // we pass to the JavaScript SDK, so they can be unregistered by users later.
-  Map<String, JsSDKEventListener> uuidToEventListenerMap = {};
+  Map<String, JsSDKEventListener> _uuidToEventListenerMap = {};
 
   // Used to send JavaScript SDK events to the Flutter
   // SDK Code.
@@ -191,6 +191,8 @@ class FfFlutterClientSdkWebPlugin {
   /// function callback reference so they can be removed when requried.
   void _registerAndStoreJSEventListener(String event, Function callback) {
     JavaScriptSDKClient.on(event, allowInterop(callback));
+    _uuidToEventListenerMap['your-uuid'] = JsSDKEventListener(event, callback);
+
     _registeredEventListeners[event]!.add(callback);
   }
 
