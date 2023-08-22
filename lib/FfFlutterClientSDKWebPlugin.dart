@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:js/js.dart';
 import 'package:logging/logging.dart';
-import 'package:uuid/uuid.dart';
 import 'CfClient.dart';
 import 'web_plugin_internal//FfJavascriptSDKInterop.dart';
 
@@ -213,16 +212,6 @@ class FfFlutterClientSdkWebPlugin {
       log.warning("Attempted to unregister event listener, but the"
           "requested event listener was not found.");
     }
-  }
-
-  // TODO, `off` needs the original cb function reference. Fix.
-  void _removeJsSDKEventListener(String event, Function callBack) {
-    JavaScriptSDKClient.off(event, allowInterop(callBack));
-  }
-
-  /// Callback used for logging errors that have been emitted by the JS SDK
-  void _errorCallback(String logString, dynamic error) {
-    log.severe('$logString ' + (error ?? 'Error was empty'));
   }
 
   /// Helper function to turn a map into an object, which is the required
