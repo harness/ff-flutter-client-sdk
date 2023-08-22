@@ -208,7 +208,9 @@ class CfClient {
     // TODO, registerEventsListener with a function reference
     //  needs implemented for Android/iOS, but for now, those platforms have destroy.
     if (kIsWeb) {
-      return _channel.invokeMethod('registerEventsListener', listener);
+      final uuid = _uuid.v4();
+      _listenerUuidMap[listener] = uuid;
+      return _channel.invokeMethod('registerEventsListener', {'uuid': uuid});
     }
     return _channel.invokeMethod('registerEventsListener');
   }
