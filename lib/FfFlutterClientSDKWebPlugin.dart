@@ -14,13 +14,14 @@ import 'web_plugin_internal//FfJavascriptSDKInterop.dart';
 @JS('window')
 external dynamic get window;
 
-// Type used to group the event and callback function used when registering
-// events with the JavaScript SDK
-class JsSDKEventListener {
-  final String event;
-  final Function function;
+// Type used to group callback functions used when registering
+// stream events with the JavaScript SDK
+class JsSDKStreamCallbackFunctions {
+  final Function connectedFunction;
+  final Function changedFunction;
+  final Function disconnectedFunction;
 
-  JsSDKEventListener(this.event, this.function);
+  JsSDKStreamCallbackFunctions(this.connectedFunction, this.disconnectedFunction, this.changedFunction);
 }
 
 class FfFlutterClientSdkWebPlugin {
@@ -38,7 +39,7 @@ class FfFlutterClientSdkWebPlugin {
   // The core Flutter SDK passes uuids over the method channel for each
   // listener that has been registered. This maps the UUID to the event and function callback
   // we pass to the JavaScript SDK, so they can be unregistered by users later.
-  Map<String, JsSDKEventListener> _uuidToEventListenerMap = {};
+  Map<String, JsSDKStreamCallbackFunctions> _uuidToEventListenerMap = {};
 
   // Used to send JavaScript SDK events to the Flutter
   // SDK Code.
@@ -124,8 +125,8 @@ class FfFlutterClientSdkWebPlugin {
     };
 
     // Listen for the JavaScript SDK READY / ERROR_AUTH events to be emitted
-    _registerJSEventListener(Event.READY, readyCallback);
-    _registerJSEventListener(Event.ERROR_AUTH, initErrorCallback);
+    JavaScriptSDKClient.on(Event.READY, allowInterop(readyCallback));
+    JavaScriptSDKClient.on(Event.ERROR_AUTH, allowInterop(initErrorCallback));
 
     final result = await initializationResult.future;
 
@@ -144,12 +145,10 @@ class FfFlutterClientSdkWebPlugin {
     final streamStartCallBack = (_) {
       _eventController.add({'event': EventType.SSE_START});
     };
-    _registerAndStoreJSEventListener(uuid, Event.CONNECTED, streamStartCallBack);
 
     final streamDisconnectedCallBack = (_) {
       _eventController.add({'event': EventType.SSE_END});
     };
-    _registerAndStoreJSEventListener(uuid, Event.DISCONNECTED, streamDisconnectedCallBack);
 
     final streamEvaluationChangeCallBack = (changeInfo) {
       FlagChange flagChange = changeInfo;
@@ -163,7 +162,11 @@ class FfFlutterClientSdkWebPlugin {
             evaluationResponse
       });
     };
-    _registerAndStoreJSEventListener(uuid, Event.CHANGED, streamEvaluationChangeCallBack);
+    JavaScriptSDKClient.on(Event.CONNECTED, allowInterop(streamStartCallBack));
+    JavaScriptSDKClient.on(Event.DISCONNECTED, allowInterop(streamDisconnectedCallBack));
+    JavaScriptSDKClient.on(Event.CHANGED, allowInterop(streamEvaluationChangeCallBack));
+
+    _uuidToEventListenerMap[uuid] = JsSDKStreamCallbackFunctions(streamStartCallBack, streamDisconnectedCallBack, streamEvaluationChangeCallBack);
 
     _eventController.stream.listen((event) {
       switch (event['event']) {
@@ -190,25 +193,13 @@ class FfFlutterClientSdkWebPlugin {
     });
   }
 
-  /// Helper function to register JavaScript SDK event listeners and store the
-  /// function callback reference so they can be removed when requried.
-  void _registerAndStoreJSEventListener(String listenerUUID, String event, Function callback) {
-    JavaScriptSDKClient.on(event, allowInterop(callback));
-    _uuidToEventListenerMap[listenerUUID] = JsSDKEventListener(event, callback);
-  }
-
-  /// Helper function to simply register JavaScript SDK event listeners. This is
-  /// for READY and AUTH_ERROR where we remove them in the same scope that they've
-  /// been registered, so no need to store them.
-  void _registerJSEventListener(String event, Function callback) {
-    JavaScriptSDKClient.on(event, allowInterop(callback));
-  }
-
   void _unregisterJsSDKStreamListeners(String uuid) {
-    JsSDKEventListener? registeredEvent = _uuidToEventListenerMap[uuid];
+    JsSDKStreamCallbackFunctions? registeredEvent = _uuidToEventListenerMap[uuid];
     if (registeredEvent != null) {
       print("register: gonna unregister func on plugin side");
-      _removeJsSDKEventListener(registeredEvent.event, registeredEvent.function);
+      JavaScriptSDKClient.off(Event.CONNECTED, allowInterop(registeredEvent.connectedFunction));
+      JavaScriptSDKClient.off(Event.DISCONNECTED, allowInterop(registeredEvent.disconnectedFunction));
+      JavaScriptSDKClient.off(Event.CHANGED, allowInterop(registeredEvent.changedFunction));
     } else {
       log.warning("Attempted to unregister event listener, but the"
           "requested event listener was not found.");
