@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:js/js.dart';
 import 'package:logging/logging.dart';
+import 'package:uuid/uuid.dart';
 import 'CfClient.dart';
 import 'web_plugin_internal//FfJavascriptSDKInterop.dart';
 
@@ -189,9 +190,9 @@ class FfFlutterClientSdkWebPlugin {
 
   /// Helper function to register JavaScript SDK event listeners and store the
   /// function callback reference so they can be removed when requried.
-  void _registerAndStoreJSEventListener(String event, Function callback) {
+  void _registerAndStoreJSEventListener(String listenerUUID, String event, Function callback) {
     JavaScriptSDKClient.on(event, allowInterop(callback));
-    _uuidToEventListenerMap['your-uuid'] = JsSDKEventListener(event, callback);
+    _uuidToEventListenerMap[listenerUUID] = JsSDKEventListener(event, callback);
 
     _registeredEventListeners[event]!.add(callback);
   }

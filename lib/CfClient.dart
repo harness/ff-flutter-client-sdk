@@ -201,16 +201,17 @@ class CfClient {
   /// Register a listener for different types of events. Possible types are based on [EventType] class
   Future<void> registerEventsListener(CfEventsListener listener) async {
     _listenerSet.add(listener);
+
+    if (!kIsWeb) return _channel.invokeMethod('registerEventsListener');
+
     // For the web platform, pass the listener reference so that it can be removed
     // later, so that the JavaScript SDK can stop emitting events when not needed.
-    // TODO, registerEventsListener with a function reference
-    //  needs implemented for Android/iOS, but for now, those platforms have destroy.
-    if (kIsWeb) {
+    // TODO needs implemented for Android/iOS, but for now, those platforms have destroy.
+    if (!_listenerUuidMap.containsKey(listener)) {
       final uuid = _uuid.v4();
       _listenerUuidMap[listener] = uuid;
       return _channel.invokeMethod('registerEventsListener', {'uuid': uuid});
     }
-    return _channel.invokeMethod('registerEventsListener');
   }
 
   /// Removes a previously-registered listener from internal collection of listeners. From this point, provided
@@ -222,7 +223,7 @@ class CfClient {
     // unregisterEventsListener implemented. For now, those platforms have
     // destroy.
     if (kIsWeb && _listenerUuidMap[listener] != null) {
-      return _channel.invokeMethod('unregisterEventsListener', _listenerUuidMap[listener]);
+      return _channel.invokeMethod('unRegisterEventsListener', _listenerUuidMap[listener]);
     }
   }
 
