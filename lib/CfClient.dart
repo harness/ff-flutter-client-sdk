@@ -13,7 +13,6 @@ part 'CfConfiguration.dart';
 
 final log = Logger('CFClientLogger');
 
-
 class InitializationResult {
   InitializationResult(bool value) {
     this.success = value;
@@ -84,7 +83,6 @@ typedef void CfEventsListener(dynamic data, EventType eventType);
 ///
 ///```
 class CfClient {
-
   static CfClient? _instance;
 
   // A map to hold UUID against the CfEventsListener references
@@ -92,10 +90,8 @@ class CfClient {
 
   final _uuid = Uuid();
 
-  MethodChannel _channel =
-      const MethodChannel('ff_flutter_client_sdk');
-  MethodChannel _hostChannel =
-      const MethodChannel('cf_flutter_host');
+  MethodChannel _channel = const MethodChannel('ff_flutter_client_sdk');
+  MethodChannel _hostChannel = const MethodChannel('cf_flutter_host');
 
   Set<CfEventsListener> _listenerSet = new HashSet();
 
@@ -112,8 +108,7 @@ class CfClient {
       _listenerSet.forEach((element) {
         element(null, EventType.SSE_RESUME);
       });
-    }
-    else if (methodCall.method == "evaluation_change") {
+    } else if (methodCall.method == "evaluation_change") {
       String flag = methodCall.arguments["flag"];
       dynamic value = methodCall.arguments["value"];
 
@@ -140,9 +135,7 @@ class CfClient {
   }
 
   static CfClient getInstance() {
-
     if (_instance == null) {
-
       _instance = CfClient();
     }
     return _instance!;
@@ -150,8 +143,8 @@ class CfClient {
 
   /// Initializes the SDK client with provided API key, configuration and target. Returns information if
   /// initialization succeeded or not
-  Future<InitializationResult> initialize(String apiKey,
-      CfConfiguration configuration, CfTarget target) async {
+  Future<InitializationResult> initialize(
+      String apiKey, CfConfiguration configuration, CfTarget target) async {
     Logger.root.level = configuration.logLevel; // defaults to Level.INFO
     Logger.root.onRecord.listen((record) {
       print('${record.level.name}: ${record.time}: ${record.message}');
@@ -159,13 +152,16 @@ class CfClient {
     _hostChannel.setMethodCallHandler(_hostChannelHandler);
     bool initialized = false;
     try {
-    initialized = await _channel.invokeMethod('initialize', {
-      'apiKey': apiKey,
-      'configuration': configuration._toCodecValue(),
-      'target': target._toCodecValue()
-    }); } on PlatformException catch(e) {
+      initialized = await _channel.invokeMethod('initialize', {
+        'apiKey': apiKey,
+        'configuration': configuration._toCodecValue(),
+        'target': target._toCodecValue()
+      });
+    } on PlatformException catch (e) {
       // For now just log the error. In the future, we should add retry and backoff logic.
-      log.severe(e.message ?? 'Error message was empty' + (e.details ?? 'Error details was empty').toString());
+      log.severe(e.message ??
+          'Error message was empty' +
+              (e.details ?? 'Error details was empty').toString());
       return new Future(() => InitializationResult(false));
     }
     return new Future(() => InitializationResult(initialized));
@@ -173,7 +169,8 @@ class CfClient {
 
   /// Performs string evaluation for given evaluation id. If no such id is present, the default value will be returned.
   Future<String> stringVariation(String id, String defaultValue) async {
-      return _sendMessage('stringVariation', new EvaluationRequest(id, defaultValue));
+    return _sendMessage(
+        'stringVariation', new EvaluationRequest(id, defaultValue));
   }
 
   /// Performs boolean evaluation for given evaluation id. If no such id is present, the default value will be returned.
@@ -196,7 +193,8 @@ class CfClient {
 
   Future<T> _sendMessage<T>(
       String messageType, EvaluationRequest evaluationRequest) async {
-    return _channel.invokeMethod(messageType, evaluationRequest.toMap())
+    return _channel
+        .invokeMethod(messageType, evaluationRequest.toMap())
         .then((result) => result as T);
   }
 
@@ -217,15 +215,14 @@ class CfClient {
 
   /// Removes a previously-registered listener from internal collection of listeners. From this point, provided
   /// listener will not receive any events triggered by SDK
-  Future<void> unregisterEventsListener(
-      CfEventsListener listener) async {
+  Future<void> unregisterEventsListener(CfEventsListener listener) async {
     _listenerSet.remove(listener);
     // For the web platform, ensure the JavaScript SDK stops emitting
     // events when it is not needed. TODO, for iOS and Android, needs an
     // unregisterEventsListener implemented. For now, those platforms have
     // destroy.
-    if (kIsWeb) {
-      return _channel.invokeMethod('unregisterEventsListener', listener);
+    if (kIsWeb && _listenerUuidMap[listener] != null) {
+      return _channel.invokeMethod('unregisterEventsListener', _listenerUuidMap[listener]);
     }
   }
 
