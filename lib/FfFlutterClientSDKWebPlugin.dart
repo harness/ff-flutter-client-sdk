@@ -200,12 +200,15 @@ class FfFlutterClientSdkWebPlugin {
         _uuidToEventListenerMap[uuid];
     if (registeredEvent != null) {
       print("register: gonna unregister func on plugin side");
+
       JavaScriptSDKClient.off(
           Event.CONNECTED, allowInterop(registeredEvent.connectedFunction));
       JavaScriptSDKClient.off(Event.DISCONNECTED,
           allowInterop(registeredEvent.disconnectedFunction));
       JavaScriptSDKClient.off(
           Event.CHANGED, allowInterop(registeredEvent.changedFunction));
+
+      _uuidToEventListenerMap.remove(uuid);
     } else {
       log.warning("Attempted to unregister event listener, but the"
           "requested event listener was not found.");
