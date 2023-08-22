@@ -90,10 +90,11 @@ class FfFlutterClientSdkWebPlugin {
 
     // Used to return the result of initialize after the JavaScript SDK
     // emits either a READY or ERROR event.
-    return _waitForInitializationResult();
+    final result = await _waitForInitializationResult();
+    return result;
   }
 
-  Future<bool> _waitForInitializationResult() {
+  Future<bool> _waitForInitializationResult() async {
     final _initializationResult = Completer<bool>();
 
     // Callback for the JavaScript SDK's READY event. It returns a list of
@@ -111,9 +112,7 @@ class FfFlutterClientSdkWebPlugin {
 
     // Callback to handle errors that can occur when initializing.
     final initErrorCallback = (dynamic error) {
-      log.severe(error ?? 'Auth error was empty');
-      _removeJsSDKEventListener(Event.ERROR);
-      _removeJsSDKEventListener(Event.READY);
+      log.severe("Failed to initialize: " + (error?.toString() ?? 'Auth error was empty'));
       // Same as above, defensive check.
       if (!_initializationResult.isCompleted) {
         _initializationResult.complete(false);
@@ -123,10 +122,19 @@ class FfFlutterClientSdkWebPlugin {
       }
     };
 
+    // Listen for the JavaScript SDK READY / ERROR_AUTH events to be emitted
     _registerAndStoreJSEventListener(Event.READY, readyCallback);
     _registerAndStoreJSEventListener(Event.ERROR_AUTH, initErrorCallback);
 
-    return _initializationResult.future;
+    final result = await _initializationResult.future;
+
+    // After READY or ERROR_AUTH has been emitted and we have a result,
+    // then unregister these listeners from the JavaScript SDK as we don't
+    // need them anymore.
+    _removeJsSDKEventListener(Event.READY, readyCallback);
+    _removeJsSDKEventListener(Event.ERROR_AUTH, initErrorCallback);
+
+    return result;
   }
 
   /// Registers the underlying JavaScript SDK event listeners, and emits events
@@ -189,12 +197,8 @@ class FfFlutterClientSdkWebPlugin {
   }
 
   // TODO, `off` needs the original cb function reference. Fix.
-  void _removeJsSDKEventListener(String event) {
-    JavaScriptSDKClient.off(event, allowInterop((dynamic error) {
-      log.severe('Error removing event listener: ' +
-          (error ?? 'Auth error was empty'));
-      return false;
-    }));
+  void _removeJsSDKEventListener(String event, Function callBack) {
+    JavaScriptSDKClient.off(event, allowInterop(callBack));
   }
 
   /// Callback used for logging errors that have been emitted by the JS SDK
