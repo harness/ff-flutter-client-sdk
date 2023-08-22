@@ -105,19 +105,18 @@ class FfFlutterClientSdkWebPlugin {
       if (!_initializationResult.isCompleted) {
         _initializationResult.complete(true);
       } else {
-        log.info(
+        log.fine(
             'JavaScript SDK success response already handled. Ignoring subsequent response.');
       }
     };
 
     // Callback to handle errors that can occur when initializing.
     final initErrorCallback = (dynamic error) {
-      log.severe("Failed to initialize: " + (error?.toString() ?? 'Auth error was empty'));
       // Same as above, defensive check.
       if (!_initializationResult.isCompleted) {
         _initializationResult.complete(false);
       } else {
-        log.info(
+        log.fine(
             'JavaScript SDK failed response already handled. Ignoring subsequent response.');
       }
     };
