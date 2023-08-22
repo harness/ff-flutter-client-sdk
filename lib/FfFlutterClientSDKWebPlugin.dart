@@ -143,60 +143,6 @@ class FfFlutterClientSdkWebPlugin {
 
   /// Registers the underlying JavaScript SDK event listeners, and emits events
   /// back to the core Flutter SDK using the plugin's host MethodChannel
-  void _registerJsSDKStreamListeners2(uuid) {
-    final streamStartCallBack = (_) {
-      _eventController.add({'event': EventType.SSE_START});
-    };
-
-    final streamDisconnectedCallBack = (_) {
-      _eventController.add({'event': EventType.SSE_END});
-    };
-
-    final streamEvaluationChangeCallBack = (changeInfo) {
-      FlagChange flagChange = changeInfo;
-      Map<String, dynamic> evaluationResponse = {
-        "flag": flagChange.flag,
-        "value": flagChange.value
-      };
-      _eventController.add(
-          {'event': EventType.EVALUATION_CHANGE, 'data': evaluationResponse});
-    };
-    JavaScriptSDKClient.on(Event.CONNECTED, allowInterop(streamStartCallBack));
-    JavaScriptSDKClient.on(
-        Event.DISCONNECTED, allowInterop(streamDisconnectedCallBack));
-    JavaScriptSDKClient.on(
-        Event.CHANGED, allowInterop(streamEvaluationChangeCallBack));
-
-    _uuidToEventListenerMap[uuid] = JsSDKStreamCallbackFunctions(
-        streamStartCallBack,
-        streamDisconnectedCallBack,
-        streamEvaluationChangeCallBack);
-
-    _eventController.stream.listen((event) {
-      switch (event['event']) {
-        case EventType.SSE_START:
-          log.fine('Internal event received: SSE_START');
-          _hostChannel.invokeMethod('start');
-          break;
-        case EventType.SSE_END:
-          log.fine('Internal event received: SSE_END');
-          _hostChannel.invokeMethod('end');
-          break;
-        case EventType.SSE_RESUME:
-          log.fine('Internal event received: SSE_RESUME');
-          break;
-        case EventType.EVALUATION_POLLING:
-          // TODO: The JavaScript SDK currently does not implement polling.
-          break;
-        case EventType.EVALUATION_CHANGE:
-          log.fine('Internal event received EVALUATION_CHANGE');
-          var evaluationResponse = event['data'];
-          _hostChannel.invokeMethod('evaluation_change', evaluationResponse);
-          break;
-      }
-    });
-  }
-
   void _registerJsSDKStreamListeners(String uuid) {
     final callbacks = {
       Event.CONNECTED: (_) =>
