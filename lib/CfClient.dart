@@ -228,7 +228,8 @@ class CfClient {
     // unregisterEventsListener implemented. For now, those platforms have
     // destroy.
     if (kIsWeb && _listenerUuidMap[listener] != null) {
-      return _channel.invokeMethod('unregisterEventsListener', {'uuid': _listenerUuidMap[listener]});
+      return _channel.invokeMethod(
+          'unregisterEventsListener', {'uuid': _listenerUuidMap[listener]});
     }
   }
 
@@ -243,10 +244,10 @@ class CfClient {
         case 'boolean':
           return value.toLowerCase() == 'true';
         case 'string':
-        // Value is already a string, so we just return it
+          // Value is already a string, so we just return it
           return value;
         case "int":
-        // Attempt to parse as an int first
+          // Attempt to parse as an int first
           final intValue = int.tryParse(value);
           if (intValue != null) {
             return intValue;
