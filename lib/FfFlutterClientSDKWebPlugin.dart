@@ -20,8 +20,11 @@ class JsSDKStreamCallbackFunctions {
   final Function changedFunction;
   final Function disconnectedFunction;
 
-  JsSDKStreamCallbackFunctions(
-      this.connectedFunction, this.disconnectedFunction, this.changedFunction);
+  JsSDKStreamCallbackFunctions({
+    required this.connectedFunction,
+    required this.disconnectedFunction,
+    required this.changedFunction
+  });
 }
 
 class FfFlutterClientSdkWebPlugin {
@@ -165,9 +168,9 @@ class FfFlutterClientSdkWebPlugin {
     }
 
     _uuidToEventListenerMap[uuid] = JsSDKStreamCallbackFunctions(
-        callbacks[Event.CONNECTED]!,
-        callbacks[Event.DISCONNECTED]!,
-        callbacks[Event.CHANGED]!);
+        connectedFunction: callbacks[Event.CONNECTED]!,
+        disconnectedFunction: callbacks[Event.DISCONNECTED]!,
+        changedFunction: callbacks[Event.CHANGED]!);
 
     _eventController.stream.listen((event) {
       switch (event['event']) {
