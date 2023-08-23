@@ -240,7 +240,7 @@ class CfClient {
     log.severe("GONNA CONVERT");
     if (value is String) {
       switch (kind) {
-        case 'boolnea':
+        case 'boolean':
           return value.toLowerCase() == 'true';
         case 'string':
         // Value is already a string, so we just return it
