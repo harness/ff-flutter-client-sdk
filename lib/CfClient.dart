@@ -233,7 +233,7 @@ class CfClient {
     }
   }
 
-  // At present, the Android and iOS SDKs SSE events return evaluation values
+  // At present, the Android and iOS SDKs (not JavaScript) SSE events return evaluation values
   // as strings. This is a function to standardise them into the correct type,
   // so the SSE evaluations are the same underlying type as the variation
   // evaluations.
