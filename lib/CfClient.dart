@@ -114,7 +114,7 @@ class CfClient {
       final String kind = methodCall.arguments["kind"];
       final dynamic value = methodCall.arguments["value"];
 
-      final parsedValue = convertValueByKind(kind, value);
+      final dynamic parsedValue = convertValueByKind(kind, value);
 
       final EvaluationResponse response = EvaluationResponse(flag, parsedValue);
 
@@ -237,8 +237,10 @@ class CfClient {
   // as strings. This is a function to standardise them into the correct type,
   // so the SSE evaluations are the same underlying type as the variation
   // evaluations.
+  // We return as dynamic in order to keep backwards compatability with, but
+  // this means that users don't have to cast values between SSE evaluations
+  // ane evaluations made via the public variation functions.
   dynamic convertValueByKind(String kind, dynamic value) {
-    log.severe("GONNA CONVERT");
     if (value is String) {
       switch (kind) {
         case 'boolean':
