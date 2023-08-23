@@ -111,12 +111,21 @@ class CfClient {
       });
     } else if (methodCall.method == "evaluation_change") {
       final String flag = methodCall.arguments["flag"];
-      final String kind = methodCall.arguments["kind"];
+
       final dynamic value = methodCall.arguments["value"];
 
-      final dynamic parsedValue = convertValueByKind(kind, value);
+      // TODO - the iOS SDK doesn't emit this so it will need a very
+      //  minor SDK update there. For now, iOS will use the string SSE
+      // values.
+      final String? kind = methodCall.arguments["kind"];
+      late dynamic response;
+      if (kind != null) {
+        final dynamic parsedValue = convertValueByKind(kind, value);
+        response = EvaluationResponse(flag, parsedValue);
+      } else {
+        response = EvaluationResponse(flag, value);
+      }
 
-      final EvaluationResponse response = EvaluationResponse(flag, parsedValue);
 
       _listenerSet.forEach((element) {
         element(response, EventType.EVALUATION_CHANGE);
@@ -127,7 +136,6 @@ class CfClient {
 
       list.forEach((element) {
         String flag = element["flag"];
-        String kind = element["kind"];
         dynamic value = element["value"];
 
         resultList.add(EvaluationResponse(flag, value));
