@@ -118,18 +118,13 @@ class CfClient {
       //  minor SDK update there. For now, iOS will use the string SSE
       // values.
       final String? kind = methodCall.arguments["kind"];
-      late dynamic response;
-      if (kind != null) {
-        final dynamic parsedValue = convertValueByKind(kind, value);
-        response = EvaluationResponse(flag, parsedValue);
-      } else {
-        response = EvaluationResponse(flag, value);
-      }
-
+      final dynamic parsedValue = kind != null ? convertValueByKind(kind, value) : value;
+      final response = EvaluationResponse(flag, parsedValue);
 
       _listenerSet.forEach((element) {
         element(response, EventType.EVALUATION_CHANGE);
       });
+
     } else if (methodCall.method == "evaluation_polling") {
       List list = methodCall.arguments["evaluationData"] as List;
       List<EvaluationResponse> resultList = [];
