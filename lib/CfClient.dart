@@ -2,6 +2,7 @@ library ff_flutter_client_sdk;
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:flutter/services.dart';
@@ -109,10 +110,13 @@ class CfClient {
         element(null, EventType.SSE_RESUME);
       });
     } else if (methodCall.method == "evaluation_change") {
-      String flag = methodCall.arguments["flag"];
-      dynamic value = methodCall.arguments["value"];
+      final String flag = methodCall.arguments["flag"];
+      final String kind = methodCall.arguments["kind"];
+      final dynamic value = methodCall.arguments["value"];
 
-      EvaluationResponse response = EvaluationResponse(flag, value);
+      final parsedValue = convertValueByKind(kind, value);
+
+      final EvaluationResponse response = EvaluationResponse(flag, parsedValue);
 
       _listenerSet.forEach((element) {
         element(response, EventType.EVALUATION_CHANGE);
@@ -123,6 +127,7 @@ class CfClient {
 
       list.forEach((element) {
         String flag = element["flag"];
+        String kind = element["kind"];
         dynamic value = element["value"];
 
         resultList.add(EvaluationResponse(flag, value));
@@ -225,6 +230,38 @@ class CfClient {
     if (kIsWeb && _listenerUuidMap[listener] != null) {
       return _channel.invokeMethod('unregisterEventsListener', {'uuid': _listenerUuidMap[listener]});
     }
+  }
+
+  // At present, the Android and iOS SDKs SSE events return evaluation values
+  // as strings. This is a function to standardise them into the correct type,
+  // so the SSE evaluations are the same underlying type as the variation
+  // evaluations.
+  dynamic convertValueByKind(String kind, dynamic value) {
+    log.severe("GONNA CONVERT");
+    if (value is String) {
+      switch (kind) {
+        case 'boolnea':
+          return value.toLowerCase() == 'true';
+        case 'string':
+        // Value is already a string, so we just return it
+          return value;
+        case "int":
+        // Attempt to parse as an int first
+          final intValue = int.tryParse(value);
+          if (intValue != null) {
+            return intValue;
+          }
+          final doubleValue = double.tryParse(value);
+          if (doubleValue != null) {
+            return doubleValue;
+          }
+          break;
+        case 'json':
+          return jsonDecode(value);
+      }
+    }
+    // Return the original value if it's not a string or if the kind is not recognized
+    return value;
   }
 
   /// Client's method to deregister and cleanup internal resources used by SDK

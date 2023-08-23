@@ -146,7 +146,7 @@ public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
 									guard let eval = eval else { result(nil); return }
 
 									let value = self.extractValue(eval.value)
-									let content = ["flag": eval.flag, "value": value ?? ""]
+									let content = ["flag": eval.flag, "value": value ?? "", "kind": eval.kind]
 
 									DispatchQueue.main.async {
 										self.hostChannel.invokeMethod(EventTypeId.evaluationChange.rawValue, arguments: content)

@@ -3,6 +3,7 @@ library ff_web_plugin;
 
 import 'dart:async';
 import 'dart:js_util';
+import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:js/js.dart';
@@ -153,8 +154,13 @@ class FfFlutterClientSdkWebPlugin {
           _eventController.add({'event': EventType.SSE_END}),
       Event.CHANGED: (changeInfo) {
         FlagChange flagChange = changeInfo;
+        // The core Flutter SDK expects a map for json flag values,
+        // so we need to decode it instead of passing the json string that
+        // the JS SDK returns.
+        // Map<String, dynamic> value = (flagChange.kind == 'json') ? json.decode(flagChange.value) : flagChange.value;
         Map<String, dynamic> evaluationResponse = {
           "flag": flagChange.flag,
+          "kind": flagChange.kind,
           "value": flagChange.value
         };
         _eventController.add(
