@@ -202,8 +202,6 @@ class FfFlutterClientSdkWebPlugin {
     JsSDKStreamCallbackFunctions? registeredEvent =
         _uuidToEventListenerMap[uuid];
     if (registeredEvent != null) {
-      print("register: gonna unregister func on plugin side");
-
       JavaScriptSDKClient.off(
           Event.CONNECTED, allowInterop(registeredEvent.connectedFunction));
       JavaScriptSDKClient.off(Event.DISCONNECTED,
