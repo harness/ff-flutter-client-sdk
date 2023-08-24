@@ -21,11 +21,10 @@ class JsSDKStreamCallbackFunctions {
   final Function changedFunction;
   final Function disconnectedFunction;
 
-  JsSDKStreamCallbackFunctions({
-    required this.connectedFunction,
-    required this.disconnectedFunction,
-    required this.changedFunction
-  });
+  JsSDKStreamCallbackFunctions(
+      {required this.connectedFunction,
+      required this.disconnectedFunction,
+      required this.changedFunction});
 }
 
 class FfFlutterClientSdkWebPlugin {

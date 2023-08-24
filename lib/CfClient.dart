@@ -118,13 +118,13 @@ class CfClient {
       //  minor SDK update there. For now, iOS will use the string SSE
       // values.
       final String? kind = methodCall.arguments["kind"];
-      final dynamic parsedValue = kind != null ? convertValueByKind(kind, value) : value;
+      final dynamic parsedValue =
+          kind != null ? convertValueByKind(kind, value) : value;
       final response = EvaluationResponse(flag, parsedValue);
 
       _listenerSet.forEach((element) {
         element(response, EventType.EVALUATION_CHANGE);
       });
-
     } else if (methodCall.method == "evaluation_polling") {
       List list = methodCall.arguments["evaluationData"] as List;
       List<EvaluationResponse> resultList = [];
@@ -177,7 +177,8 @@ class CfClient {
 
   /// Performs string evaluation for given evaluation id. If no such id is present, the default value will be returned.
   Future<String> stringVariation(String id, String defaultValue) async {
-      return _sendMessage('stringVariation', new EvaluationRequest(id, defaultValue));
+    return _sendMessage(
+        'stringVariation', new EvaluationRequest(id, defaultValue));
   }
 
   /// Performs boolean evaluation for given evaluation id. If no such id is present, the default value will be returned.
