@@ -239,7 +239,7 @@ class CfClient {
   // as strings. This is a function to standardise them into the correct type,
   // so the SSE evaluations are the same underlying type as the variation
   // evaluations.
-  // We return as dynamic in order to keep backwards compatability with, but
+  // We return as dynamic in order to keep backwards compatability, but
   // this means that users don't have to cast values between SSE evaluations
   // ane evaluations made via the public variation functions.
   dynamic convertValueByKind(String kind, dynamic value) {
@@ -251,7 +251,7 @@ class CfClient {
           // Value is already a string, so we just return it
           return value;
         case "int":
-          // Attempt to parse as an int first
+          // Number flags can be integer or floating point
           final intValue = int.tryParse(value);
           if (intValue != null) {
             return intValue;
