@@ -14,6 +14,7 @@ dependencies:
   logging: ^1.1.1
   flutter_web_plugins:
     sdk: flutter
+  uuid: ^3.0.7
 
 dev_dependencies:
   flutter_test:

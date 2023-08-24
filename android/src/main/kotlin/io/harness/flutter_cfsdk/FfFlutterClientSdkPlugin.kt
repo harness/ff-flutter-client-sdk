@@ -125,6 +125,7 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
         return mutableMapOf<String, Any>().apply {
             this["flag"] = evaluation.flag
             this["value"] = evaluation.getValue()
+            this["kind"] = evaluation.kind
         }
     }
 

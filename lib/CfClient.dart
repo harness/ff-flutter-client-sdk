@@ -2,16 +2,17 @@ library ff_flutter_client_sdk;
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:flutter/services.dart';
-
+import 'package:uuid/uuid.dart';
 
 part 'CfTarget.dart';
 
 part 'CfConfiguration.dart';
 
 final log = Logger('CFClientLogger');
-
 
 class InitializationResult {
   InitializationResult(bool value) {
@@ -83,13 +84,15 @@ typedef void CfEventsListener(dynamic data, EventType eventType);
 ///
 ///```
 class CfClient {
-
   static CfClient? _instance;
 
-  MethodChannel _channel =
-      const MethodChannel('ff_flutter_client_sdk');
-  MethodChannel _hostChannel =
-      const MethodChannel('cf_flutter_host');
+  // A map to hold UUID against the CfEventsListener references
+  final Map<CfEventsListener, String> _listenerUuidMap = {};
+
+  final _uuid = Uuid();
+
+  MethodChannel _channel = const MethodChannel('ff_flutter_client_sdk');
+  MethodChannel _hostChannel = const MethodChannel('cf_flutter_host');
 
   Set<CfEventsListener> _listenerSet = new HashSet();
 
@@ -106,12 +109,18 @@ class CfClient {
       _listenerSet.forEach((element) {
         element(null, EventType.SSE_RESUME);
       });
-    }
-    else if (methodCall.method == "evaluation_change") {
-      String flag = methodCall.arguments["flag"];
-      dynamic value = methodCall.arguments["value"];
+    } else if (methodCall.method == "evaluation_change") {
+      final String flag = methodCall.arguments["flag"];
 
-      EvaluationResponse response = EvaluationResponse(flag, value);
+      final dynamic value = methodCall.arguments["value"];
+
+      // TODO - the iOS SDK doesn't emit this so it will need a very
+      //  minor SDK update there. For now, iOS will use the string SSE
+      // values.
+      final String? kind = methodCall.arguments["kind"];
+      final dynamic parsedValue =
+          kind != null ? convertValueByKind(kind, value) : value;
+      final response = EvaluationResponse(flag, parsedValue);
 
       _listenerSet.forEach((element) {
         element(response, EventType.EVALUATION_CHANGE);
@@ -134,9 +143,7 @@ class CfClient {
   }
 
   static CfClient getInstance() {
-
     if (_instance == null) {
-
       _instance = CfClient();
     }
     return _instance!;
@@ -144,22 +151,25 @@ class CfClient {
 
   /// Initializes the SDK client with provided API key, configuration and target. Returns information if
   /// initialization succeeded or not
-  Future<InitializationResult> initialize(String apiKey,
-      CfConfiguration configuration, CfTarget target) async {
-    Logger.root.level = Level.SEVERE; // defaults to Level.INFO
+  Future<InitializationResult> initialize(
+      String apiKey, CfConfiguration configuration, CfTarget target) async {
+    Logger.root.level = configuration.logLevel; // defaults to Level.INFO
     Logger.root.onRecord.listen((record) {
       print('${record.level.name}: ${record.time}: ${record.message}');
     });
     _hostChannel.setMethodCallHandler(_hostChannelHandler);
     bool initialized = false;
     try {
-    initialized = await _channel.invokeMethod('initialize', {
-      'apiKey': apiKey,
-      'configuration': configuration._toCodecValue(),
-      'target': target._toCodecValue()
-    }); } on PlatformException catch(e) {
+      initialized = await _channel.invokeMethod('initialize', {
+        'apiKey': apiKey,
+        'configuration': configuration._toCodecValue(),
+        'target': target._toCodecValue()
+      });
+    } on PlatformException catch (e) {
       // For now just log the error. In the future, we should add retry and backoff logic.
-      log.severe(e.message ?? 'Error message was empty' + (e.details ?? 'Error details was empty').toString());
+      log.severe(e.message ??
+          'Error message was empty' +
+              (e.details ?? 'Error details was empty').toString());
       return new Future(() => InitializationResult(false));
     }
     return new Future(() => InitializationResult(initialized));
@@ -167,7 +177,8 @@ class CfClient {
 
   /// Performs string evaluation for given evaluation id. If no such id is present, the default value will be returned.
   Future<String> stringVariation(String id, String defaultValue) async {
-      return _sendMessage('stringVariation', new EvaluationRequest(id, defaultValue));
+    return _sendMessage(
+        'stringVariation', new EvaluationRequest(id, defaultValue));
   }
 
   /// Performs boolean evaluation for given evaluation id. If no such id is present, the default value will be returned.
@@ -190,21 +201,73 @@ class CfClient {
 
   Future<T> _sendMessage<T>(
       String messageType, EvaluationRequest evaluationRequest) async {
-    return _channel.invokeMethod(messageType, evaluationRequest.toMap())
+    return _channel
+        .invokeMethod(messageType, evaluationRequest.toMap())
         .then((result) => result as T);
   }
 
   /// Register a listener for different types of events. Possible types are based on [EventType] class
   Future<void> registerEventsListener(CfEventsListener listener) async {
     _listenerSet.add(listener);
-    return _channel.invokeMethod('registerEventsListener');
+
+    if (!kIsWeb) return _channel.invokeMethod('registerEventsListener');
+
+    // For the web platform, pass the listener reference so that it can be removed
+    // later, so that the JavaScript SDK can stop emitting events when not needed.
+    // TODO needs implemented for Android/iOS, but for now, those platforms have destroy.
+    if (!_listenerUuidMap.containsKey(listener)) {
+      final uuid = _uuid.v4();
+      _listenerUuidMap[listener] = uuid;
+      return _channel.invokeMethod('registerEventsListener', {'uuid': uuid});
+    }
   }
 
   /// Removes a previously-registered listener from internal collection of listeners. From this point, provided
   /// listener will not receive any events triggered by SDK
-  Future<void> unregisterEventsListener(
-      CfEventsListener listener) async {
+  Future<void> unregisterEventsListener(CfEventsListener listener) async {
     _listenerSet.remove(listener);
+    // For the web platform, ensure the JavaScript SDK stops emitting
+    // events when it is not needed. TODO, for iOS and Android, needs an
+    // unregisterEventsListener implemented. For now, those platforms have
+    // destroy.
+    if (kIsWeb && _listenerUuidMap[listener] != null) {
+      return _channel.invokeMethod(
+          'unregisterEventsListener', {'uuid': _listenerUuidMap[listener]});
+    }
+  }
+
+  // At present, the Android and iOS SDKs (not JavaScript) SSE events return evaluation values
+  // as strings. This is a function to standardise them into the correct type,
+  // so the SSE evaluations are the same underlying type as the variation
+  // evaluations.
+  // We return as dynamic in order to keep backwards compatability, but
+  // this means that users don't have to cast values between SSE evaluations
+  // ane evaluations made via the public variation functions.
+  dynamic convertValueByKind(String kind, dynamic value) {
+    if (value is String) {
+      switch (kind) {
+        case 'boolean':
+          return value.toLowerCase() == 'true';
+        case 'string':
+          // Value is already a string, so we just return it
+          return value;
+        case "int":
+          // Number flags can be integer or floating point
+          final intValue = int.tryParse(value);
+          if (intValue != null) {
+            return intValue;
+          }
+          final doubleValue = double.tryParse(value);
+          if (doubleValue != null) {
+            return doubleValue;
+          }
+          break;
+        case 'json':
+          return jsonDecode(value);
+      }
+    }
+    // Return the original value if it's not a string or if the kind is not recognized
+    return value;
   }
 
   /// Client's method to deregister and cleanup internal resources used by SDK
