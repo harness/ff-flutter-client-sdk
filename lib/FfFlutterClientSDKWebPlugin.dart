@@ -3,7 +3,6 @@ library ff_web_plugin;
 
 import 'dart:async';
 import 'dart:js_util';
-import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:js/js.dart';
@@ -199,15 +198,15 @@ class FfFlutterClientSdkWebPlugin {
   }
 
   void _unregisterJsSDKStreamListeners(String uuid) {
-    JsSDKStreamCallbackFunctions? registeredEvent =
+    JsSDKStreamCallbackFunctions? callBackFunctions =
         _uuidToEventListenerMap[uuid];
-    if (registeredEvent != null) {
+    if (callBackFunctions != null) {
       JavaScriptSDKClient.off(
-          Event.CONNECTED, allowInterop(registeredEvent.connectedFunction));
+          Event.CONNECTED, allowInterop(callBackFunctions.connectedFunction));
       JavaScriptSDKClient.off(Event.DISCONNECTED,
-          allowInterop(registeredEvent.disconnectedFunction));
+          allowInterop(callBackFunctions.disconnectedFunction));
       JavaScriptSDKClient.off(
-          Event.CHANGED, allowInterop(registeredEvent.changedFunction));
+          Event.CHANGED, allowInterop(callBackFunctions.changedFunction));
 
       _uuidToEventListenerMap.remove(uuid);
     } else {
