@@ -226,6 +226,12 @@ class FfFlutterClientSdkWebPlugin {
     }
   }
 
+  _invokeVariation(MethodCall call) {
+    final flagIdentifier =  call.arguments['flag'];
+    final defaultValue =  call.arguments['defaultValue'];
+    final result = JavaScriptSDKClient.variation(flagIdentifier, defaultValue, true);
+  }
+
   /// Helper function to turn a map into an object, which is the required
   /// type for interop with JavaScript objects
   Object _mapToJsObject(Map map) {
@@ -239,4 +245,5 @@ class FfFlutterClientSdkWebPlugin {
     });
     return object;
   }
+
 }

@@ -20,11 +20,12 @@ class JavaScriptSDKClient {
   static const windowReference = 'cfClient';
   static const onFunction = 'on';
   static const offFunction = 'off';
-  static const variation = 'variation';
-  static const close = 'close';
+  static const variationFunction = 'variation';
+  static const closeFunction = 'close';
 
   external static dynamic on(dynamic eventType, Function callback);
   external static dynamic off(dynamic eventType, Function callback);
+  external static dynamic variation(dynamic flagIdentifier, dynamic defaultValue, bool withDebug);
 }
 
 // Represents the events that the JavaScript SDK Client can emit
