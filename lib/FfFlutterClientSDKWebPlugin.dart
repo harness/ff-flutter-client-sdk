@@ -32,7 +32,10 @@ class FfFlutterClientSdkWebPlugin {
   static const _initializeMethodCall = 'initialize';
   static const _registerEventsListenerMethodCall = 'registerEventsListener';
   static const _unregisterEventsListenerMethodCall = 'unregisterEventsListener';
-  static const _variationMethodCall = 'variation';
+  static const _boolVariationMethodCall = 'boolVariation';
+  static const _stringVariationMethodCall = 'stringVariation';
+  static const _numberVariationMethodCall = 'numberVariation';
+  static const _jsonVariationMethodCall = 'jsonVariation';
 
   // Used to emit JavaScript SDK events to the host MethodChannel
   final StreamController<Map<String, dynamic>> _eventController =
@@ -78,6 +81,7 @@ class FfFlutterClientSdkWebPlugin {
         log.fine("test");
         _unregisterJsSDKStreamListeners(uuid);
         break;
+      case
     }
   }
 
