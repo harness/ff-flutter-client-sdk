@@ -81,7 +81,14 @@ class FfFlutterClientSdkWebPlugin {
         log.fine("test");
         _unregisterJsSDKStreamListeners(uuid);
         break;
-      case
+      default:
+        if (call.method == _boolVariationMethodCall ||
+            call.method == _stringVariationMethodCall ||
+            call.method == _numberVariationMethodCall ||
+            call.method == _jsonVariationMethodCall) {
+          return await _invokeVariation(call);
+        }
+        break;
     }
   }
 
