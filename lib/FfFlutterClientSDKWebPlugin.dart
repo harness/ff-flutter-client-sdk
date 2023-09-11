@@ -227,16 +227,18 @@ class FfFlutterClientSdkWebPlugin {
     }
   }
 
-  Future<dynamic>_invokeVariation(MethodCall call) async {
-    final flagIdentifier =  call.arguments['flag'];
-    final defaultValue =  call.arguments['defaultValue'];
-    final VariationResult result = await JavaScriptSDKClient.variation(flagIdentifier, defaultValue, true);
-    if (result.isDefaultValue == true) {
-      log.warning("Flag '${flagIdentifier}' not found when calling ${call.method}. Default value returned.");
+  Future<dynamic> _invokeVariation(MethodCall call) async {
+    final flagIdentifier = call.arguments['flag'];
+    final defaultValue = call.arguments['defaultValue'];
+    final VariationResult result =
+        await JavaScriptSDKClient.variation(flagIdentifier, defaultValue, true);
+    if (result.isDefaultValue) {
+      log.warning(
+          "Flag '${flagIdentifier}' not found when calling ${call.method}. Default value returned.");
     }
     // The JavaScript SDK returns a json string, so we need to encode it as the
     // type expected by the core Flutter SDK
-    if (call.method == _jsonVariationMethodCall) {
+    if (call.method == _jsonVariationMethodCall && !result.isDefaultValue) {
       return jsonDecode(result.value);
     }
     return result.value;
@@ -255,5 +257,4 @@ class FfFlutterClientSdkWebPlugin {
     });
     return object;
   }
-
 }
