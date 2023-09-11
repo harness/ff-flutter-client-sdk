@@ -231,6 +231,9 @@ class FfFlutterClientSdkWebPlugin {
     final flagIdentifier =  call.arguments['flag'];
     final defaultValue =  call.arguments['defaultValue'];
     final VariationResult result = await JavaScriptSDKClient.variation(flagIdentifier, defaultValue, true);
+    if (result.isDefaultValue == true) {
+      log.warning("Flag '${flagIdentifier}' not found when calling ${call.method}. Default value returned.");
+    }
     if (call.method == _jsonVariationMethodCall) {
       return jsonDecode(result.value);
     }
