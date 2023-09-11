@@ -56,7 +56,7 @@ class FlagChange {
 
 @JS()
 @anonymous
-/// The payload from [Event.CHANGED].
+/// The payload from [JavaScriptSDKClient.variation].
 class VariationResult {
   external dynamic get value;
   external dynamic get isDefaultValue;
