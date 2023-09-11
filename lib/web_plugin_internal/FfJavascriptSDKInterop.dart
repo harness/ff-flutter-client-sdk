@@ -59,5 +59,5 @@ class FlagChange {
 /// The payload from [JavaScriptSDKClient.variation].
 class VariationResult {
   external dynamic get value;
-  external dynamic get isDefaultValue;
+  external bool get isDefaultValue;
 }
