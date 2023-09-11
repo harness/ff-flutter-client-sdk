@@ -234,6 +234,8 @@ class FfFlutterClientSdkWebPlugin {
     if (result.isDefaultValue == true) {
       log.warning("Flag '${flagIdentifier}' not found when calling ${call.method}. Default value returned.");
     }
+    // The JavaScript SDK returns a json string, so we need to encode it as the
+    // type expected by the core Flutter SDK
     if (call.method == _jsonVariationMethodCall) {
       return jsonDecode(result.value);
     }
