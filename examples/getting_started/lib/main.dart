@@ -51,7 +51,7 @@ class _FlagState extends State<FlagState> {
         print("Successfully initialized client");
 
         // Evaluate flag and set initial state
-        CfClient.getInstance().boolVariation("Adasdas", false).then((value) {
+        CfClient.getInstance().boolVariation(boolFlagName, false).then((value) {
           print("$_boolFlagValue: $value");
           setState(() {
             _boolFlagValue = value;
@@ -59,7 +59,7 @@ class _FlagState extends State<FlagState> {
         });
 
         // Evaluate flag and set initial state
-        CfClient.getInstance().jsonVariation("Adasdas", {"aaa": "asdsd"}).then((value) {
+        CfClient.getInstance().jsonVariation(jsonFlagName, {}).then((value) {
           print("$_jsonFlagValue: $value");
           setState(() {
             _jsonFlagValue = value;
@@ -67,7 +67,7 @@ class _FlagState extends State<FlagState> {
         });
 
         // Evaluate flag and set initial state
-        CfClient.getInstance().stringVariation("Adasdas", "default").then((value) {
+        CfClient.getInstance().stringVariation(stringFlagName, "default").then((value) {
           print("$_stringFlagValue: $value");
           setState(() {
             _stringFlagValue = value;
@@ -75,7 +75,7 @@ class _FlagState extends State<FlagState> {
         });
 
         // Evaluate flag and set initial state
-        CfClient.getInstance().numberVariation("Adasdas", 1).then((value) {
+        CfClient.getInstance().numberVariation(numberFlagName, 1).then((value) {
           print("$_numberFlagValue: $value");
           setState(() {
             _numberFlagValue = value;
