@@ -2,8 +2,8 @@
 library ff_web_plugin;
 
 import 'dart:async';
-import 'dart:js_util';
 import 'dart:convert';
+import 'dart:js_util';
 import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:js/js.dart';
@@ -33,7 +33,10 @@ class FfFlutterClientSdkWebPlugin {
   static const _initializeMethodCall = 'initialize';
   static const _registerEventsListenerMethodCall = 'registerEventsListener';
   static const _unregisterEventsListenerMethodCall = 'unregisterEventsListener';
-  static const _variationMethodCall = 'variation';
+  static const _boolVariationMethodCall = 'boolVariation';
+  static const _stringVariationMethodCall = 'stringVariation';
+  static const _numberVariationMethodCall = 'numberVariation';
+  static const _jsonVariationMethodCall = 'jsonVariation';
 
   // Used to emit JavaScript SDK events to the host MethodChannel
   final StreamController<Map<String, dynamic>> _eventController =
@@ -78,6 +81,14 @@ class FfFlutterClientSdkWebPlugin {
         final uuid = call.arguments['uuid'];
         log.fine("test");
         _unregisterJsSDKStreamListeners(uuid);
+        break;
+      default:
+        if (call.method == _boolVariationMethodCall ||
+            call.method == _stringVariationMethodCall ||
+            call.method == _numberVariationMethodCall ||
+            call.method == _jsonVariationMethodCall) {
+          return await _invokeVariation(call);
+        }
         break;
     }
   }
@@ -199,23 +210,38 @@ class FfFlutterClientSdkWebPlugin {
   }
 
   void _unregisterJsSDKStreamListeners(String uuid) {
-    JsSDKStreamCallbackFunctions? registeredEvent =
+    JsSDKStreamCallbackFunctions? callBackFunctions =
         _uuidToEventListenerMap[uuid];
-    if (registeredEvent != null) {
-      print("register: gonna unregister func on plugin side");
-
+    if (callBackFunctions != null) {
       JavaScriptSDKClient.off(
-          Event.CONNECTED, allowInterop(registeredEvent.connectedFunction));
+          Event.CONNECTED, allowInterop(callBackFunctions.connectedFunction));
       JavaScriptSDKClient.off(Event.DISCONNECTED,
-          allowInterop(registeredEvent.disconnectedFunction));
+          allowInterop(callBackFunctions.disconnectedFunction));
       JavaScriptSDKClient.off(
-          Event.CHANGED, allowInterop(registeredEvent.changedFunction));
+          Event.CHANGED, allowInterop(callBackFunctions.changedFunction));
 
       _uuidToEventListenerMap.remove(uuid);
     } else {
       log.warning("Attempted to unregister event listener, but the"
           "requested event listener was not found.");
     }
+  }
+
+  Future<dynamic> _invokeVariation(MethodCall call) async {
+    final flagIdentifier = call.arguments['flag'];
+    final defaultValue = call.arguments['defaultValue'];
+    final VariationResult result =
+        await JavaScriptSDKClient.variation(flagIdentifier, defaultValue, true);
+    if (result.isDefaultValue) {
+      log.warning(
+          "Flag '${flagIdentifier}' not found when calling ${call.method}. Default value returned.");
+    }
+    // The JavaScript SDK returns a json string, so we need to encode it as the
+    // type expected by the core Flutter SDK
+    if (call.method == _jsonVariationMethodCall && !result.isDefaultValue) {
+      return jsonDecode(result.value);
+    }
+    return result.value;
   }
 
   /// Helper function to turn a map into an object, which is the required

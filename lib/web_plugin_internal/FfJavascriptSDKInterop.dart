@@ -20,11 +20,12 @@ class JavaScriptSDKClient {
   static const windowReference = 'cfClient';
   static const onFunction = 'on';
   static const offFunction = 'off';
-  static const variation = 'variation';
-  static const close = 'close';
+  static const variationFunction = 'variation';
+  static const closeFunction = 'close';
 
   external static dynamic on(dynamic eventType, Function callback);
   external static dynamic off(dynamic eventType, Function callback);
+  external static dynamic variation(dynamic flagIdentifier, dynamic defaultValue, bool withDebug);
 }
 
 // Represents the events that the JavaScript SDK Client can emit
@@ -45,11 +46,18 @@ class Event {
 
 @JS()
 @anonymous
-
 /// The payload from [Event.CHANGED].
 class FlagChange {
   external String get flag;
   external String get identifier;
   external String get value;
   external String get kind;
+}
+
+@JS()
+@anonymous
+/// The payload from [JavaScriptSDKClient.variation].
+class VariationResult {
+  external dynamic get value;
+  external bool get isDefaultValue;
 }
