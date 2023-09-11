@@ -46,11 +46,18 @@ class Event {
 
 @JS()
 @anonymous
-
 /// The payload from [Event.CHANGED].
 class FlagChange {
   external String get flag;
   external String get identifier;
   external String get value;
   external String get kind;
+}
+
+@JS()
+@anonymous
+/// The payload from [Event.CHANGED].
+class VariationResult {
+  external dynamic get value;
+  external dynamic get isDefaultValue;
 }

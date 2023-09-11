@@ -2,6 +2,7 @@
 library ff_web_plugin;
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:js_util';
 import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
@@ -226,10 +227,14 @@ class FfFlutterClientSdkWebPlugin {
     }
   }
 
-  _invokeVariation(MethodCall call) {
+  Future<dynamic>_invokeVariation(MethodCall call) async {
     final flagIdentifier =  call.arguments['flag'];
     final defaultValue =  call.arguments['defaultValue'];
-    final result = JavaScriptSDKClient.variation(flagIdentifier, defaultValue, true);
+    final VariationResult result = await JavaScriptSDKClient.variation(flagIdentifier, defaultValue, true);
+    if (call.method == _jsonVariationMethodCall) {
+      return jsonDecode(result.value);
+    }
+    return result.value;
   }
 
   /// Helper function to turn a map into an object, which is the required
