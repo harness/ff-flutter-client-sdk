@@ -96,8 +96,18 @@ class FfFlutterClientSdkWebPlugin {
   Future<bool> _invokeInitialize(MethodCall call) async {
     final String apiKey = call.arguments['apiKey'];
     final Object target = _mapToJsObject(call.arguments['target']);
-    final Object options = _mapToJsObject(call.arguments['configuration']);
-    final response = JavaScriptSDK.initialize(apiKey, target, options);
+
+    final Map options = call.arguments['configuration'];
+    // The JS SDK uses `debug` for its option, so we need to send this
+    if (options['debugEnabled'] == true) {
+      options.remove('debugEnabled');
+      options['debug'] = true;
+    } else {
+      // Just remove the key if it's set to false as the JS SDK won't use it
+      options.remove('debugEnabled');
+    }
+    final Object optionsAsJSObj = _mapToJsObject(options);
+    final response = JavaScriptSDK.initialize(apiKey, target, optionsAsJSObj);
 
     // The JavaScript SDK returns the client instance, whether or not
     // the initialization was successful. We set a reference to it on
