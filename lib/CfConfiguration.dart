@@ -34,7 +34,7 @@ class CfConfiguration {
     result['analyticsEnabled'] = analyticsEnabled;
     result['pollingInterval'] = pollingInterval;
     // Needed for Web platform as the JS SDK exposes this
-    result['pollingEnabled'] = pollingInterval;
+    result['pollingEnabled'] = pollingEnabled;
     result['debugEnabled'] = debugEnabled;
     return result;
   }

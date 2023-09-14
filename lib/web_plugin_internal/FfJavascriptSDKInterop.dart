@@ -25,7 +25,8 @@ class JavaScriptSDKClient {
 
   external static dynamic on(dynamic eventType, Function callback);
   external static dynamic off(dynamic eventType, Function callback);
-  external static dynamic variation(dynamic flagIdentifier, dynamic defaultValue, bool withDebug);
+  external static dynamic variation(
+      dynamic flagIdentifier, dynamic defaultValue, bool withDebug);
 }
 
 // Represents the events that the JavaScript SDK Client can emit
@@ -46,18 +47,23 @@ class Event {
 
 @JS()
 @anonymous
+
 /// The payload from [Event.CHANGED].
 class Options {
+  external String get baseUrl;
+  external String get eventUrl;
+  external int get pollingInterval;
   external bool get streamEnabled;
   external bool get pollingEnabled;
   external bool get debug;
 
-  external factory Options({bool streamEnabled, bool pollingEnabled, bool debug});
-
+  external factory Options(
+      {String baseUrl, String eventUrl, int pollingInterval, bool streamEnabled, bool pollingEnabled, bool debug});
 }
 
 @JS()
 @anonymous
+
 /// The payload from [Event.CHANGED].
 class FlagChange {
   external String get flag;
@@ -68,6 +74,7 @@ class FlagChange {
 
 @JS()
 @anonymous
+
 /// The payload from [JavaScriptSDKClient.variation].
 class VariationResult {
   external dynamic get value;
