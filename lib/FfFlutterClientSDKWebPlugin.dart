@@ -96,19 +96,17 @@ class FfFlutterClientSdkWebPlugin {
   Future<bool> _invokeInitialize(MethodCall call) async {
     final String apiKey = call.arguments['apiKey'];
     final Object target = _mapToJsObject(call.arguments['target']);
+    final Map flutterOptions = call.arguments['configuration'];
 
-    final Map options = call.arguments['configuration'];
-    // The JS SDK uses `debug` for its option, so we need to send this
+    var javascriptSdkOptions = Options(
+        baseUrl: flutterOptions['configUrl'],
+        eventUrl: flutterOptions['eventUrl'],
+        pollingInterval: flutterOptions['pollingInterval'],
+        pollingEnabled: flutterOptions['pollingEnabled'],
+        streamEnabled: flutterOptions['streamEnabled'],
+        debug: flutterOptions['debugEnabled']);
 
-    var optionsInstance = Options(
-        baseUrl: options['configUrl'],
-        eventUrl: options['eventUrl'],
-        pollingInterval: options['pollingInterval'],
-        pollingEnabled: options['pollingEnabled'],
-        streamEnabled: options['streamEnabled'],
-        debug: options['debugEnabled']);
-
-    final response = JavaScriptSDK.initialize(apiKey, target, optionsInstance);
+    final response = JavaScriptSDK.initialize(apiKey, target, javascriptSdkOptions);
 
     // The JavaScript SDK returns the client instance, whether or not
     // the initialization was successful. We set a reference to it on
