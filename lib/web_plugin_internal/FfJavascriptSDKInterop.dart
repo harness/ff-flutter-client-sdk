@@ -10,7 +10,7 @@ class JavaScriptSDK {
   static const initializeFunction = 'initialize';
 
   external static dynamic initialize(
-      String apiKey, Object target, Object options);
+      String apiKey, Object target, Options options);
 }
 
 // Represents the JavaScript SDK Client instance. Once we've initialized the
@@ -42,6 +42,18 @@ class Event {
   static const ERROR_FETCH_FLAGS = 'fetch flags error';
   static const ERROR_FETCH_FLAG = 'fetch flag error';
   static const ERROR_STREAM = 'stream error';
+}
+
+@JS()
+@anonymous
+/// The payload from [Event.CHANGED].
+class Options {
+  external bool get streamEnabled;
+  external bool get pollingEnabled;
+  external bool get debug;
+
+  external factory Options({bool streamEnabled, bool pollingEnabled, bool debug});
+
 }
 
 @JS()

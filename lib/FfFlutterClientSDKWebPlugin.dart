@@ -101,13 +101,17 @@ class FfFlutterClientSdkWebPlugin {
     // The JS SDK uses `debug` for its option, so we need to send this
     if (options['debugEnabled'] == true) {
       options.remove('debugEnabled');
+      options.remove('debugEnabled');
       options['debug'] = true;
     } else {
       // Just remove the key if it's set to false as the JS SDK won't use it
       options.remove('debugEnabled');
     }
-    final Object optionsAsJSObj = _mapToJsObject(options);
-    final response = JavaScriptSDK.initialize(apiKey, target, optionsAsJSObj);
+    final Map test = {"streamEnabled": false};
+    final Object optionsAsJSObj = _mapToJsObject(test);
+    var optionsInstance = Options(streamEnabled: false, pollingEnabled: true, debug: true);
+
+    final response = JavaScriptSDK.initialize(apiKey, target, optionsInstance);
 
     // The JavaScript SDK returns the client instance, whether or not
     // the initialization was successful. We set a reference to it on
