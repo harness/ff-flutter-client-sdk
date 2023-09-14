@@ -5,6 +5,7 @@ class CfConfiguration {
   String streamUrl;
   String eventUrl;
   bool streamEnabled;
+  bool pollingEnabled;
   bool analyticsEnabled;
   int pollingInterval;
   // We use logLevel in CfClient.dart only, so no need to get a codec value
@@ -16,6 +17,7 @@ class CfConfiguration {
         eventUrl = builder._eventUrl,
         streamEnabled = builder._streamEnabled,
         analyticsEnabled = builder._analyticsEnabled,
+        pollingEnabled = builder._pollingEnabled,
         pollingInterval = builder._pollingInterval,
         logLevel = builder._logLevel;
 
@@ -27,6 +29,8 @@ class CfConfiguration {
     result['streamEnabled'] = streamEnabled;
     result['analyticsEnabled'] = analyticsEnabled;
     result['pollingInterval'] = pollingInterval;
+    // Needed for Web platform as the JS SDK exposes this
+    result['pollingEnabled'] = pollingInterval;
     return result;
   }
 }
@@ -36,6 +40,7 @@ class CfConfigurationBuilder {
   String _streamUrl = "https://config.ff.harness.io/api/1.0/stream";
   String _eventUrl = "https://events.ff.harness.io/api/1.0";
   bool _streamEnabled = true;
+  bool _pollingEnabled = true;
   bool _analyticsEnabled = true;
   int _pollingInterval = 60;
   Level _logLevel = Level.SEVERE;
@@ -57,6 +62,11 @@ class CfConfigurationBuilder {
 
   CfConfigurationBuilder setStreamEnabled(bool streamEnabled) {
     this._streamEnabled = streamEnabled;
+    return this;
+  }
+
+  CfConfigurationBuilder setPollingEnabled(bool pollingEnabled) {
+    this._pollingEnabled = pollingEnabled;
     return this;
   }
 
