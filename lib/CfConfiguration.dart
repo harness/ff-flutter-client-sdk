@@ -10,6 +10,9 @@ class CfConfiguration {
   int pollingInterval;
   // We use logLevel in CfClient.dart only, so no need to get a codec value
   Level logLevel;
+  // Separate log level for the JavaScript SDK - TODO, need same thing
+  // for Android / iOS and should standardise.
+  bool debugEnabled;
 
   CfConfiguration._builder(CfConfigurationBuilder builder)
       : configUrl = builder._configUrl,
@@ -19,7 +22,8 @@ class CfConfiguration {
         analyticsEnabled = builder._analyticsEnabled,
         pollingEnabled = builder._pollingEnabled,
         pollingInterval = builder._pollingInterval,
-        logLevel = builder._logLevel;
+        logLevel = builder._logLevel,
+        debugEnabled = builder.debugEnabled;
 
   Map<String, dynamic> _toCodecValue() {
     final Map<String, dynamic> result = <String, dynamic>{};
@@ -31,6 +35,7 @@ class CfConfiguration {
     result['pollingInterval'] = pollingInterval;
     // Needed for Web platform as the JS SDK exposes this
     result['pollingEnabled'] = pollingInterval;
+    result['debugEnabled'] = debugEnabled;
     return result;
   }
 }
@@ -44,6 +49,7 @@ class CfConfigurationBuilder {
   bool _analyticsEnabled = true;
   int _pollingInterval = 60;
   Level _logLevel = Level.SEVERE;
+  bool debugEnabled = false;
 
   CfConfigurationBuilder setConfigUri(String configUrl) {
     this._configUrl = configUrl;
@@ -82,6 +88,11 @@ class CfConfigurationBuilder {
 
   CfConfigurationBuilder setLogLevel(Level logLevel) {
     this._logLevel = logLevel;
+    return this;
+  }
+
+  CfConfigurationBuilder setDebugEnabled(bool debugEnabled) {
+    this.debugEnabled = debugEnabled;
     return this;
   }
 
