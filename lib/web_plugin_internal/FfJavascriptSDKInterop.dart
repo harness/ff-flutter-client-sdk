@@ -48,7 +48,7 @@ class Event {
 @JS()
 @anonymous
 
-/// The payload from [Event.CHANGED].
+/// The options payload for [JavaScriptSDK.initialize].
 class Options {
   external String get baseUrl;
   external String get eventUrl;
