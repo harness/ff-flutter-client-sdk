@@ -98,7 +98,7 @@ class FfFlutterClientSdkWebPlugin {
     final Object target = _mapToJsObject(call.arguments['target']);
     final Map flutterOptions = call.arguments['configuration'];
 
-    var javascriptSdkOptions = Options(
+    final javascriptSdkOptions = Options(
         baseUrl: flutterOptions['configUrl'],
         eventUrl: flutterOptions['eventUrl'],
         pollingInterval: flutterOptions['pollingInterval'],
