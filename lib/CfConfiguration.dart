@@ -40,7 +40,7 @@ class CfConfigurationBuilder {
   String _streamUrl = "https://config.ff.harness.io/api/1.0/stream";
   String _eventUrl = "https://events.ff.harness.io/api/1.0";
   bool _streamEnabled = true;
-  bool _pollingEnabled = true;
+  bool _pollingEnabled = false;
   bool _analyticsEnabled = true;
   int _pollingInterval = 60;
   Level _logLevel = Level.SEVERE;
