@@ -105,8 +105,8 @@ class FfFlutterClientSdkWebPlugin {
         eventUrl: options['eventUrl'],
         pollingInterval: options['pollingInterval'],
         pollingEnabled: options['pollingEnabled'],
-        streamEnabled: options['debugEnabled'],
-        debug: true);
+        streamEnabled: options['streamEnabled'],
+        debug: options['debugEnabled']);
 
     final response = JavaScriptSDK.initialize(apiKey, target, optionsInstance);
 
