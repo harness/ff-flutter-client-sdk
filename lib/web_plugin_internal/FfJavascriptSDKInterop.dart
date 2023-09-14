@@ -47,7 +47,6 @@ class Event {
 
 @JS()
 @anonymous
-
 /// The options payload for [JavaScriptSDK.initialize].
 class Options {
   external String get baseUrl;
@@ -63,7 +62,6 @@ class Options {
 
 @JS()
 @anonymous
-
 /// The payload from [Event.CHANGED].
 class FlagChange {
   external String get flag;
@@ -74,7 +72,6 @@ class FlagChange {
 
 @JS()
 @anonymous
-
 /// The payload from [JavaScriptSDKClient.variation].
 class VariationResult {
   external dynamic get value;
