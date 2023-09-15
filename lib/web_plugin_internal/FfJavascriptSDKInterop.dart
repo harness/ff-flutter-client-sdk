@@ -10,7 +10,7 @@ class JavaScriptSDK {
   static const initializeFunction = 'initialize';
 
   external static dynamic initialize(
-      String apiKey, Object target, Object options);
+      String apiKey, Object target, Options options);
 }
 
 // Represents the JavaScript SDK Client instance. Once we've initialized the
@@ -25,7 +25,8 @@ class JavaScriptSDKClient {
 
   external static dynamic on(dynamic eventType, Function callback);
   external static dynamic off(dynamic eventType, Function callback);
-  external static dynamic variation(dynamic flagIdentifier, dynamic defaultValue, bool withDebug);
+  external static dynamic variation(
+      dynamic flagIdentifier, dynamic defaultValue, bool withDebug);
 }
 
 // Represents the events that the JavaScript SDK Client can emit
@@ -42,6 +43,21 @@ class Event {
   static const ERROR_FETCH_FLAGS = 'fetch flags error';
   static const ERROR_FETCH_FLAG = 'fetch flag error';
   static const ERROR_STREAM = 'stream error';
+}
+
+@JS()
+@anonymous
+/// The options payload for [JavaScriptSDK.initialize].
+class Options {
+  external String get baseUrl;
+  external String get eventUrl;
+  external int get pollingInterval;
+  external bool get streamEnabled;
+  external bool get pollingEnabled;
+  external bool get debug;
+
+  external factory Options(
+      {String baseUrl, String eventUrl, int pollingInterval, bool streamEnabled, bool pollingEnabled, bool debug});
 }
 
 @JS()
