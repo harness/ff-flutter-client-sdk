@@ -44,6 +44,11 @@ class FfFlutterClientSdkWebPlugin {
   final StreamController<Map<String, dynamic>> _eventController =
       StreamController.broadcast();
 
+  // Keep track of the JavaScript SDK event subscription so we can close it
+  // if users close the SDK.
+  StreamSubscription? _eventSubscription;
+
+
   // The core Flutter SDK passes uuids over the method channel for each
   // listener that has been registered. This maps the UUID to the event and function callback
   // we pass to the JavaScript SDK, so they can be unregistered by users later.
@@ -188,8 +193,9 @@ class FfFlutterClientSdkWebPlugin {
       }
     };
 
-    for (var event in callbacks.keys) {
-      var callback = callbacks[event];
+
+    for (final event in callbacks.keys) {
+      final callback = callbacks[event];
       JavaScriptSDKClient.on(event, allowInterop(callback!));
     }
 
@@ -198,7 +204,7 @@ class FfFlutterClientSdkWebPlugin {
         disconnectedFunction: callbacks[Event.DISCONNECTED]!,
         changedFunction: callbacks[Event.CHANGED]!);
 
-    _eventController.stream.listen((event) {
+    _eventSubscription =_eventController.stream.listen((event) {
       switch (event['event']) {
         case EventType.SSE_START:
           log.fine('Internal event received: SSE_START');
@@ -212,11 +218,10 @@ class FfFlutterClientSdkWebPlugin {
           log.fine('Internal event received: SSE_RESUME');
           break;
         case EventType.EVALUATION_POLLING:
-          // TODO: The JavaScript SDK currently does not implement polling.
           break;
         case EventType.EVALUATION_CHANGE:
           log.fine('Internal event received EVALUATION_CHANGE');
-          var evaluationResponse = event['data'];
+          final evaluationResponse = event['data'];
           _hostChannel.invokeMethod('evaluation_change', evaluationResponse);
           break;
       }
@@ -263,7 +268,7 @@ class FfFlutterClientSdkWebPlugin {
     JavaScriptSDKClient.close();
 
     // Cleanup Dart resources
-    _eventController.close();
+    _eventSubscription?.cancel();
     _uuidToEventListenerMap.clear();
     _hostChannel.setMethodCallHandler(null);
   }
