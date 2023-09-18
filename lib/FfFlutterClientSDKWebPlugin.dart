@@ -267,10 +267,9 @@ class FfFlutterClientSdkWebPlugin {
     // Cleanup JavaScript SDK resources
     JavaScriptSDKClient.close();
 
-    // Cleanup Dart resources
+    // Cancel any JS SDK subscriptions that may have been registered
     _eventSubscription?.cancel();
     _uuidToEventListenerMap.clear();
-    _hostChannel.setMethodCallHandler(null);
   }
 
   /// Helper function to turn a map into an object, which is the required
