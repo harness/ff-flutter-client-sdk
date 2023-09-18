@@ -85,7 +85,7 @@ class FfFlutterClientSdkWebPlugin {
         _unregisterJsSDKStreamListeners(uuid);
         break;
       case _destroyMethodCall:
-        JavaScriptSDKClient.close();
+        destroy();
         break;
       default:
         if (call.method == _boolVariationMethodCall ||

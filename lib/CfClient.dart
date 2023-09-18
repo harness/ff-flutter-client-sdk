@@ -273,6 +273,7 @@ class CfClient {
   /// Client's method to deregister and cleanup internal resources used by SDK
   Future<void> destroy() async {
     _listenerSet.clear();
+    log.fine('Shutting down Harness Feature Flags SDK Client');
     return _channel.invokeMethod('destroy');
   }
 }
