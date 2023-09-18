@@ -38,6 +38,9 @@ class Event {
   static const FLAG_LOADED = 'flags loaded';
   static const CACHE_LOADED = 'cache loaded';
   static const CHANGED = 'changed';
+  static const POLLING = 'polling';
+  static const POLLING_STOPPED = 'polling stopped';
+  static const POLLING_CHANGED = 'polling changed';
   static const ERROR = 'error';
   static const ERROR_AUTH = 'auth error';
   static const ERROR_METRICS = 'metrics error';

@@ -177,8 +177,10 @@ class FfFlutterClientSdkWebPlugin {
   /// back to the core Flutter SDK using the plugin's host MethodChannel
   void _registerJsSDKStreamListeners(String uuid) {
     final callbacks = {
+      // The JavaScript SDK's `CONNECTED` event is emitted when an SSE connection
+      // has been lost and reestablished
       Event.CONNECTED: (_) =>
-          _eventController.add({'event': EventType.SSE_START}),
+          _eventController.add({'event': EventType.SSE_RESUME}),
       Event.DISCONNECTED: (_) =>
           _eventController.add({'event': EventType.SSE_END}),
       Event.CHANGED: (changeInfo) {
@@ -190,7 +192,9 @@ class FfFlutterClientSdkWebPlugin {
         };
         _eventController.add(
             {'event': EventType.EVALUATION_CHANGE, 'data': evaluationResponse});
-      }
+      },
+      Event.POLLING: (_) =>
+          _eventController.add({'event': EventType.EVALUATION_POLLING}),
     };
 
 
@@ -216,6 +220,7 @@ class FfFlutterClientSdkWebPlugin {
           break;
         case EventType.SSE_RESUME:
           log.fine('Internal event received: SSE_RESUME');
+          _hostChannel.invokeMethod('resume');
           break;
         case EventType.EVALUATION_POLLING:
           break;
