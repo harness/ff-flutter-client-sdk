@@ -32,11 +32,13 @@ class FfFlutterClientSdkWebPlugin {
   // The method calls that the core Flutter SDK can make
   static const _initializeMethodCall = 'initialize';
   static const _registerEventsListenerMethodCall = 'registerEventsListener';
-  static const _unregisterEventsListenerMethodCall = 'unregisterEventsListener';
   static const _boolVariationMethodCall = 'boolVariation';
   static const _stringVariationMethodCall = 'stringVariation';
   static const _numberVariationMethodCall = 'numberVariation';
   static const _jsonVariationMethodCall = 'jsonVariation';
+  static const _unregisterEventsListenerMethodCall = 'unregisterEventsListener';
+  static const _destroyMethodCall = 'destroy';
+
 
   // Used to emit JavaScript SDK events to the host MethodChannel
   final StreamController<Map<String, dynamic>> _eventController =
@@ -81,6 +83,9 @@ class FfFlutterClientSdkWebPlugin {
         final uuid = call.arguments['uuid'];
         log.fine("test");
         _unregisterJsSDKStreamListeners(uuid);
+        break;
+      case _destroyMethodCall:
+        JavaScriptSDKClient.close();
         break;
       default:
         if (call.method == _boolVariationMethodCall ||
@@ -251,6 +256,16 @@ class FfFlutterClientSdkWebPlugin {
       return jsonDecode(result.value);
     }
     return result.value;
+  }
+
+  void destroy() {
+    // Cleanup JavaScript SDK resources
+    JavaScriptSDKClient.close();
+
+    // Cleanup Dart resources
+    _eventController.close();
+    _uuidToEventListenerMap.clear();
+    _hostChannel.setMethodCallHandler(null);
   }
 
   /// Helper function to turn a map into an object, which is the required
