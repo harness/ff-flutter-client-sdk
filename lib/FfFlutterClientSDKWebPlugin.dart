@@ -19,11 +19,13 @@ external dynamic get window;
 class JsSDKStreamCallbackFunctions {
   final Function connectedFunction;
   final Function changedFunction;
-  final Function disconnectedFunction;
+  final Function stoppedFunction;
+  final Function pollingChangedFunction;
 
   JsSDKStreamCallbackFunctions(
       {required this.connectedFunction,
-      required this.disconnectedFunction,
+      required this.stoppedFunction,
+      required this.pollingChangedFunction,
       required this.changedFunction});
 }
 
@@ -39,7 +41,6 @@ class FfFlutterClientSdkWebPlugin {
   static const _unregisterEventsListenerMethodCall = 'unregisterEventsListener';
   static const _destroyMethodCall = 'destroy';
 
-
   // Used to emit JavaScript SDK events to the host MethodChannel
   final StreamController<Map<String, dynamic>> _eventController =
       StreamController.broadcast();
@@ -47,7 +48,6 @@ class FfFlutterClientSdkWebPlugin {
   // Keep track of the JavaScript SDK event subscription so we can close it
   // if users close the SDK.
   StreamSubscription? _eventSubscription;
-
 
   // The core Flutter SDK passes uuids over the method channel for each
   // listener that has been registered. This maps the UUID to the event and function callback
@@ -112,11 +112,14 @@ class FfFlutterClientSdkWebPlugin {
         baseUrl: flutterOptions['configUrl'],
         eventUrl: flutterOptions['eventUrl'],
         pollingInterval: flutterOptions['pollingInterval'],
-        pollingEnabled: flutterOptions['pollingEnabled'],
+        // Enable polling by default for the JS SDK, so we can fallback to polling
+        // of stream fails.
+        pollingEnabled: true,
         streamEnabled: flutterOptions['streamEnabled'],
         debug: flutterOptions['debugEnabled']);
 
-    final response = JavaScriptSDK.initialize(apiKey, target, javascriptSdkOptions);
+    final response =
+        JavaScriptSDK.initialize(apiKey, target, javascriptSdkOptions);
 
     // The JavaScript SDK returns the client instance, whether or not
     // the initialization was successful. We set a reference to it on
@@ -177,10 +180,11 @@ class FfFlutterClientSdkWebPlugin {
   /// back to the core Flutter SDK using the plugin's host MethodChannel
   void _registerJsSDKStreamListeners(String uuid) {
     final callbacks = {
+      // The JavaScript SDK's `CONNECTED` event is emitted when an SSE connection
+      // has been lost and reestablished
       Event.CONNECTED: (_) =>
-          _eventController.add({'event': EventType.SSE_START}),
-      Event.DISCONNECTED: (_) =>
-          _eventController.add({'event': EventType.SSE_END}),
+          _eventController.add({'event': EventType.SSE_RESUME}),
+      Event.STOPPED: (_) => _eventController.add({'event': EventType.SSE_END}),
       Event.CHANGED: (changeInfo) {
         FlagChange flagChange = changeInfo;
         Map<String, dynamic> evaluationResponse = {
@@ -190,9 +194,22 @@ class FfFlutterClientSdkWebPlugin {
         };
         _eventController.add(
             {'event': EventType.EVALUATION_CHANGE, 'data': evaluationResponse});
-      }
+      },
+      Event.POLLING_CHANGED: (polledFlags) {
+        dynamic flags = polledFlags;
+        List<dynamic> evaluationResponses = flags.map((flagChange) {
+          return {
+            "flag": flagChange.flag,
+            "kind": flagChange.kind,
+            "value": flagChange.value
+          };
+        }).toList();
+        _eventController.add({
+          'event': EventType.EVALUATION_POLLING,
+          'data': evaluationResponses
+        });
+      },
     };
-
 
     for (final event in callbacks.keys) {
       final callback = callbacks[event];
@@ -201,10 +218,11 @@ class FfFlutterClientSdkWebPlugin {
 
     _uuidToEventListenerMap[uuid] = JsSDKStreamCallbackFunctions(
         connectedFunction: callbacks[Event.CONNECTED]!,
-        disconnectedFunction: callbacks[Event.DISCONNECTED]!,
-        changedFunction: callbacks[Event.CHANGED]!);
+        stoppedFunction: callbacks[Event.STOPPED]!,
+        changedFunction: callbacks[Event.CHANGED]!,
+        pollingChangedFunction: callbacks[Event.POLLING_CHANGED]!);
 
-    _eventSubscription =_eventController.stream.listen((event) {
+    _eventSubscription = _eventController.stream.listen((event) {
       switch (event['event']) {
         case EventType.SSE_START:
           log.fine('Internal event received: SSE_START');
@@ -216,8 +234,13 @@ class FfFlutterClientSdkWebPlugin {
           break;
         case EventType.SSE_RESUME:
           log.fine('Internal event received: SSE_RESUME');
+          _hostChannel.invokeMethod('resume');
           break;
         case EventType.EVALUATION_POLLING:
+          log.fine('Internal event received EVALUATION_POLLING');
+          final pollingEvaluations = event['data'];
+          _hostChannel.invokeMethod(
+              'evaluation_polling', {'evaluationData': pollingEvaluations});
           break;
         case EventType.EVALUATION_CHANGE:
           log.fine('Internal event received EVALUATION_CHANGE');
@@ -234,8 +257,8 @@ class FfFlutterClientSdkWebPlugin {
     if (callBackFunctions != null) {
       JavaScriptSDKClient.off(
           Event.CONNECTED, allowInterop(callBackFunctions.connectedFunction));
-      JavaScriptSDKClient.off(Event.DISCONNECTED,
-          allowInterop(callBackFunctions.disconnectedFunction));
+      JavaScriptSDKClient.off(
+          Event.STOPPED, allowInterop(callBackFunctions.stoppedFunction));
       JavaScriptSDKClient.off(
           Event.CHANGED, allowInterop(callBackFunctions.changedFunction));
 
