@@ -130,10 +130,13 @@ class CfClient {
       List<EvaluationResponse> resultList = [];
 
       list.forEach((element) {
+        final dynamic value = element["value"];
+        final String? kind = element["kind"];
+        final dynamic parsedValue =
+        kind != null ? convertValueByKind(kind, value) : value;
         String flag = element["flag"];
-        dynamic value = element["value"];
 
-        resultList.add(EvaluationResponse(flag, value));
+        resultList.add(EvaluationResponse(flag, parsedValue));
       });
 
       _listenerSet.forEach((element) {
