@@ -20,10 +20,12 @@ class JsSDKStreamCallbackFunctions {
   final Function connectedFunction;
   final Function changedFunction;
   final Function disconnectedFunction;
+  final Function pollingChangedFunction;
 
   JsSDKStreamCallbackFunctions(
       {required this.connectedFunction,
       required this.disconnectedFunction,
+      required this.pollingChangedFunction,
       required this.changedFunction});
 }
 
@@ -39,7 +41,6 @@ class FfFlutterClientSdkWebPlugin {
   static const _unregisterEventsListenerMethodCall = 'unregisterEventsListener';
   static const _destroyMethodCall = 'destroy';
 
-
   // Used to emit JavaScript SDK events to the host MethodChannel
   final StreamController<Map<String, dynamic>> _eventController =
       StreamController.broadcast();
@@ -47,7 +48,6 @@ class FfFlutterClientSdkWebPlugin {
   // Keep track of the JavaScript SDK event subscription so we can close it
   // if users close the SDK.
   StreamSubscription? _eventSubscription;
-
 
   // The core Flutter SDK passes uuids over the method channel for each
   // listener that has been registered. This maps the UUID to the event and function callback
@@ -116,7 +116,8 @@ class FfFlutterClientSdkWebPlugin {
         streamEnabled: flutterOptions['streamEnabled'],
         debug: flutterOptions['debugEnabled']);
 
-    final response = JavaScriptSDK.initialize(apiKey, target, javascriptSdkOptions);
+    final response =
+        JavaScriptSDK.initialize(apiKey, target, javascriptSdkOptions);
 
     // The JavaScript SDK returns the client instance, whether or not
     // the initialization was successful. We set a reference to it on
@@ -181,8 +182,7 @@ class FfFlutterClientSdkWebPlugin {
       // has been lost and reestablished
       Event.CONNECTED: (_) =>
           _eventController.add({'event': EventType.SSE_RESUME}),
-      Event.DISCONNECTED: (_) =>
-          _eventController.add({'event': EventType.SSE_END}),
+      Event.STOPPED: (_) => _eventController.add({'event': EventType.SSE_END}),
       Event.CHANGED: (changeInfo) {
         FlagChange flagChange = changeInfo;
         Map<String, dynamic> evaluationResponse = {
@@ -193,10 +193,22 @@ class FfFlutterClientSdkWebPlugin {
         _eventController.add(
             {'event': EventType.EVALUATION_CHANGE, 'data': evaluationResponse});
       },
-      Event.POLLING: (_) =>
-          _eventController.add({'event': EventType.EVALUATION_POLLING}),
+      Event.POLLING_CHANGED: (polledFlags) {
+        List<FlagChange> flags = polledFlags;
+        List<Map<String, dynamic>> evaluationResponses =
+            flags.map((flagChange) {
+          return {
+            "flag": flagChange.flag,
+            "kind": flagChange.kind,
+            "value": flagChange.value
+          };
+        }).toList();
+        _eventController.add({
+          'event': EventType.EVALUATION_POLLING,
+          'data': evaluationResponses
+        });
+      },
     };
-
 
     for (final event in callbacks.keys) {
       final callback = callbacks[event];
@@ -206,9 +218,10 @@ class FfFlutterClientSdkWebPlugin {
     _uuidToEventListenerMap[uuid] = JsSDKStreamCallbackFunctions(
         connectedFunction: callbacks[Event.CONNECTED]!,
         disconnectedFunction: callbacks[Event.DISCONNECTED]!,
-        changedFunction: callbacks[Event.CHANGED]!);
+        changedFunction: callbacks[Event.CHANGED]!,
+        pollingChangedFunction: callbacks[Event.POLLING_CHANGED]!);
 
-    _eventSubscription =_eventController.stream.listen((event) {
+    _eventSubscription = _eventController.stream.listen((event) {
       switch (event['event']) {
         case EventType.SSE_START:
           log.fine('Internal event received: SSE_START');
@@ -223,6 +236,11 @@ class FfFlutterClientSdkWebPlugin {
           _hostChannel.invokeMethod('resume');
           break;
         case EventType.EVALUATION_POLLING:
+          log.fine('Internal event received EVALUATION_POLLING');
+          final pollingEvaluations = event['data'];
+
+          _hostChannel.invokeMethod('evaluation_polling');
+
           break;
         case EventType.EVALUATION_CHANGE:
           log.fine('Internal event received EVALUATION_CHANGE');

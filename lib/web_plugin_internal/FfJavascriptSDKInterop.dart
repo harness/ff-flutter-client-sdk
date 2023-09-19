@@ -34,6 +34,7 @@ class JavaScriptSDKClient {
 class Event {
   static const READY = 'ready';
   static const CONNECTED = 'connected';
+  static const STOPPED = 'stopped';
   static const DISCONNECTED = 'disconnected';
   static const FLAG_LOADED = 'flags loaded';
   static const CACHE_LOADED = 'cache loaded';
