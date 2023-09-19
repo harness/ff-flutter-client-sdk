@@ -112,7 +112,9 @@ class FfFlutterClientSdkWebPlugin {
         baseUrl: flutterOptions['configUrl'],
         eventUrl: flutterOptions['eventUrl'],
         pollingInterval: flutterOptions['pollingInterval'],
-        pollingEnabled: flutterOptions['pollingEnabled'],
+        // Enable polling by default for the JS SDK, so we can fallback to polling
+        // of stream fails.
+        pollingEnabled: true,
         streamEnabled: flutterOptions['streamEnabled'],
         debug: flutterOptions['debugEnabled']);
 
