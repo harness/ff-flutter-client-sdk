@@ -181,7 +181,7 @@ class FfFlutterClientSdkWebPlugin {
   void _registerJsSDKStreamListeners(String uuid) {
     final callbacks = {
       // The JavaScript SDK's `CONNECTED` event is emitted when an SSE connection
-      // has been lost and reestablished
+      // has been lost and reestablished, so we use it with SSE_RESUME here
       Event.CONNECTED: (_) =>
           _eventController.add({'event': EventType.SSE_RESUME}),
       Event.STOPPED: (_) => _eventController.add({'event': EventType.SSE_END}),
