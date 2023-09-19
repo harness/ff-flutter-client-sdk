@@ -19,12 +19,12 @@ external dynamic get window;
 class JsSDKStreamCallbackFunctions {
   final Function connectedFunction;
   final Function changedFunction;
-  final Function disconnectedFunction;
+  final Function stoppedFunction;
   final Function pollingChangedFunction;
 
   JsSDKStreamCallbackFunctions(
       {required this.connectedFunction,
-      required this.disconnectedFunction,
+      required this.stoppedFunction,
       required this.pollingChangedFunction,
       required this.changedFunction});
 }
@@ -194,9 +194,8 @@ class FfFlutterClientSdkWebPlugin {
             {'event': EventType.EVALUATION_CHANGE, 'data': evaluationResponse});
       },
       Event.POLLING_CHANGED: (polledFlags) {
-        List<FlagChange> flags = polledFlags;
-        List<Map<String, dynamic>> evaluationResponses =
-            flags.map((flagChange) {
+        dynamic flags = polledFlags;
+        List<dynamic> evaluationResponses = flags.map((flagChange) {
           return {
             "flag": flagChange.flag,
             "kind": flagChange.kind,
@@ -217,7 +216,7 @@ class FfFlutterClientSdkWebPlugin {
 
     _uuidToEventListenerMap[uuid] = JsSDKStreamCallbackFunctions(
         connectedFunction: callbacks[Event.CONNECTED]!,
-        disconnectedFunction: callbacks[Event.DISCONNECTED]!,
+        stoppedFunction: callbacks[Event.STOPPED]!,
         changedFunction: callbacks[Event.CHANGED]!,
         pollingChangedFunction: callbacks[Event.POLLING_CHANGED]!);
 
@@ -238,9 +237,8 @@ class FfFlutterClientSdkWebPlugin {
         case EventType.EVALUATION_POLLING:
           log.fine('Internal event received EVALUATION_POLLING');
           final pollingEvaluations = event['data'];
-
-          _hostChannel.invokeMethod('evaluation_polling');
-
+          _hostChannel.invokeMethod(
+              'evaluation_polling', {'evaluationData': pollingEvaluations});
           break;
         case EventType.EVALUATION_CHANGE:
           log.fine('Internal event received EVALUATION_CHANGE');
@@ -257,8 +255,8 @@ class FfFlutterClientSdkWebPlugin {
     if (callBackFunctions != null) {
       JavaScriptSDKClient.off(
           Event.CONNECTED, allowInterop(callBackFunctions.connectedFunction));
-      JavaScriptSDKClient.off(Event.DISCONNECTED,
-          allowInterop(callBackFunctions.disconnectedFunction));
+      JavaScriptSDKClient.off(
+          Event.STOPPED, allowInterop(callBackFunctions.stoppedFunction));
       JavaScriptSDKClient.off(
           Event.CHANGED, allowInterop(callBackFunctions.changedFunction));
 

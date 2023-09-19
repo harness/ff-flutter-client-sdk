@@ -75,6 +75,7 @@ class FlagChange {
   external String get kind;
 }
 
+
 @JS()
 @anonymous
 /// The payload from [JavaScriptSDKClient.variation].
