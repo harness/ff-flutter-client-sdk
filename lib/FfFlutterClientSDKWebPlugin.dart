@@ -32,15 +32,22 @@ class FfFlutterClientSdkWebPlugin {
   // The method calls that the core Flutter SDK can make
   static const _initializeMethodCall = 'initialize';
   static const _registerEventsListenerMethodCall = 'registerEventsListener';
-  static const _unregisterEventsListenerMethodCall = 'unregisterEventsListener';
   static const _boolVariationMethodCall = 'boolVariation';
   static const _stringVariationMethodCall = 'stringVariation';
   static const _numberVariationMethodCall = 'numberVariation';
   static const _jsonVariationMethodCall = 'jsonVariation';
+  static const _unregisterEventsListenerMethodCall = 'unregisterEventsListener';
+  static const _destroyMethodCall = 'destroy';
+
 
   // Used to emit JavaScript SDK events to the host MethodChannel
   final StreamController<Map<String, dynamic>> _eventController =
       StreamController.broadcast();
+
+  // Keep track of the JavaScript SDK event subscription so we can close it
+  // if users close the SDK.
+  StreamSubscription? _eventSubscription;
+
 
   // The core Flutter SDK passes uuids over the method channel for each
   // listener that has been registered. This maps the UUID to the event and function callback
@@ -81,6 +88,9 @@ class FfFlutterClientSdkWebPlugin {
         final uuid = call.arguments['uuid'];
         log.fine("test");
         _unregisterJsSDKStreamListeners(uuid);
+        break;
+      case _destroyMethodCall:
+        destroy();
         break;
       default:
         if (call.method == _boolVariationMethodCall ||
@@ -183,8 +193,9 @@ class FfFlutterClientSdkWebPlugin {
       }
     };
 
-    for (var event in callbacks.keys) {
-      var callback = callbacks[event];
+
+    for (final event in callbacks.keys) {
+      final callback = callbacks[event];
       JavaScriptSDKClient.on(event, allowInterop(callback!));
     }
 
@@ -193,7 +204,7 @@ class FfFlutterClientSdkWebPlugin {
         disconnectedFunction: callbacks[Event.DISCONNECTED]!,
         changedFunction: callbacks[Event.CHANGED]!);
 
-    _eventController.stream.listen((event) {
+    _eventSubscription =_eventController.stream.listen((event) {
       switch (event['event']) {
         case EventType.SSE_START:
           log.fine('Internal event received: SSE_START');
@@ -207,11 +218,10 @@ class FfFlutterClientSdkWebPlugin {
           log.fine('Internal event received: SSE_RESUME');
           break;
         case EventType.EVALUATION_POLLING:
-          // TODO: The JavaScript SDK currently does not implement polling.
           break;
         case EventType.EVALUATION_CHANGE:
           log.fine('Internal event received EVALUATION_CHANGE');
-          var evaluationResponse = event['data'];
+          final evaluationResponse = event['data'];
           _hostChannel.invokeMethod('evaluation_change', evaluationResponse);
           break;
       }
@@ -251,6 +261,15 @@ class FfFlutterClientSdkWebPlugin {
       return jsonDecode(result.value);
     }
     return result.value;
+  }
+
+  void destroy() {
+    // Cleanup JavaScript SDK resources
+    JavaScriptSDKClient.close();
+
+    // Cancel any JS SDK subscriptions that may have been registered
+    _eventSubscription?.cancel();
+    _uuidToEventListenerMap.clear();
   }
 
   /// Helper function to turn a map into an object, which is the required
