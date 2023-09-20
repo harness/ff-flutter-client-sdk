@@ -43,6 +43,12 @@ class FfFlutterClientSdkWebPlugin {
 
   static late bool streamingEnabled;
 
+  // For polling based events, we integrate with the JavaScript SDK's `FLAGS_LOADED` event,
+  // but that fires when the client is initialized, and in that case we can't consume it
+  // as a polling based event. This enables us to check if the initial flags have been loaded,
+  // so we can safely assume subsequent events are polling based.
+  static bool initialFlagsLoaded = false;
+
   // Used to emit JavaScript SDK events to the host MethodChannel
   final StreamController<Map<String, dynamic>> _eventController =
       StreamController.broadcast();
