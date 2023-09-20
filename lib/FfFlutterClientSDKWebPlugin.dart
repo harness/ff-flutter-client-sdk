@@ -51,6 +51,9 @@ class FfFlutterClientSdkWebPlugin {
   static late bool streamingEnabled;
   static late String changeEvent;
 
+  // The JS SDK emits `CONNECTED` for the first time it connects, and even for stream reconnects after a failure,
+  // so we need to keep track of if the stream is currently disconnected so that
+  // we can take action and emit the SSE_RESUME event.
   static late bool streamingDisconnected;
 
   // Used to emit JavaScript SDK events to the host MethodChannel
@@ -201,10 +204,6 @@ class FfFlutterClientSdkWebPlugin {
       // The JavaScript SDK's `CONNECTED` event is emitted when an SSE connection
       // has been lost and reestablished, so we use it with SSE_RESUME here
       Event.CONNECTED: (_) {
-        // Refresh the cache so listeners to SSE_RESUME can be assured they
-        // get the most up to date values
-        log.fine("REFRESHING EVALS");
-        // JavaScriptSDKClient.refreshEvaluations();
         _eventController.add({'event': Events.STREAMING_CONNECTED});
       },
 
@@ -251,8 +250,10 @@ class FfFlutterClientSdkWebPlugin {
     _eventSubscription = _eventController.stream.listen((event) {
       switch (event['event']) {
         case Events.STREAMING_CONNECTED:
-          log.fine('Internal event received: SSE_START');
-          if (streamingDisconnected) {
+          if (streamingEnabled && streamingDisconnected) {
+            // Refresh the cache so listeners to SSE_RESUME can be assured they
+            // get the most up to date values
+            JavaScriptSDKClient.refreshEvaluations();
             _hostChannel.invokeMethod('resume');
             return;
           }
