@@ -18,6 +18,7 @@ enum Events {
   STREAMING_CONNECTED,
   STREAMING_EVALUATION,
   POLLING_EVALUATION,
+  STREAMING_DISCONNECTED,
 }
 
 // Type used to group callback functions used when registering
@@ -221,6 +222,10 @@ class FfFlutterClientSdkWebPlugin {
       _eventController.add({'event': Events.STREAMING_CONNECTED});
     };
 
+    final streamingDisconnectedCallback = (_) {
+      _eventController.add({'event': Events.STREAMING_DISCONNECTED});
+    };
+
     final streamingCallBack = (changeInfo) {
       FlagChange flagChange = changeInfo;
       Map<String, dynamic> evaluationResponse = {
@@ -235,13 +240,14 @@ class FfFlutterClientSdkWebPlugin {
     // Only register streaming callbacks if streaming is enabled
     if (streamingEnabled) {
       callbacks[Event.CONNECTED] = streamingConnectedCallback;
+      callbacks[Event.DISCONNECTED] = streamingDisconnectedCallback;
       callbacks[Event.CHANGED] = streamingCallBack;
     }
 
     // Register polling callback by default, which is enabled even if
     // streaming is enabled as it is used as a fallback
     callbacks[Event.FLAGS_LOADED] = pollingEvaluationCallBack;
-    
+
     for (final event in callbacks.keys) {
       final callback = callbacks[event];
       JavaScriptSDKClient.on(event, allowInterop(callback!));
@@ -249,6 +255,7 @@ class FfFlutterClientSdkWebPlugin {
 
     _uuidToEventListenerMap[uuid] = JsSDKStreamCallbackFunctions(
         connectedFunction: callbacks[Event.CONNECTED]!,
+        disconnectedFunction: callbacks[Event.DISCONNECTED]!,
         stoppedFunction: callbacks[Event.STOPPED]!,
         streamingEvaluationFunction: callbacks[Event.CHANGED]!,
         pollingEvaluationFunction: callbacks[Event.FLAGS_LOADED]!);
