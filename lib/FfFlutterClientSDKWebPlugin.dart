@@ -20,12 +20,10 @@ class JsSDKStreamCallbackFunctions {
   final Function connectedFunction;
   final Function changedFunction;
   final Function stoppedFunction;
-  final Function pollingChangedFunction;
 
   JsSDKStreamCallbackFunctions(
       {required this.connectedFunction,
       required this.stoppedFunction,
-      required this.pollingChangedFunction,
       required this.changedFunction});
 }
 
@@ -230,16 +228,6 @@ class FfFlutterClientSdkWebPlugin {
       Event.CONNECTED: (_) =>
           _eventController.add({'event': EventType.SSE_RESUME}),
       Event.STOPPED: (_) => _eventController.add({'event': EventType.SSE_END}),
-      Event.CHANGED: (changeInfo) {
-        FlagChange flagChange = changeInfo;
-        Map<String, dynamic> evaluationResponse = {
-          "flag": flagChange.flag,
-          "kind": flagChange.kind,
-          "value": flagChange.value
-        };
-        _eventController.add(
-            {'event': EventType.EVALUATION_CHANGE, 'data': evaluationResponse});
-      },
 
       changeOrLoadEvent: changeOrLoadCallback,
 
@@ -267,8 +255,7 @@ class FfFlutterClientSdkWebPlugin {
     _uuidToEventListenerMap[uuid] = JsSDKStreamCallbackFunctions(
         connectedFunction: callbacks[Event.CONNECTED]!,
         stoppedFunction: callbacks[Event.STOPPED]!,
-        changedFunction: callbacks[Event.CHANGED]!,
-        pollingChangedFunction: callbacks[Event.FLAG_LOADED]!);
+        changedFunction: callbacks[changeOrLoadEvent]!);
 
     _eventSubscription = _eventController.stream.listen((event) {
       switch (event['event']) {

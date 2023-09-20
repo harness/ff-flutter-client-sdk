@@ -289,7 +289,7 @@ class CfClient {
         // If the decoded value still has escape characters, continue to decode
         value = decodedValue;
         decodeAttempt++;
-        
+
       } catch (e) {
         log.severe("Failed to decode Feature Flags JSON flag evaluation value: $e, Returning original value: $value");
         // If decoding fails, return the original value
