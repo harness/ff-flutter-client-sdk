@@ -185,7 +185,6 @@ class FfFlutterClientSdkWebPlugin {
   /// Registers the underlying JavaScript SDK event listeners, and emits events
   /// back to the core Flutter SDK using the plugin's host MethodChannel
   void _registerJsSDKStreamListeners(String uuid) {
-
     // Register either a streaming or polling related event
     final String changeOrLoadEvent;
     final Function changeOrLoadCallback;
@@ -199,10 +198,8 @@ class FfFlutterClientSdkWebPlugin {
           "kind": flagChange.kind,
           "value": flagChange.value
         };
-        _eventController.add({
-          'event': EventType.EVALUATION_CHANGE,
-          'data': evaluationResponse
-        });
+        _eventController.add(
+            {'event': EventType.EVALUATION_CHANGE, 'data': evaluationResponse});
       };
     } else {
       changeOrLoadEvent = Event.FLAGS_LOADED;
@@ -225,8 +222,12 @@ class FfFlutterClientSdkWebPlugin {
     final callbacks = {
       // The JavaScript SDK's `CONNECTED` event is emitted when an SSE connection
       // has been lost and reestablished, so we use it with SSE_RESUME here
-      Event.CONNECTED: (_) =>
-          _eventController.add({'event': EventType.SSE_RESUME}),
+      Event.CONNECTED: (_) {
+        // Refresh the cache so listeners to SSE_RESUME can be assured they
+        // get the most up to date values
+        JavaScriptSDKClient.refreshEvaluations();
+        _eventController.add({'event': EventType.SSE_RESUME});
+      },
       Event.STOPPED: (_) => _eventController.add({'event': EventType.SSE_END}),
 
       changeOrLoadEvent: changeOrLoadCallback,

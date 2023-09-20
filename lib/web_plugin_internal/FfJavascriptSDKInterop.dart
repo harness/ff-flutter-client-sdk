@@ -28,6 +28,7 @@ class JavaScriptSDKClient {
   external static dynamic variation(
       dynamic flagIdentifier, dynamic defaultValue, bool withDebug);
   external static dynamic close();
+  external static dynamic refreshEvaluations();
 }
 
 // Represents the events that the JavaScript SDK Client can emit
