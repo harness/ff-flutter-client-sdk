@@ -266,11 +266,25 @@ class CfClient {
           }
           break;
         case 'json':
-          return jsonDecode(value);
+          return _recursiveJsonDecode(value);
       }
     }
     // Return the original value if it's not a string or if the kind is not recognized
     return value;
+  }
+
+  dynamic _recursiveJsonDecode(String value) {
+    try {
+      dynamic decodedValue = jsonDecode(value);
+      if (decodedValue is String) {
+        return _recursiveJsonDecode(decodedValue);
+      }
+      return decodedValue;
+    } catch (e) {
+      log.severe("Failed to decode Feature Flags JSON flag evaluation value: $e, Returning original value: $value");
+      // If decoding fails, return the original value
+      return value;
+    }
   }
 
   /// Client's method to deregister and cleanup internal resources used by SDK
