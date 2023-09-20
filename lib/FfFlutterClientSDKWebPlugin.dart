@@ -50,9 +50,8 @@ class FfFlutterClientSdkWebPlugin {
   static const _unregisterEventsListenerMethodCall = 'unregisterEventsListener';
   static const _destroyMethodCall = 'destroy';
 
-  // Used so we can subscribe to correct event in the JavaScript SDK
+  // Used so we can subscribe to correct events in the JavaScript SDK
   static late bool streamingEnabled;
-  static late String changeEvent;
 
   // The JS SDK emits `CONNECTED` for the first time it connects, and even for stream reconnects after a failure,
   // so we need to keep track of if the stream is currently disconnected so that
@@ -297,12 +296,16 @@ class FfFlutterClientSdkWebPlugin {
     JsSDKStreamCallbackFunctions? callBackFunctions =
         _uuidToEventListenerMap[uuid];
     if (callBackFunctions != null) {
-      JavaScriptSDKClient.off(
-          Event.CONNECTED, allowInterop(callBackFunctions.connectedFunction));
-      JavaScriptSDKClient.off(
-          Event.STOPPED, allowInterop(callBackFunctions.stoppedFunction));
-      JavaScriptSDKClient.off(changeEvent,
-          allowInterop(callBackFunctions.streamingEvaluationFunction));
+      if (streamingEnabled) {
+        JavaScriptSDKClient.off(
+            Event.CONNECTED, allowInterop(callBackFunctions.connectedFunction));
+        JavaScriptSDKClient.off(
+            Event.DISCONNECTED, allowInterop(callBackFunctions.disconnectedFunction));
+        JavaScriptSDKClient.off(Event.CHANGED,
+            allowInterop(callBackFunctions.streamingEvaluationFunction));
+      }
+      JavaScriptSDKClient.off(Event.FLAGS_LOADED,
+          allowInterop(callBackFunctions.pollingEvaluationFunction));
 
       _uuidToEventListenerMap.remove(uuid);
     } else {
