@@ -28,12 +28,10 @@ class JsSDKStreamCallbackFunctions {
   final Function disconnectedFunction;
   final Function streamingEvaluationFunction;
   final Function pollingEvaluationFunction;
-  final Function stoppedFunction;
 
   JsSDKStreamCallbackFunctions(
       {required this.connectedFunction,
       required this.disconnectedFunction,
-      required this.stoppedFunction,
       required this.streamingEvaluationFunction,
       required this.pollingEvaluationFunction});
 }
@@ -56,7 +54,7 @@ class FfFlutterClientSdkWebPlugin {
   // The JS SDK emits `CONNECTED` for the first time it connects, and even for stream reconnects after a failure,
   // so we need to keep track of if the stream is currently disconnected so that
   // we can take action and emit the SSE_RESUME event.
-  static late bool streamingDisconnected;
+  static bool streamingDisconnected = false;
 
   // Used to emit JavaScript SDK events to the host MethodChannel
   final StreamController<Map<String, dynamic>> _eventController =
@@ -255,7 +253,6 @@ class FfFlutterClientSdkWebPlugin {
     _uuidToEventListenerMap[uuid] = JsSDKStreamCallbackFunctions(
         connectedFunction: callbacks[Event.CONNECTED]!,
         disconnectedFunction: callbacks[Event.DISCONNECTED]!,
-        stoppedFunction: callbacks[Event.STOPPED]!,
         streamingEvaluationFunction: callbacks[Event.CHANGED]!,
         pollingEvaluationFunction: callbacks[Event.FLAGS_LOADED]!);
 
@@ -265,19 +262,23 @@ class FfFlutterClientSdkWebPlugin {
           if (streamingEnabled && streamingDisconnected) {
             // Refresh the cache so listeners to SSE_RESUME can be assured they
             // get the most up to date values
+            streamingDisconnected = false;
             JavaScriptSDKClient.refreshEvaluations();
             _hostChannel.invokeMethod('resume');
             return;
           }
           _hostChannel.invokeMethod('start');
           break;
+        case Events.STREAMING_DISCONNECTED:
+          streamingDisconnected = true;
+          return;
         case Events.POLLING_EVALUATION:
-          // Only send polling evaluations if streaming is disconnected because
-          // the `FLAGS_LOADED` event from the JS SDK is triggered when the
-          // SDK initializes
           if (streamingEnabled && streamingDisconnected) {
             return;
           }
+          // Only send polling evaluations if streaming is disconnected because
+          // the `FLAGS_LOADED` event from the JS SDK is triggered when the
+          // SDK initializes
           log.fine('Internal event received EVALUATION_POLLING');
           final pollingEvaluations = event['data'];
           _hostChannel.invokeMethod(
@@ -299,8 +300,8 @@ class FfFlutterClientSdkWebPlugin {
       if (streamingEnabled) {
         JavaScriptSDKClient.off(
             Event.CONNECTED, allowInterop(callBackFunctions.connectedFunction));
-        JavaScriptSDKClient.off(
-            Event.DISCONNECTED, allowInterop(callBackFunctions.disconnectedFunction));
+        JavaScriptSDKClient.off(Event.DISCONNECTED,
+            allowInterop(callBackFunctions.disconnectedFunction));
         JavaScriptSDKClient.off(Event.CHANGED,
             allowInterop(callBackFunctions.streamingEvaluationFunction));
       }
