@@ -273,7 +273,12 @@ class CfClient {
     return value;
   }
 
-  dynamic _recursiveJsonDecode(String value) {
+  dynamic _recursiveJsonDecode(String value, [int depth = 0]) {
+    // Safety check: if we're more than 5 levels deep, just return the value
+    if (depth > 10) {
+      log.severe("Failed to decode Feature Flags JSON flag evaluation value: JSON was escaped more than 10 times, Returning original value: $value");
+      return value;
+    }
     try {
       dynamic decodedValue = jsonDecode(value);
       if (decodedValue is String) {
