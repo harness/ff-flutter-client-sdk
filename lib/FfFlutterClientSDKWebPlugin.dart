@@ -41,6 +41,8 @@ class FfFlutterClientSdkWebPlugin {
   static const _unregisterEventsListenerMethodCall = 'unregisterEventsListener';
   static const _destroyMethodCall = 'destroy';
 
+  static late bool streamingEnabled;
+
   // Used to emit JavaScript SDK events to the host MethodChannel
   final StreamController<Map<String, dynamic>> _eventController =
       StreamController.broadcast();
@@ -108,6 +110,12 @@ class FfFlutterClientSdkWebPlugin {
     final Object target = _mapToJsObject(call.arguments['target']);
     final Map flutterOptions = call.arguments['configuration'];
 
+    final bool streamingOption = flutterOptions['streamEnabled'];
+
+    // Keep track of the streaming option the user has chosen, so we can
+    // register the right listener when the user sets up a listener
+    streamingEnabled = streamingOption;
+
     final javascriptSdkOptions = Options(
         baseUrl: flutterOptions['configUrl'],
         eventUrl: flutterOptions['eventUrl'],
@@ -115,7 +123,7 @@ class FfFlutterClientSdkWebPlugin {
         // Enable polling by default for the JS SDK, so we can fallback to polling
         // of stream fails.
         pollingEnabled: true,
-        streamEnabled: flutterOptions['streamEnabled'],
+        streamEnabled: streamingOption,
         debug: flutterOptions['debugEnabled']);
 
     final response =
@@ -179,6 +187,43 @@ class FfFlutterClientSdkWebPlugin {
   /// Registers the underlying JavaScript SDK event listeners, and emits events
   /// back to the core Flutter SDK using the plugin's host MethodChannel
   void _registerJsSDKStreamListeners(String uuid) {
+
+    // Register either a streaming or polling related event
+    final String changeOrLoadEvent;
+    final Function changeOrLoadCallback;
+
+    if (streamingEnabled) {
+      changeOrLoadEvent = Event.CHANGED;
+      changeOrLoadCallback = (changeInfo) {
+        FlagChange flagChange = changeInfo;
+        Map<String, dynamic> evaluationResponse = {
+          "flag": flagChange.flag,
+          "kind": flagChange.kind,
+          "value": flagChange.value
+        };
+        _eventController.add({
+          'event': EventType.EVALUATION_CHANGE,
+          'data': evaluationResponse
+        });
+      };
+    } else {
+      changeOrLoadEvent = Event.FLAG_LOADED;
+      changeOrLoadCallback = (polledFlags) {
+        dynamic flags = polledFlags;
+        List<dynamic> evaluationResponses = flags.map((flagChange) {
+          return {
+            "flag": flagChange.flag,
+            "kind": flagChange.kind,
+            "value": flagChange.value
+          };
+        }).toList();
+        _eventController.add({
+          'event': EventType.EVALUATION_POLLING,
+          'data': evaluationResponses
+        });
+      };
+    }
+
     final callbacks = {
       // The JavaScript SDK's `CONNECTED` event is emitted when an SSE connection
       // has been lost and reestablished, so we use it with SSE_RESUME here
@@ -195,7 +240,10 @@ class FfFlutterClientSdkWebPlugin {
         _eventController.add(
             {'event': EventType.EVALUATION_CHANGE, 'data': evaluationResponse});
       },
-      Event.POLLING_CHANGED: (polledFlags) {
+
+      changeOrLoadEvent: changeOrLoadCallback,
+
+      Event.FLAG_LOADED: (polledFlags) {
         dynamic flags = polledFlags;
         List<dynamic> evaluationResponses = flags.map((flagChange) {
           return {
@@ -220,7 +268,7 @@ class FfFlutterClientSdkWebPlugin {
         connectedFunction: callbacks[Event.CONNECTED]!,
         stoppedFunction: callbacks[Event.STOPPED]!,
         changedFunction: callbacks[Event.CHANGED]!,
-        pollingChangedFunction: callbacks[Event.POLLING_CHANGED]!);
+        pollingChangedFunction: callbacks[Event.FLAG_LOADED]!);
 
     _eventSubscription = _eventController.stream.listen((event) {
       switch (event['event']) {

@@ -126,7 +126,7 @@ class CfClient {
         element(response, EventType.EVALUATION_CHANGE);
       });
     } else if (methodCall.method == "evaluation_polling") {
-      List list = methodCall.arguments["evaluationData"] as List;
+      List list = methodCall.arguments["evaluationData"];
       List<EvaluationResponse> resultList = [];
 
       list.forEach((element) {
