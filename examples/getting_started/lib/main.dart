@@ -1,6 +1,4 @@
 // @dart=2.12
-import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:ff_flutter_client_sdk/CfClient.dart';
 import 'package:logging/logging.dart';
@@ -14,13 +12,6 @@ const boolFlagName = 'boolflag';
 const stringFlagName = "multivariateflag";
 const numberFlagName = "numberflag";
 const jsonFlagName = "jsonflag";
-
-final Set<String> flagNames = {
-  boolFlagName,
-  stringFlagName,
-  numberFlagName,
-  jsonFlagName,
-};
 
 void main() => runApp(MyApp());
 
@@ -108,37 +99,21 @@ class _FlagState extends State<FlagState> {
             case EventType.EVALUATION_CHANGE:
               String flag = (data as EvaluationResponse).flag;
               dynamic value = data.value;
-              switch (flag) {
-                case boolFlagName:
-                  setState(() {
-                    _flagValues[boolFlagName] = value;
-                  });
-                  break;
-                case stringFlagName:
-                  setState(() {
-                    _flagValues[stringFlagName] = value;
-                  });
-                  break;
-                case numberFlagName:
-                  setState(() {
-                    _flagValues[numberFlagName] = value;
-                  });
-                  break;
-                case jsonFlagName:
-                  setState(() {
-                    _flagValues[jsonFlagName] = value;
-                  });
-                  break;
+
+              if (_flagValues.containsKey(flag)) {
+                setState(() {
+                  _flagValues[flag] = value;
+                });
               }
               break;
+
             case EventType.EVALUATION_POLLING:
               List<EvaluationResponse> evals =
                   (data as List<EvaluationResponse>);
               for (final eval in evals) {
-                // Check for existence
-                if (flagNames.contains(eval.flag)) {
+                if (_flagValues.containsKey(eval.flag)){
                   setState(() {
-                    eval.flag = eval.value;
+                    _flagValues[eval.flag] = value;
                   });
                 }
               }
