@@ -24,15 +24,15 @@ enum Events {
 // Type used to group callback functions used when registering
 // stream events with the JavaScript SDK
 class JsSDKStreamCallbackFunctions {
-  final Function connectedFunction;
-  final Function disconnectedFunction;
-  final Function streamingEvaluationFunction;
+  final Function? connectedFunction;
+  final Function? disconnectedFunction;
+  final Function? streamingEvaluationFunction;
   final Function pollingEvaluationFunction;
 
   JsSDKStreamCallbackFunctions(
-      {required this.connectedFunction,
-      required this.disconnectedFunction,
-      required this.streamingEvaluationFunction,
+      {this.connectedFunction,
+      this.disconnectedFunction,
+      this.streamingEvaluationFunction,
       required this.pollingEvaluationFunction});
 }
 
