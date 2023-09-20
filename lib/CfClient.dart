@@ -266,30 +266,39 @@ class CfClient {
           }
           break;
         case 'json':
-          return _recursiveJsonDecode(value);
+          return _iterativeJsonDecode(value);
       }
     }
     // Return the original value if it's not a string or if the kind is not recognized
     return value;
   }
 
-  dynamic _recursiveJsonDecode(String value, [int depth = 0]) {
-    // Safety check: if we're more than 5 levels deep, just return the value
-    if (depth > 10) {
-      log.severe("Failed to decode Feature Flags JSON flag evaluation value: JSON was escaped more than 10 times, Returning original value: $value");
-      return value;
-    }
-    try {
-      dynamic decodedValue = jsonDecode(value);
-      if (decodedValue is String) {
-        return _recursiveJsonDecode(decodedValue);
+  dynamic _iterativeJsonDecode(dynamic value) {
+    int decodeAttempt = 0;
+    const int maxAttempt = 10;
+
+    while (decodeAttempt < maxAttempt) {
+      try {
+        dynamic decodedValue = jsonDecode(value);
+
+        // Return the fully escaped JSON
+        if (!(decodedValue is String)) {
+          return decodedValue;
+        }
+
+        // If the decoded value still has escape characters, continue to decode
+        value = decodedValue;
+        decodeAttempt++;
+        
+      } catch (e) {
+        log.severe("Failed to decode Feature Flags JSON flag evaluation value: $e, Returning original value: $value");
+        // If decoding fails, return the original value
+        return value;
       }
-      return decodedValue;
-    } catch (e) {
-      log.severe("Failed to decode Feature Flags JSON flag evaluation value: $e, Returning original value: $value");
-      // If decoding fails, return the original value
-      return value;
     }
+
+    log.severe("Failed to decode Feature Flags JSON flag evaluation value: JSON was escaped more than 10 times, Returning original value: $value");
+    return value;
   }
 
   /// Client's method to deregister and cleanup internal resources used by SDK
