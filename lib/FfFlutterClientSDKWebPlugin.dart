@@ -39,7 +39,9 @@ class FfFlutterClientSdkWebPlugin {
   static const _unregisterEventsListenerMethodCall = 'unregisterEventsListener';
   static const _destroyMethodCall = 'destroy';
 
+  // Used so we can subscribe to correct event in the JavaScript SDK
   static late bool streamingEnabled;
+  static late String changeEvent;
 
   // Used to emit JavaScript SDK events to the host MethodChannel
   final StreamController<Map<String, dynamic>> _eventController =
@@ -191,6 +193,8 @@ class FfFlutterClientSdkWebPlugin {
 
     if (streamingEnabled) {
       changeOrLoadEvent = Event.CHANGED;
+      // Also store the event as an instance variable so we can unsubscribe later
+      changeEvent = Event.FLAGS_LOADED;
       changeOrLoadCallback = (changeInfo) {
         FlagChange flagChange = changeInfo;
         Map<String, dynamic> evaluationResponse = {
@@ -203,6 +207,8 @@ class FfFlutterClientSdkWebPlugin {
       };
     } else {
       changeOrLoadEvent = Event.FLAGS_LOADED;
+      // Also store the event as an instance variable so we can unsubscribe later
+      changeEvent = Event.CHANGED;
       changeOrLoadCallback = (polledFlags) {
         dynamic flags = polledFlags;
         List<dynamic> evaluationResponses = flags.map((flagChange) {
@@ -296,7 +302,7 @@ class FfFlutterClientSdkWebPlugin {
       JavaScriptSDKClient.off(
           Event.STOPPED, allowInterop(callBackFunctions.stoppedFunction));
       JavaScriptSDKClient.off(
-          Event.CHANGED, allowInterop(callBackFunctions.changedFunction));
+          changeEvent, allowInterop(callBackFunctions.changedFunction));
 
       _uuidToEventListenerMap.remove(uuid);
     } else {
