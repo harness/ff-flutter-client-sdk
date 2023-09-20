@@ -292,6 +292,12 @@ class FfFlutterClientSdkWebPlugin {
           break;
         case EventType.EVALUATION_POLLING:
           log.fine('Internal event received EVALUATION_POLLING');
+          // Only notify users of this event if it isn't the initial loading
+          // of the JS SDK's flags when it is initialized
+          if (!initialFlagsLoaded) {
+            initialFlagsLoaded = true;
+            return;
+          }
           final pollingEvaluations = event['data'];
           _hostChannel.invokeMethod(
               'evaluation_polling', {'evaluationData': pollingEvaluations});
