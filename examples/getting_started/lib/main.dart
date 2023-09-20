@@ -38,10 +38,12 @@ class FlagState extends StatefulWidget {
 }
 
 class _FlagState extends State<FlagState> {
-  dynamic _boolFlagValue = false;
-  dynamic _stringFlagValue = "off";
-  dynamic _numberFlagValue = 3;
-  dynamic _jsonFlagValue = {};
+  final Map<String, dynamic> _flagValues = {
+    boolFlagName: false,
+    stringFlagName: "off",
+    numberFlagName: 3,
+    jsonFlagName: {},
+  };
 
   @override
   void initState() {
@@ -51,8 +53,9 @@ class _FlagState extends State<FlagState> {
     // change the URL the client connects to etc
     var conf = CfConfigurationBuilder()
         .setLogLevel(Level.FINE)
-        .setStreamEnabled(false)
+        .setStreamEnabled(true)
         .setDebugEnabled(true)
+        .setConfigUri("http://localhost:8003/api/1.0")
         .setPollingInterval(60000)
         .build();
 
@@ -69,17 +72,15 @@ class _FlagState extends State<FlagState> {
 
         // Evaluate flag and set initial state
         CfClient.getInstance().boolVariation(boolFlagName, false).then((value) {
-          print("$_boolFlagValue: $value");
           setState(() {
-            _boolFlagValue = value;
+            _flagValues[boolFlagName] = value;
           });
         });
 
         // Evaluate flag and set initial state
         CfClient.getInstance().jsonVariation(jsonFlagName, {}).then((value) {
-          print("$_jsonFlagValue: $value");
           setState(() {
-            _jsonFlagValue = value;
+            _flagValues[jsonFlagName] = value;
           });
         });
 
@@ -87,17 +88,15 @@ class _FlagState extends State<FlagState> {
         CfClient.getInstance()
             .stringVariation(stringFlagName, "default")
             .then((value) {
-          print("$_stringFlagValue: $value");
           setState(() {
-            _stringFlagValue = value;
+            _flagValues[stringFlagName] = value;
           });
         });
 
         // Evaluate flag and set initial state
         CfClient.getInstance().numberVariation(numberFlagName, 1).then((value) {
-          print("$_numberFlagValue: $value");
           setState(() {
-            _numberFlagValue = value;
+            _flagValues[numberFlagName] = value;
           });
         });
 
@@ -112,22 +111,22 @@ class _FlagState extends State<FlagState> {
               switch (flag) {
                 case boolFlagName:
                   setState(() {
-                    _boolFlagValue = value;
+                    _flagValues[boolFlagName] = value;
                   });
                   break;
                 case stringFlagName:
                   setState(() {
-                    _stringFlagValue = value;
+                    _flagValues[stringFlagName] = value;
                   });
                   break;
                 case numberFlagName:
                   setState(() {
-                    _numberFlagValue = value;
+                    _flagValues[numberFlagName] = value;
                   });
                   break;
                 case jsonFlagName:
                   setState(() {
-                    _jsonFlagValue = value;
+                    _flagValues[jsonFlagName] = value;
                   });
                   break;
               }
@@ -155,7 +154,7 @@ class _FlagState extends State<FlagState> {
                   .then((value) {
                 print("$boolFlagName: $value");
                 setState(() {
-                  _boolFlagValue = value;
+                  _flagValues[boolFlagName] = value;
                 });
               });
               break;
@@ -185,20 +184,20 @@ class _FlagState extends State<FlagState> {
             children: [
               Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
-                child: Text("$boolFlagName : $_boolFlagValue",
+                child: Text("$boolFlagName : ${_flagValues[boolFlagName]}",
                     style: const TextStyle(fontSize: 25)),
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
-                child: Text("$stringFlagName : $_stringFlagValue",
+                child: Text("$stringFlagName : ${_flagValues[stringFlagName]}",
                     style: const TextStyle(fontSize: 25)),
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
-                child: Text("$numberFlagName : $_numberFlagValue",
+                child: Text("$numberFlagName : ${_flagValues[numberFlagName]}",
                     style: const TextStyle(fontSize: 25)),
               ),
-              Text("$jsonFlagName : $_jsonFlagValue",
+              Text("$jsonFlagName : ${_flagValues[jsonFlagName]}",
                   style: const TextStyle(fontSize: 25)),
             ],
           ),
