@@ -205,7 +205,7 @@ class FfFlutterClientSdkWebPlugin {
         });
       };
     } else {
-      changeOrLoadEvent = Event.FLAG_LOADED;
+      changeOrLoadEvent = Event.FLAGS_LOADED;
       changeOrLoadCallback = (polledFlags) {
         dynamic flags = polledFlags;
         List<dynamic> evaluationResponses = flags.map((flagChange) {
@@ -231,7 +231,7 @@ class FfFlutterClientSdkWebPlugin {
 
       changeOrLoadEvent: changeOrLoadCallback,
 
-      Event.FLAG_LOADED: (polledFlags) {
+      Event.FLAGS_LOADED: (polledFlags) {
         dynamic flags = polledFlags;
         List<dynamic> evaluationResponses = flags.map((flagChange) {
           return {
