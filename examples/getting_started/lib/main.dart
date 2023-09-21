@@ -10,10 +10,8 @@ const stringFlagName = "multivariateflag";
 const numberFlagName = "numberflag";
 const jsonFlagName = "jsonflag";
 
-
 // The SDK API Key to use for authentication.
 // final provider.UniversalApiKeyProvider apiKeyProvider = kIsWeb ? provider() : MobileApiKeyProvider();
-
 
 void main() async {
   await dotenv.load(fileName: ".env");
@@ -49,10 +47,10 @@ class _FlagState extends State<FlagState> {
     // change the URL the client connects to etc
     var conf = CfConfigurationBuilder()
         .setLogLevel(Level.FINE)
-        .setStreamEnabled(true)
+        .setStreamEnabled(false)
         .setDebugEnabled(true)
         // .setConfigUri("http://localhost:8003/api/1.0")
-        .setPollingInterval(60000)
+        // .setPollingInterval(60000)
         .build();
 
     // Create a target (different targets can get different results based on rules.  This include a custom attribute 'location')
@@ -73,52 +71,20 @@ class _FlagState extends State<FlagState> {
       if (initResult.success) {
         print("Successfully initialized client");
 
-        // Evaluate flag and set initial state
-        CfClient.getInstance()
-            .boolVariation(boolFlagName, false)
-            .then((variationResult) {
-          setState(() {
-            _flagValues[boolFlagName] = variationResult;
-          });
-        });
-
-        // Evaluate flag and set initial state
-        CfClient.getInstance()
-            .jsonVariation(jsonFlagName, {}).then((variationResult) {
-          setState(() {
-            _flagValues[jsonFlagName] = variationResult;
-          });
-        });
-
-        // Evaluate flag and set initial state
-        CfClient.getInstance()
-            .stringVariation(stringFlagName, "default")
-            .then((variationResult) {
-          setState(() {
-            _flagValues[stringFlagName] = variationResult;
-          });
-        });
-
-        // Evaluate flag and set initial state
-        CfClient.getInstance()
-            .numberVariation(numberFlagName, 1)
-            .then((variationResult) {
-          setState(() {
-            _flagValues[numberFlagName] = variationResult;
-          });
-        });
+        // Evaluate flags and set initial state
+        flagVariations();
 
         // Setup Event Handler
         listener(data, eventType) {
-          print(
-              "received event: ${eventType.toString()}");
+          print("received event: ${eventType.toString()}");
           switch (eventType) {
             case EventType.EVALUATION_CHANGE:
               String flag = (data as EvaluationResponse).flag;
 
               if (_flagValues.containsKey(flag)) {
                 setState(() {
-                  print("Flag evaluation changed via streaming event: Flag: '$flag', New Evaluation: ${data.value}");
+                  print(
+                      "Flag evaluation changed via streaming event: Flag: '$flag', New Evaluation: ${data.value}");
                   _flagValues[flag] = data.value;
                 });
               }
@@ -142,14 +108,7 @@ class _FlagState extends State<FlagState> {
             // If we have missed any SSE events while the connection has been interrupted, we can call
             // bool variation to get the most up to date evaluation value.
             case EventType.SSE_RESUME:
-              // CfClient.getInstance()
-              //     .boolVariation(boolFlagName, false)
-              //     .then((value) {
-              //   print("$boolFlagName: $value");
-              //   setState(() {
-              //     _flagValues[boolFlagName] = value;
-              //   });
-              // });
+              flagVariations();
               break;
 
             default:
@@ -161,6 +120,43 @@ class _FlagState extends State<FlagState> {
         // CfClient.getInstance().destroy();
         // CfClient.getInstance().unregisterEventsListener(listener);
       }
+    });
+  }
+
+  void flagVariations() {
+    // Evaluate flag and set initial state
+    CfClient.getInstance()
+        .boolVariation(boolFlagName, false)
+        .then((variationResult) {
+      setState(() {
+        _flagValues[boolFlagName] = variationResult;
+      });
+    });
+
+    // Evaluate flag and set initial state
+    CfClient.getInstance()
+        .jsonVariation(jsonFlagName, {}).then((variationResult) {
+      setState(() {
+        _flagValues[jsonFlagName] = variationResult;
+      });
+    });
+
+    // Evaluate flag and set initial state
+    CfClient.getInstance()
+        .stringVariation(stringFlagName, "default")
+        .then((variationResult) {
+      setState(() {
+        _flagValues[stringFlagName] = variationResult;
+      });
+    });
+
+    // Evaluate flag and set initial state
+    CfClient.getInstance()
+        .numberVariation(numberFlagName, 1)
+        .then((variationResult) {
+      setState(() {
+        _flagValues[numberFlagName] = variationResult;
+      });
     });
   }
 
