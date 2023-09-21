@@ -31,7 +31,11 @@
 
   <title>getting_started</title>
   <link rel="manifest" href="manifest.json">
-  <script src="https://unpkg.com/@harnessio/ff-javascript-client-sdk/dist/sdk.client-iife.js"></script>
+  <script>
+    window.FF_API_KEY = 'your_api_key_here';
+  </script>
+  <script src="https://unpkg.com/@harnessio/ff-javascript-client-sdk@1.19.0-rc.3/dist/sdk.client-iife.js"></script>
+<!--  <script src="https://sdk.ff.harness.io/1.18.0/sdk.client-iife.js"></script>-->
 
   <script>
     // The value below is injected by flutter build, do not touch.
