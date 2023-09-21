@@ -2,6 +2,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ff_flutter_client_sdk/CfClient.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:logging/logging.dart';
 import 'universal_api_key.dart';
 
@@ -13,9 +14,15 @@ const jsonFlagName = "jsonflag";
 
 // The SDK API Key to use for authentication.
 // final provider.UniversalApiKeyProvider apiKeyProvider = kIsWeb ? provider() : MobileApiKeyProvider();
-final apiKey = UniversalApiKeyProvider().getApiKey();
 
-void main() => runApp(MyApp());
+
+void main() async {
+  // To load the .env file contents into dotenv.
+  // NOTE: fileName defaults to .env and can be omitted in this case.
+  // Ensure that the filename corresponds to the path in step 1 and 2.
+  await dotenv.load(fileName: ".env");
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -57,6 +64,13 @@ class _FlagState extends State<FlagState> {
         .setIdentifier("fluttersdk")
         .setName("FlutterSDK")
         .build();
+
+    var apiKey = dotenv.env['FF_API_KEY'];
+
+    if (apiKey == null) {
+      print("API Key missing, existing FF Sample application");
+      return;
+    }
 
     // Init the default instance of the Feature Flag Client
     CfClient.getInstance().initialize(apiKey, conf, target).then((initResult) {
