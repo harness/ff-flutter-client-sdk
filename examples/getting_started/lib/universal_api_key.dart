@@ -5,6 +5,4 @@ abstract class UniversalApiKeyProvider {
   String getApiKey();
 
   factory UniversalApiKeyProvider() => getPlatformKeyProvider();
-
-
 }
