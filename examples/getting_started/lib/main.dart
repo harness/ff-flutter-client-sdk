@@ -44,7 +44,7 @@ class _FlagState extends State<FlagState> {
     // change the URL the client connects to etc
     var conf = CfConfigurationBuilder()
         .setLogLevel(Level.FINE)
-        .setStreamEnabled(false)
+        .setStreamEnabled(true)
         .setDebugEnabled(true)
         .setConfigUri("http://localhost:8003/api/1.0")
         .setPollingInterval(60000)
@@ -99,13 +99,14 @@ class _FlagState extends State<FlagState> {
         // Setup Event Handler
         listener(data, eventType) {
           print(
-              "received event: ${eventType.toString()} with Data: ${data.toString()}");
+              "received event: ${eventType.toString()}");
           switch (eventType) {
             case EventType.EVALUATION_CHANGE:
               String flag = (data as EvaluationResponse).flag;
 
               if (_flagValues.containsKey(flag)) {
                 setState(() {
+                  print("Flag evaluation changed via streaming event: Flag: '$flag', New Evaluation: ${data.value}");
                   _flagValues[flag] = data.value;
                 });
               }
