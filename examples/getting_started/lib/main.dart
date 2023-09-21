@@ -44,7 +44,7 @@ class _FlagState extends State<FlagState> {
     // change the URL the client connects to etc
     var conf = CfConfigurationBuilder()
         .setLogLevel(Level.FINE)
-        .setStreamEnabled(true)
+        .setStreamEnabled(false)
         .setDebugEnabled(true)
         .setConfigUri("http://localhost:8003/api/1.0")
         .setPollingInterval(60000)
@@ -57,37 +57,42 @@ class _FlagState extends State<FlagState> {
         .build();
 
     // Init the default instance of the Feature Flag Client
-    CfClient.getInstance().initialize(apiKey, conf, target).then((value) {
-      if (value.success) {
+    CfClient.getInstance().initialize(apiKey, conf, target).then((initResult) {
+      if (initResult.success) {
         print("Successfully initialized client");
 
         // Evaluate flag and set initial state
-        CfClient.getInstance().boolVariation(boolFlagName, false).then((value) {
+        CfClient.getInstance()
+            .boolVariation(boolFlagName, false)
+            .then((variationResult) {
           setState(() {
-            _flagValues[boolFlagName] = value;
+            _flagValues[boolFlagName] = variationResult;
           });
         });
 
         // Evaluate flag and set initial state
-        CfClient.getInstance().jsonVariation(jsonFlagName, {}).then((value) {
+        CfClient.getInstance()
+            .jsonVariation(jsonFlagName, {}).then((variationResult) {
           setState(() {
-            _flagValues[jsonFlagName] = value;
+            _flagValues[jsonFlagName] = variationResult;
           });
         });
 
         // Evaluate flag and set initial state
         CfClient.getInstance()
             .stringVariation(stringFlagName, "default")
-            .then((value) {
+            .then((variationResult) {
           setState(() {
-            _flagValues[stringFlagName] = value;
+            _flagValues[stringFlagName] = variationResult;
           });
         });
 
         // Evaluate flag and set initial state
-        CfClient.getInstance().numberVariation(numberFlagName, 1).then((value) {
+        CfClient.getInstance()
+            .numberVariation(numberFlagName, 1)
+            .then((variationResult) {
           setState(() {
-            _flagValues[numberFlagName] = value;
+            _flagValues[numberFlagName] = variationResult;
           });
         });
 
@@ -98,11 +103,10 @@ class _FlagState extends State<FlagState> {
           switch (eventType) {
             case EventType.EVALUATION_CHANGE:
               String flag = (data as EvaluationResponse).flag;
-              dynamic value = data.value;
 
               if (_flagValues.containsKey(flag)) {
                 setState(() {
-                  _flagValues[flag] = value;
+                  _flagValues[flag] = data.value;
                 });
               }
               break;
@@ -110,10 +114,11 @@ class _FlagState extends State<FlagState> {
             case EventType.EVALUATION_POLLING:
               List<EvaluationResponse> evals =
                   (data as List<EvaluationResponse>);
+
               for (final eval in evals) {
-                if (_flagValues.containsKey(eval.flag)){
+                if (_flagValues.containsKey(eval.flag)) {
                   setState(() {
-                    _flagValues[eval.flag] = value;
+                    _flagValues[eval.flag] = eval.value;
                   });
                 }
               }
@@ -124,14 +129,14 @@ class _FlagState extends State<FlagState> {
             // If we have missed any SSE events while the connection has been interrupted, we can call
             // bool variation to get the most up to date evaluation value.
             case EventType.SSE_RESUME:
-              CfClient.getInstance()
-                  .boolVariation(boolFlagName, false)
-                  .then((value) {
-                print("$boolFlagName: $value");
-                setState(() {
-                  _flagValues[boolFlagName] = value;
-                });
-              });
+              // CfClient.getInstance()
+              //     .boolVariation(boolFlagName, false)
+              //     .then((value) {
+              //   print("$boolFlagName: $value");
+              //   setState(() {
+              //     _flagValues[boolFlagName] = value;
+              //   });
+              // });
               break;
 
             default:
