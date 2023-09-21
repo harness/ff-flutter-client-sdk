@@ -3,8 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ff_flutter_client_sdk/CfClient.dart';
 import 'package:logging/logging.dart';
-
-import 'api_key_provider.dart';
+import 'universal_api_key.dart';
 
 const boolFlagName = 'boolflag';
 const stringFlagName = "multivariateflag";
@@ -13,8 +12,8 @@ const jsonFlagName = "jsonflag";
 
 
 // The SDK API Key to use for authentication.
-final ApiKeyProvider apiKeyProvider = kIsWeb ? WebApiKeyProvider() : MobileApiKeyProvider();
-final apiKey = apiKeyProvider.getApiKey();
+// final provider.UniversalApiKeyProvider apiKeyProvider = kIsWeb ? provider() : MobileApiKeyProvider();
+final apiKey = UniversalApiKeyProvider().getApiKey();
 
 void main() => runApp(MyApp());
 
@@ -49,7 +48,7 @@ class _FlagState extends State<FlagState> {
         .setLogLevel(Level.FINE)
         .setStreamEnabled(true)
         .setDebugEnabled(true)
-        .setConfigUri("http://localhost:8003/api/1.0")
+        // .setConfigUri("http://localhost:8003/api/1.0")
         .setPollingInterval(60000)
         .build();
 
