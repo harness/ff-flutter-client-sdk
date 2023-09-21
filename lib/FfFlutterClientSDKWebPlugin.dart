@@ -251,9 +251,9 @@ class FfFlutterClientSdkWebPlugin {
     }
 
     _uuidToEventListenerMap[uuid] = JsSDKStreamCallbackFunctions(
-        connectedFunction: callbacks[Event.CONNECTED]!,
-        disconnectedFunction: callbacks[Event.DISCONNECTED]!,
-        streamingEvaluationFunction: callbacks[Event.CHANGED]!,
+        connectedFunction: callbacks[Event.CONNECTED],
+        disconnectedFunction: callbacks[Event.DISCONNECTED],
+        streamingEvaluationFunction: callbacks[Event.CHANGED],
         pollingEvaluationFunction: callbacks[Event.FLAGS_LOADED]!);
 
     _eventSubscription = _eventController.stream.listen((event) {
@@ -299,11 +299,11 @@ class FfFlutterClientSdkWebPlugin {
     if (callBackFunctions != null) {
       if (streamingEnabled) {
         JavaScriptSDKClient.off(
-            Event.CONNECTED, allowInterop(callBackFunctions.connectedFunction));
+            Event.CONNECTED, allowInterop(callBackFunctions.connectedFunction!));
         JavaScriptSDKClient.off(Event.DISCONNECTED,
-            allowInterop(callBackFunctions.disconnectedFunction));
+            allowInterop(callBackFunctions.disconnectedFunction!));
         JavaScriptSDKClient.off(Event.CHANGED,
-            allowInterop(callBackFunctions.streamingEvaluationFunction));
+            allowInterop(callBackFunctions.streamingEvaluationFunction!));
       }
       JavaScriptSDKClient.off(Event.FLAGS_LOADED,
           allowInterop(callBackFunctions.pollingEvaluationFunction));
