@@ -297,13 +297,11 @@ class FfFlutterClientSdkWebPlugin {
     JsSDKStreamCallbackFunctions? callBackFunctions =
         _uuidToEventListenerMap[uuid];
     if (callBackFunctions != null) {
+
       if (streamingEnabled) {
-        JavaScriptSDKClient.off(
-            Event.CONNECTED, allowInterop(callBackFunctions.connectedFunction!));
-        JavaScriptSDKClient.off(Event.DISCONNECTED,
-            allowInterop(callBackFunctions.disconnectedFunction!));
-        JavaScriptSDKClient.off(Event.CHANGED,
-            allowInterop(callBackFunctions.streamingEvaluationFunction!));
+        unregisterListener(Event.CONNECTED, callBackFunctions.connectedFunction, 'connectedFunction', uuid);
+        unregisterListener(Event.DISCONNECTED, callBackFunctions.disconnectedFunction, 'disconnectedFunction', uuid);
+        unregisterListener(Event.CHANGED, callBackFunctions.streamingEvaluationFunction, 'streamingEvaluationFunction', uuid);
       }
       JavaScriptSDKClient.off(Event.FLAGS_LOADED,
           allowInterop(callBackFunctions.pollingEvaluationFunction));
@@ -312,6 +310,14 @@ class FfFlutterClientSdkWebPlugin {
     } else {
       log.warning("Attempted to unregister event listener, but the"
           "requested event listener was not found.");
+    }
+  }
+
+  /// Helper function to check if a callback function has been registered
+  /// before unregistering it.
+  void unregisterListener(String event, Function? function, String functionName, String uuid) {
+    if (function != null) {
+      JavaScriptSDKClient.off(event, allowInterop(function));
     }
   }
 
