@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:ff_flutter_client_sdk/CfClient.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:logging/logging.dart';
-import 'universal_api_key.dart';
 
 const boolFlagName = 'boolflag';
 const stringFlagName = "multivariateflag";
