@@ -1,17 +1,20 @@
 // @dart=2.12
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ff_flutter_client_sdk/CfClient.dart';
 import 'package:logging/logging.dart';
 
-// The SDK API Key to use for authentication.  Configure it when installing the app by setting FF_API_KEY
-// e.g..
-const apiKey = String.fromEnvironment('FF_API_KEY',
-    defaultValue: '');
+import 'api_key_provider.dart';
 
 const boolFlagName = 'boolflag';
 const stringFlagName = "multivariateflag";
 const numberFlagName = "numberflag";
 const jsonFlagName = "jsonflag";
+
+
+// The SDK API Key to use for authentication.
+final ApiKeyProvider apiKeyProvider = kIsWeb ? WebApiKeyProvider() : MobileApiKeyProvider();
+final apiKey = apiKeyProvider.getApiKey();
 
 void main() => runApp(MyApp());
 
