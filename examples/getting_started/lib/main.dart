@@ -30,10 +30,10 @@ class FlagState extends StatefulWidget {
 
 class _FlagState extends State<FlagState> {
   final Map<String, dynamic> _flagValues = {
-    boolFlagName: false,
-    stringFlagName: "off",
-    numberFlagName: 3,
-    jsonFlagName: {},
+    boolFlagName: null,
+    stringFlagName: null,
+    numberFlagName: null,
+    jsonFlagName: null,
   };
 
   @override
