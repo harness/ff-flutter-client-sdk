@@ -47,10 +47,8 @@ class _FlagState extends State<FlagState> {
     // change the URL the client connects to etc
     var conf = CfConfigurationBuilder()
         .setLogLevel(Level.FINE)
-        .setStreamEnabled(false)
+        .setStreamEnabled(true)
         .setDebugEnabled(true)
-        // .setConfigUri("http://localhost:8003/api/1.0")
-        // .setPollingInterval(60000)
         .build();
 
     // Create a target (different targets can get different results based on rules.  This include a custom attribute 'location')
