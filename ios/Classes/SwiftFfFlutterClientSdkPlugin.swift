@@ -178,7 +178,11 @@ public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
 			case .jsonVariation:
 				let val = args?["defaultValue"] as? [String:Any]
 				guard let defaultObject = val else { break }
-				let key = defaultObject.keys.first!
+                guard let key = defaultObject.keys.first else {
+                    // Handle the error or exit the current scope
+                    print("No keys found in defaultObject")
+                    return
+                }
 				let value = defaultObject[key]
 				let valueType: ValueType = determineType(value)
 
