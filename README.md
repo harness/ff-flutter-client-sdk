@@ -40,16 +40,40 @@ To follow along with our test code sample, make sure you've:
 - [Created a Feature Flag on the Harness Platform](https://docs.harness.io/article/1j7pdkqh7j-create-a-feature-flag).
 - [Created a [server/client] SDK key and made a copy of it](https://docs.harness.io/article/1j7pdkqh7j-create-a-feature-flag#step_3_create_an_sdk_key)
 
-## Installing the SDK
-To add the SDK to your own project run
-```Dart
-ff_flutter_client_sdk: ^2.0.0
+## Install the SDK
+
+### Add the Dependency
+Begin by adding the Feature Flag Flutter SDK dependency to your pubspec.yaml file:
+
+
+```
+ff_flutter_client_sdk: ^2.1.0
 ```
 
-Then, you may import package to your project
-```Dart
-import 'package:ff_flutter_client_sdk/CfClient.dart';
+### Import Necessary Packages
+Once you've added the dependency, import the necessary packages into your Dart files:
+
 ```
+import 'package:ff_flutter_client_sdk/CfClient.dart';  
+import 'package:ff_flutter_client_sdk/CfConfiguration.dart';  
+import 'package:ff_flutter_client_sdk/CfTarget.dart';
+```
+
+### SDK Installation for Flutter Web
+If you're targeting a Flutter web application:
+
+1. Follow the steps mentioned above to set up the SDK in your project.
+
+2. In addition, embed our JavaScript SDK by adding the following script tag to the `<head>` section of your web page:
+```html
+  <script src="https://sdk.ff.harness.io/1.19.2/sdk.client-iife.js"></script>
+```
+
+This installs our Feature Flags JavaScript SDK and makes it available to your application. Please ensure you regularly upgrade the
+JavaScript SDK version to get the latest updates. For the newest JavaScript SDK updates, monitor:
+
+* [JavaScript SDK GitHub Repo](https://github.com/harness/ff-javascript-client-sdk/releases)
+* [official Feature Flags Releases Page](https://developer.harness.io/release-notes/feature-flags)
 
 ## Code Sample
 The following is a complete code example that you can use to test the harnessappdemodarkmode Flag you created on the Harness Platform. When you run the code it will:
@@ -152,29 +176,68 @@ class _FlagState extends State<FlagState> {
 }
 ```
 
-### Running the example
-If you want to run the [getting started example](examples/getting_started), then you can use flutter to on the cli.
-You just need to have either an Android or iOS emulator running.
+Certainly! Incorporating the recent details into the README section:
 
-To start an android emulator run (replace @Pixel_4.4_API_32 with your own device id)
-```
-$ANDROID_SDK/emulator/emulator @Pixel_4.4_API_32
-```
+---
 
-or for iOS run
+### Running the Getting Started Example
 
-```shell
-open -a simulator
-```
+First, provide your API key in the `.env` [file](examples/getting_started/.env) 
 
-Confirm you have an iOS or Android device with
-```shell
-flutter devices
-2 connected devices:
+You can then use [Android Studio](https://docs.flutter.dev/tools/android-studio) to run the [getting started example](examples/getting_started) 
 
-sdk gphone64 x86 64 (mobile) • emulator-5554                        • android-x64    • Android 12 (API 32) (emulator)
-iPhone 13 (mobile)           • 425E99F8-702F-4E15-8BBE-B792BF15ED88 • ios            • com.apple.CoreSimulator.SimRuntime.iOS-15-5 (simulator)
-```
+You can also run the [getting started example](examples/getting_started) using the Flutter CLI by following these steps:
+
+1. **Prerequisites**:
+    - Make sure Flutter is set up on your machine.
+    - Decide whether you're targeting an Android emulator, iOS simulator, or a web browser.
+
+2. **Setting Up and Choosing Your Target**:
+
+   **Verification**:
+    - To see available devices/emulators:
+      ```shell
+      flutter devices
+      ```
+    
+   The output will list your devices, for example:
+    ```plaintext
+    2 connected devices:
+    sdk gphone64 x86 64 (mobile) • emulator-5554                        • android-x64    • Android 12 (API 32) (emulator)
+    iPhone 13 (mobile)           • 425E99F8-702F-4E15-8BBE-B792BF15ED88 • ios            • com.apple.CoreSimulator.SimRuntime.iOS-15-5 (simulator)
+    ```
+   
+
+   **Android Emulator**:
+    - To start the Android emulator, use:
+      ```shell
+      $ANDROID_SDK/emulator/emulator @Pixel_4.4_API_32
+      ```
+      Replace `@Pixel_4.4_API_32` with your own emulator device ID.
+
+    - To run the Flutter app on your Android emulator:
+      ```shell
+      flutter run -d emulator-5554
+      ```
+
+   **iOS Simulator**:
+    - To open the iOS simulator:
+      ```shell
+      open -a simulator
+      ```
+    - To run the Flutter app on the iOS simulator:
+      ```shell
+      flutter run -d 425E99F8-702F-4E15-8BBE-B792BF15ED88
+      ```
+
+
+
+3. **Running the Example on Web**:
+
+   If targeting a web browser, use:
+    ```shell
+    flutter run -d chrome --hot
+    ```
 
 #### Build the project
 Using the SDK API key, and a device ID from above you can build and install your app
