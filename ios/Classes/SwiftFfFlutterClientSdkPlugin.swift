@@ -175,22 +175,29 @@ public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
 					result(Double(evaluation.value.intValue ?? 0))
 				}
 
-			case .jsonVariation:
-				let val = args?["defaultValue"] as? [String:Any]
-				guard let defaultObject = val else { break }
-                guard let key = defaultObject.keys.first else {
-                    // Handle the error or exit the current scope
-                    print("No keys found in defaultObject")
-                    return
-                }
-				let value = defaultObject[key]
-				let valueType: ValueType = determineType(value)
+            case .jsonVariation:
+                let val = args?["defaultValue"] as? [String: Any] ?? [:]
 
-				CfClient.sharedInstance.jsonVariation(evaluationId: args?["flag"] as! String, defaultValue: [key:valueType]) { (evaluation) in
-					guard let evaluation = evaluation else {return}
-					if let value = evaluation.value.stringValue {
-						result(self.parseJson(from: value))
-					}
+                if let key = val.keys.first, let value = val[key] {
+                    // If we have a key and value, determine its type and proceed as before
+                    let valueType: ValueType = determineType(value)
+
+                    CfClient.sharedInstance.jsonVariation(evaluationId: args?["flag"] as! String, defaultValue: [key: valueType]) { (evaluation) in
+                        guard let evaluation = evaluation else {return}
+                        if let value = evaluation.value.stringValue {
+                            result(self.parseJson(from: value))
+                        }
+                    }
+                } else {
+                        let emptyObject: [String: ValueType] = [:]
+                    CfClient.sharedInstance.jsonVariation(evaluationId: args?["flag"] as! String, defaultValue: emptyObject) { (evaluation) in
+                        guard let evaluation = evaluation else {return}
+                        if let value = evaluation.value.stringValue {
+                            result(self.parseJson(from: value))
+                        }
+                    // If the key is empty, you can handle it differently here, or just leave it as is.
+                    // The code currently does nothing if the key is empty.
+                }
 				}
 
 			case .destroy:
