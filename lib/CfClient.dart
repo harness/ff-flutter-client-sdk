@@ -126,7 +126,7 @@ class CfClient {
         element(response, EventType.EVALUATION_CHANGE);
       });
     } else if (methodCall.method == "evaluation_polling") {
-      List list = methodCall.arguments["evaluationData"] as List;
+      List list = methodCall.arguments["evaluationData"];
       List<EvaluationResponse> resultList = [];
 
       list.forEach((element) {
@@ -266,10 +266,38 @@ class CfClient {
           }
           break;
         case 'json':
-          return jsonDecode(value);
+          return _iterativeJsonDecode(value);
       }
     }
     // Return the original value if it's not a string or if the kind is not recognized
+    return value;
+  }
+
+  dynamic _iterativeJsonDecode(dynamic value) {
+    int decodeAttempt = 0;
+    const int maxAttempt = 10;
+
+    while (decodeAttempt < maxAttempt) {
+      try {
+        dynamic decodedValue = jsonDecode(value);
+
+        // Return the fully escaped JSON
+        if (!(decodedValue is String)) {
+          return decodedValue;
+        }
+
+        // If the decoded value still has escape characters, continue to decode
+        value = decodedValue;
+        decodeAttempt++;
+
+      } catch (e) {
+        log.severe("Failed to decode Feature Flags JSON flag evaluation value: $e, Returning original value: $value");
+        // If decoding fails, return the original value
+        return value;
+      }
+    }
+
+    log.severe("Failed to decode Feature Flags JSON flag evaluation value: JSON was escaped more than 10 times, Returning original value: $value");
     return value;
   }
 

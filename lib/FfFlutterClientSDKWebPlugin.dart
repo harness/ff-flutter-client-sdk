@@ -8,25 +8,31 @@ import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:js/js.dart';
 import 'package:logging/logging.dart';
-import 'CfClient.dart';
 import 'web_plugin_internal//FfJavascriptSDKInterop.dart';
 
 @JS('window')
 external dynamic get window;
 
+enum Events {
+  STREAMING_CONNECTED,
+  STREAMING_EVALUATION,
+  POLLING_EVALUATION,
+  STREAMING_DISCONNECTED,
+}
+
 // Type used to group callback functions used when registering
 // stream events with the JavaScript SDK
 class JsSDKStreamCallbackFunctions {
-  final Function connectedFunction;
-  final Function changedFunction;
-  final Function stoppedFunction;
-  final Function pollingChangedFunction;
+  final Function? connectedFunction;
+  final Function? disconnectedFunction;
+  final Function? streamingEvaluationFunction;
+  final Function pollingEvaluationFunction;
 
   JsSDKStreamCallbackFunctions(
-      {required this.connectedFunction,
-      required this.stoppedFunction,
-      required this.pollingChangedFunction,
-      required this.changedFunction});
+      {this.connectedFunction,
+      this.disconnectedFunction,
+      this.streamingEvaluationFunction,
+      required this.pollingEvaluationFunction});
 }
 
 class FfFlutterClientSdkWebPlugin {
@@ -40,6 +46,16 @@ class FfFlutterClientSdkWebPlugin {
   static const _jsonVariationMethodCall = 'jsonVariation';
   static const _unregisterEventsListenerMethodCall = 'unregisterEventsListener';
   static const _destroyMethodCall = 'destroy';
+
+  // Used so we can subscribe to correct events in the JavaScript SDK
+  static late bool streamingEnabled;
+
+  // The JS SDK emits `CONNECTED` for the first time it connects, and even for stream reconnects after a failure,
+  // so we need to keep track of if the stream is currently disconnected so that
+  // we can take action and emit the SSE_RESUME event.
+  static bool streamingDisconnected = false;
+
+  static bool refreshEvaluationsCalled = false;
 
   // Used to emit JavaScript SDK events to the host MethodChannel
   final StreamController<Map<String, dynamic>> _eventController =
@@ -108,6 +124,12 @@ class FfFlutterClientSdkWebPlugin {
     final Object target = _mapToJsObject(call.arguments['target']);
     final Map flutterOptions = call.arguments['configuration'];
 
+    final bool streamingOption = flutterOptions['streamEnabled'];
+
+    // Keep track of the streaming option the user has chosen, so we can
+    // register the right listener when the user sets up a listener
+    streamingEnabled = streamingOption;
+
     final javascriptSdkOptions = Options(
         baseUrl: flutterOptions['configUrl'],
         eventUrl: flutterOptions['eventUrl'],
@@ -115,7 +137,7 @@ class FfFlutterClientSdkWebPlugin {
         // Enable polling by default for the JS SDK, so we can fallback to polling
         // of stream fails.
         pollingEnabled: true,
-        streamEnabled: flutterOptions['streamEnabled'],
+        streamEnabled: streamingOption,
         debug: flutterOptions['debugEnabled']);
 
     final response =
@@ -179,37 +201,50 @@ class FfFlutterClientSdkWebPlugin {
   /// Registers the underlying JavaScript SDK event listeners, and emits events
   /// back to the core Flutter SDK using the plugin's host MethodChannel
   void _registerJsSDKStreamListeners(String uuid) {
-    final callbacks = {
-      // The JavaScript SDK's `CONNECTED` event is emitted when an SSE connection
-      // has been lost and reestablished
-      Event.CONNECTED: (_) =>
-          _eventController.add({'event': EventType.SSE_RESUME}),
-      Event.STOPPED: (_) => _eventController.add({'event': EventType.SSE_END}),
-      Event.CHANGED: (changeInfo) {
-        FlagChange flagChange = changeInfo;
-        Map<String, dynamic> evaluationResponse = {
+    final Map<String, Function> callbacks = {};
+
+    final pollingEvaluationCallBack = (polledFlags) {
+      dynamic flags = polledFlags;
+      List<dynamic> evaluationResponses = flags.map((flagChange) {
+        return {
           "flag": flagChange.flag,
           "kind": flagChange.kind,
           "value": flagChange.value
         };
-        _eventController.add(
-            {'event': EventType.EVALUATION_CHANGE, 'data': evaluationResponse});
-      },
-      Event.POLLING_CHANGED: (polledFlags) {
-        dynamic flags = polledFlags;
-        List<dynamic> evaluationResponses = flags.map((flagChange) {
-          return {
-            "flag": flagChange.flag,
-            "kind": flagChange.kind,
-            "value": flagChange.value
-          };
-        }).toList();
-        _eventController.add({
-          'event': EventType.EVALUATION_POLLING,
-          'data': evaluationResponses
-        });
-      },
+      }).toList();
+      _eventController.add(
+          {'event': Events.POLLING_EVALUATION, 'data': evaluationResponses});
     };
+
+    final streamingConnectedCallback = (_) {
+      _eventController.add({'event': Events.STREAMING_CONNECTED});
+    };
+
+    final streamingDisconnectedCallback = (_) {
+      _eventController.add({'event': Events.STREAMING_DISCONNECTED});
+    };
+
+    final streamingCallBack = (changeInfo) {
+      FlagChange flagChange = changeInfo;
+      Map<String, dynamic> evaluationResponse = {
+        "flag": flagChange.flag,
+        "kind": flagChange.kind,
+        "value": flagChange.value
+      };
+      _eventController.add(
+          {'event': Events.STREAMING_EVALUATION, 'data': evaluationResponse});
+    };
+
+    // Only register streaming callbacks if streaming is enabled
+    if (streamingEnabled) {
+      callbacks[Event.CONNECTED] = streamingConnectedCallback;
+      callbacks[Event.DISCONNECTED] = streamingDisconnectedCallback;
+      callbacks[Event.CHANGED] = streamingCallBack;
+    }
+
+    // Register polling callback by default, which is enabled even if
+    // streaming is enabled as it is used as a fallback
+    callbacks[Event.FLAGS_LOADED] = pollingEvaluationCallBack;
 
     for (final event in callbacks.keys) {
       final callback = callbacks[event];
@@ -217,32 +252,69 @@ class FfFlutterClientSdkWebPlugin {
     }
 
     _uuidToEventListenerMap[uuid] = JsSDKStreamCallbackFunctions(
-        connectedFunction: callbacks[Event.CONNECTED]!,
-        stoppedFunction: callbacks[Event.STOPPED]!,
-        changedFunction: callbacks[Event.CHANGED]!,
-        pollingChangedFunction: callbacks[Event.POLLING_CHANGED]!);
+        connectedFunction: callbacks[Event.CONNECTED],
+        disconnectedFunction: callbacks[Event.DISCONNECTED],
+        streamingEvaluationFunction: callbacks[Event.CHANGED],
+        pollingEvaluationFunction: callbacks[Event.FLAGS_LOADED]!);
 
     _eventSubscription = _eventController.stream.listen((event) {
       switch (event['event']) {
-        case EventType.SSE_START:
-          log.fine('Internal event received: SSE_START');
+        case Events.STREAMING_CONNECTED:
+          if (streamingEnabled && streamingDisconnected) {
+            log.fine('Internal event received STREAMING_CONNECTED WITH ISSUE');
+            // Refresh the cache so listeners to SSE_RESUME can be assured they
+            // get the most up to date values
+            streamingDisconnected = false;
+            JavaScriptSDKClient.refreshEvaluations();
+            refreshEvaluationsCalled = true;
+            _hostChannel.invokeMethod('resume');
+            return;
+          }
+          log.fine('Internal event received STREAMING_CONNECTED WITH START');
           _hostChannel.invokeMethod('start');
           break;
-        case EventType.SSE_END:
-          log.fine('Internal event received: SSE_END');
-          _hostChannel.invokeMethod('end');
-          break;
-        case EventType.SSE_RESUME:
-          log.fine('Internal event received: SSE_RESUME');
-          _hostChannel.invokeMethod('resume');
-          break;
-        case EventType.EVALUATION_POLLING:
+        case Events.STREAMING_DISCONNECTED:
+          log.fine('Internal event received STREAMING_DISCONNECTED');
+          streamingDisconnected = true;
+          return;
+        case Events.POLLING_EVALUATION:
+        // If streaming is enabled and is currently connected, don't emit a POLLING_EVALUATION
+        // event because the the `FLAGS_LOADED` JS SDK event which triggers this clause is also sent when the
+        // SDK initializes, so we don't want to indicate that a polling event has occurred in this scenario.
+          if (streamingEnabled && !streamingDisconnected) {
+            return;
+          }
+
+          // Sometimes the FLAGS_LOADED event (that we map to EVALUATION_POLLING) here
+          // can come in right after we have set streamingConnected to false, because
+          // we have called the JS SDK's refreshEvaluations. The SSE_RESUME event
+          // that we emit in this case informs our users that they need to load
+          // evaluations from the cache again.
+          if (streamingEnabled && refreshEvaluationsCalled) {
+            refreshEvaluationsCalled = false;
+            return;
+          }
+
+
           log.fine('Internal event received EVALUATION_POLLING');
           final pollingEvaluations = event['data'];
           _hostChannel.invokeMethod(
               'evaluation_polling', {'evaluationData': pollingEvaluations});
           break;
-        case EventType.EVALUATION_CHANGE:
+        case Events.STREAMING_EVALUATION:
+          // The JS SDK emits these events even on polling, as it uses a generic
+          // `CHANGED` event whether streaming or polling. To fit in with the model of the SDK, which
+          // differentiates between streaming and polling change events, we only emit a change
+          // event if streaming is currently connected.
+          if (streamingEnabled && streamingDisconnected) {
+            return;
+          }
+
+          // As above, don't emit this event type if streaming is not enabled, as
+          // we use EVALUATION_POLLING when running in polling mode
+          if (!streamingEnabled) {
+            return;
+          }
           log.fine('Internal event received EVALUATION_CHANGE');
           final evaluationResponse = event['data'];
           _hostChannel.invokeMethod('evaluation_change', evaluationResponse);
@@ -255,17 +327,30 @@ class FfFlutterClientSdkWebPlugin {
     JsSDKStreamCallbackFunctions? callBackFunctions =
         _uuidToEventListenerMap[uuid];
     if (callBackFunctions != null) {
-      JavaScriptSDKClient.off(
-          Event.CONNECTED, allowInterop(callBackFunctions.connectedFunction));
-      JavaScriptSDKClient.off(
-          Event.STOPPED, allowInterop(callBackFunctions.stoppedFunction));
-      JavaScriptSDKClient.off(
-          Event.CHANGED, allowInterop(callBackFunctions.changedFunction));
+
+      if (streamingEnabled) {
+        unregisterListener(Event.CONNECTED, callBackFunctions.connectedFunction, 'connectedFunction', uuid);
+        unregisterListener(Event.DISCONNECTED, callBackFunctions.disconnectedFunction, 'disconnectedFunction', uuid);
+        unregisterListener(Event.CHANGED, callBackFunctions.streamingEvaluationFunction, 'streamingEvaluationFunction', uuid);
+      }
+      JavaScriptSDKClient.off(Event.FLAGS_LOADED,
+          allowInterop(callBackFunctions.pollingEvaluationFunction));
 
       _uuidToEventListenerMap.remove(uuid);
-    } else {
-      log.warning("Attempted to unregister event listener, but the"
+    }
+    // It's possible to hit this state if the user shuts down the SDK and then
+    // calls `unregisterEventsListener` 
+    else {
+      log.warning("Attempted to unregister event listener, but the "
           "requested event listener was not found.");
+    }
+  }
+
+  /// Helper function to check if a callback function has been registered
+  /// before unregistering it.
+  void unregisterListener(String event, Function? function, String functionName, String uuid) {
+    if (function != null) {
+      JavaScriptSDKClient.off(event, allowInterop(function));
     }
   }
 

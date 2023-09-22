@@ -28,6 +28,7 @@ class JavaScriptSDKClient {
   external static dynamic variation(
       dynamic flagIdentifier, dynamic defaultValue, bool withDebug);
   external static dynamic close();
+  external static dynamic refreshEvaluations();
 }
 
 // Represents the events that the JavaScript SDK Client can emit
@@ -36,12 +37,11 @@ class Event {
   static const CONNECTED = 'connected';
   static const STOPPED = 'stopped';
   static const DISCONNECTED = 'disconnected';
-  static const FLAG_LOADED = 'flags loaded';
+  static const FLAGS_LOADED = 'flags loaded';
   static const CACHE_LOADED = 'cache loaded';
   static const CHANGED = 'changed';
   static const POLLING = 'polling';
   static const POLLING_STOPPED = 'polling stopped';
-  static const POLLING_CHANGED = 'polling changed';
   static const ERROR = 'error';
   static const ERROR_AUTH = 'auth error';
   static const ERROR_METRICS = 'metrics error';

@@ -1,10 +1,10 @@
 name: ff_flutter_client_sdk
 description: Feature Flag Management platform from Harness. Flutter SDK can be used to integrate with the platform in your Flutter applications.
-version: 2.0.0
+version: 2.1.0
 homepage: https://github.com/harness/ff-flutter-client-sdk
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: '>=2.12.0 <4.0.0'
   flutter: ">=1.20.0"
 
 dependencies:

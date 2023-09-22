@@ -1,3 +1,23 @@
+## 2.1.0
+
+Changes:
+
+* Flutter Web Support: You can now seamlessly run the SDK across Android, iOS, and Web platforms. 
+
+
+Fixes and Enhancements:
+
+* Consistent Evaluations: Evaluations fetched through both streaming and polling methods now match the type of evaluations returned by variation.
+
+
+* iOS Default Object Fix: iOS applications no longer encounter a runtime exception when providing an empty default object to the jsonVariation function.
+
+
+* Android SSE_RESUME Event: An issue where the SSE_RESUME event wasn't being correctly emitted by the Feature Flags Android SDK has been resolved. We've released an update for the Android SDK to address this, and the Flutter SDK has been updated to use this new version of the Android SDK.
+
+
+* iOS SDK Update: The Flutter SDK has been updated to use the latest version of the Feature Flags iOS SDK.
+
 ## 2.0.0
 
 Changes:
