@@ -56,6 +56,8 @@ class FfFlutterClientSdkWebPlugin {
   // we can take action and emit the SSE_RESUME event.
   static bool streamingDisconnected = false;
 
+  static bool refreshEvaluationsCalled = false;
+
   // Used to emit JavaScript SDK events to the host MethodChannel
   final StreamController<Map<String, dynamic>> _eventController =
       StreamController.broadcast();
@@ -260,22 +262,35 @@ class FfFlutterClientSdkWebPlugin {
       switch (event['event']) {
         case Events.STREAMING_CONNECTED:
           if (streamingEnabled && streamingDisconnected) {
+            log.fine('Internal event received STREAMING_CONNECTED WITH ISSUE');
             // Refresh the cache so listeners to SSE_RESUME can be assured they
             // get the most up to date values
             streamingDisconnected = false;
             JavaScriptSDKClient.refreshEvaluations();
+            refreshEvaluationsCalled = true;
             _hostChannel.invokeMethod('resume');
             return;
           }
+          log.fine('Internal event received STREAMING_CONNECTED WITH START');
           _hostChannel.invokeMethod('start');
           break;
         case Events.STREAMING_DISCONNECTED:
+          log.fine('Internal event received STREAMING_DISCONNECTED');
           streamingDisconnected = true;
           return;
         case Events.POLLING_EVALUATION:
           if (streamingEnabled && streamingDisconnected) {
             return;
           }
+
+          // Sometimes the FLAGS_LOADED event (that we map to EVALUATION_POLLING) here
+          // can come in right after we have set streamingConnected to false, because
+          // we have called the JS SDK's refreshEvaluations. This is another check
+          // to ensure we don't return EVALUATION_POLLING for our streaming reconnect strategy
+          if (streamingEnabled && refreshEvaluationsCalled) {
+            return;
+          }
+
           // Only send polling evaluations if streaming is disconnected because
           // the `FLAGS_LOADED` event from the JS SDK is triggered when the
           // SDK initializes
