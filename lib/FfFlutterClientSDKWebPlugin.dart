@@ -279,7 +279,10 @@ class FfFlutterClientSdkWebPlugin {
           streamingDisconnected = true;
           return;
         case Events.POLLING_EVALUATION:
-          if (streamingEnabled && streamingDisconnected) {
+        // If streaming is enabled and is currently connected, don't emit a POLLING_EVALUATION
+        // event because the the `FLAGS_LOADED` JS SDK event which triggers this clause is also sent when the
+        // SDK initializes, so we don't want to indicate that a polling event has occurred in this scenario.
+          if (streamingEnabled && !streamingDisconnected) {
             return;
           }
 
@@ -288,12 +291,11 @@ class FfFlutterClientSdkWebPlugin {
           // we have called the JS SDK's refreshEvaluations. This is another check
           // to ensure we don't return EVALUATION_POLLING for our streaming reconnect strategy
           if (streamingEnabled && refreshEvaluationsCalled) {
+            refreshEvaluationsCalled = false;
             return;
           }
 
-          // Only send polling evaluations if streaming is disconnected because
-          // the `FLAGS_LOADED` event from the JS SDK is triggered when the
-          // SDK initializes
+
           log.fine('Internal event received EVALUATION_POLLING');
           final pollingEvaluations = event['data'];
           _hostChannel.invokeMethod(
