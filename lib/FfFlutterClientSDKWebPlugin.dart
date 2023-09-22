@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:js/js.dart';
 import 'package:logging/logging.dart';
-import 'CfClient.dart';
 import 'web_plugin_internal//FfJavascriptSDKInterop.dart';
 
 @JS('window')
