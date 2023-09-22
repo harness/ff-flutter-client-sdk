@@ -337,8 +337,11 @@ class FfFlutterClientSdkWebPlugin {
           allowInterop(callBackFunctions.pollingEvaluationFunction));
 
       _uuidToEventListenerMap.remove(uuid);
-    } else {
-      log.warning("Attempted to unregister event listener, but the"
+    }
+    // It's possible to hit this state if the user shuts down the SDK and then
+    // calls `unregisterEventsListener` 
+    else {
+      log.warning("Attempted to unregister event listener, but the "
           "requested event listener was not found.");
     }
   }
