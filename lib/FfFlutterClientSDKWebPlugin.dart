@@ -288,8 +288,9 @@ class FfFlutterClientSdkWebPlugin {
 
           // Sometimes the FLAGS_LOADED event (that we map to EVALUATION_POLLING) here
           // can come in right after we have set streamingConnected to false, because
-          // we have called the JS SDK's refreshEvaluations. This is another check
-          // to ensure we don't return EVALUATION_POLLING for our streaming reconnect strategy
+          // we have called the JS SDK's refreshEvaluations. The SSE_RESUME event
+          // that we emit in this case informs our users that they need to load
+          // evaluations from the cache again.
           if (streamingEnabled && refreshEvaluationsCalled) {
             refreshEvaluationsCalled = false;
             return;
@@ -302,6 +303,19 @@ class FfFlutterClientSdkWebPlugin {
               'evaluation_polling', {'evaluationData': pollingEvaluations});
           break;
         case Events.STREAMING_EVALUATION:
+          // The JS SDK emits these events even on polling, as it uses a generic
+          // `CHANGED` event whether streaming or polling. To fit in with the model of the SDK, which
+          // differentiates between streaming and polling change events, we only emit a change
+          // event if streaming is currently connected.
+          if (streamingEnabled && streamingDisconnected) {
+            return;
+          }
+
+          // As above, don't emit this event type if streaming is not enabled, as
+          // we use EVALUATION_POLLING when running in polling mode
+          if (!streamingEnabled) {
+            return;
+          }
           log.fine('Internal event received EVALUATION_CHANGE');
           final evaluationResponse = event['data'];
           _hostChannel.invokeMethod('evaluation_change', evaluationResponse);
