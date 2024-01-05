@@ -1,3 +1,13 @@
+## 2.1.1
+
+Changes:
+
+* Adds support for Kotlin version 1.7.x for Android projects. Previously, compilation would fail
+due to Kotlin compilation issues.
+* Upgrades Feature Flags Android SDK to 1.2.3, which ensures the SDK will not crash the application
+should initialization fails. For full details of all Feature Flags Android SDK relases, see: https://github.com/harness/ff-android-client-sdk/releases
+
+
 ## 2.1.0
 
 Changes:

@@ -14,15 +14,15 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
 import io.harness.cfsdk.CfClient
 import io.harness.cfsdk.CfConfiguration
-import io.harness.cfsdk.cloud.core.model.Evaluation
 import io.harness.cfsdk.cloud.model.Target
-import io.harness.cfsdk.cloud.oksse.EventsListener
-import io.harness.cfsdk.cloud.oksse.model.StatusEvent
+import io.harness.cfsdk.cloud.sse.EventsListener
+import io.harness.cfsdk.cloud.sse.StatusEvent
 import org.json.JSONArray
 import org.json.JSONObject
-import java.lang.Exception
 import java.util.concurrent.*;
 import io.harness.cfsdk.AndroidSdkVersion.ANDROID_SDK_VERSION;
+import io.harness.cfsdk.cloud.openapi.client.model.Evaluation
+import kotlin.Exception
 
 /** FfFlutterClientSdkPlugin */
 class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
@@ -94,30 +94,35 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
             val targetInstance = Target().identifier(target)
 
 
-                CfClient.getInstance().initialize(
+            CfClient.getInstance().initialize(
 
-                    application,
-                    key,
-                    conf,
-                    targetInstance
+                application,
+                key,
+                conf,
+                targetInstance
 
-                ) { auth, execResult ->
-                    if (execResult.error == null) {
+            ) { auth, execResult ->
+                if (execResult.error == null) {
 
-                        postToMainThread {
-                            print(auth.environment)
+                    postToMainThread {
+                        print(auth.environment)
 
-                            Handler(Looper.getMainLooper()).post {
+                        Handler(Looper.getMainLooper()).post {
 
-                                result.success(execResult.isSuccess())
-                            }
-
+                            result.success(execResult.isSuccess())
                         }
+
                     }
-                    else {
-                        result.error("authError","Error when initializing SDK", execResult.error.localizedMessage )
-                    }
+                } else {
+                    result.error(
+                        "authError",
+                        "Error when initializing SDK",
+                        execResult.error.localizedMessage
+                    )
                 }
+            }
+
+
         }
     }
 
@@ -138,52 +143,30 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
                         hostChannel.invokeMethod("start", null)
                     }
                 }
+
                 StatusEvent.EVENT_TYPE.SSE_END -> {
                     postToMainThread {
                         hostChannel.invokeMethod("end", null)
                     }
                 }
+
                 StatusEvent.EVENT_TYPE.SSE_RESUME -> {
                     postToMainThread {
                         hostChannel.invokeMethod("resume", null)
                     }
                 }
+
                 StatusEvent.EVENT_TYPE.EVALUATION_CHANGE -> {
-                    // TODO - there is a bug in Android that can sometimes send the change event in an ArrayList
-                    // instead of an Evaluation. This can happen when the SDK disconnects from the stream -> a flag is toggles -> and it reconnects.
-                    // This is a temporary solution until the bug can be fixed there.
-
-                    try {
-                        val evaluation = it.extractPayload<Evaluation>()
-                        val content = evaluationToMap(evaluation)
-
-                        postToMainThread {
-                            hostChannel.invokeMethod("evaluation_change", content)
-                        }
-                    } catch (e: Exception) {
-                        // We assume the first exception is due to a type mismatch.
-                        // Attempt to extract as a list.
-                        try {
-                            val evaluationList = it.extractPayload<List<Evaluation>>()
-                            val firstEvaluation = evaluationList.firstOrNull() // Safely get the first item or null
-                            if (firstEvaluation != null) {
-                                val content = evaluationToMap(firstEvaluation)
-
-                                postToMainThread {
-                                    hostChannel.invokeMethod("evaluation_change", content)
-                                }
-                            } else {
-                                // Handle the case where the list might be empty or null
-                            }
-                        } catch (e: Exception) {
-                            // Handle other errors, possibly logging them or taking some other action.
-                        }
+                    val evaluation = it.extractEvaluationPayload()
+                    val content = evaluationToMap(evaluation)
+                    postToMainThread {
+                        hostChannel.invokeMethod("evaluation_change", content)
                     }
                 }
 
                 StatusEvent.EVENT_TYPE.EVALUATION_RELOAD -> {
 
-                    val evaluationList = it.extractPayload<List<Evaluation>>()
+                    val evaluationList = it.extractEvaluationListPayload()
 
                     val resultList = evaluationList.map { evaluation ->
                         evaluationToMap(evaluation)
@@ -195,8 +178,15 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
                         hostChannel.invokeMethod("evaluation_polling", content)
                     }
                 }
+
+                // We don't need to notify users of internal events, as the underlying
+                // SDKs handle events like `EVALUATION_REMOVE` appropriately.
+                else -> {
+                    if (it != null) {
+                        println("internal received event ${it.eventType.name}")
+                    } else println("internal received event")
+                }
             }
-            println("internal received event ${it.eventType.name}")
         }
         CfClient.getInstance().registerEventsListener(listener)
     }
@@ -266,6 +256,7 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
             is Boolean, is Number, is String -> {
                 value
             }
+
             is ArrayList<*> -> {
                 val jsonArr = JSONArray()
                 value.forEach {
@@ -273,6 +264,7 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
                 }
                 jsonArr
             }
+
             else -> {
                 val jsonObj = JSONObject()
                 (value as HashMap<*, *>).forEach {
@@ -288,6 +280,7 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
             is Boolean, is Number, is String -> {
                 jsonElement.toString()
             }
+
             is JSONArray -> {
                 val res = ArrayList<Any?>()
                 for (i in 0 until jsonElement.length()) {
@@ -295,6 +288,7 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
                 }
                 res
             }
+
             is JSONObject -> {
                 val res = HashMap<String, Any?>()
                 jsonElement.keys().forEach {
@@ -302,6 +296,7 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
                 }
                 res
             }
+
             else -> {
                 null
             }
