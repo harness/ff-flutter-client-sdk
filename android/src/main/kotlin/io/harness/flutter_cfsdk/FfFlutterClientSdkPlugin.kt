@@ -14,15 +14,15 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
 import io.harness.cfsdk.CfClient
 import io.harness.cfsdk.CfConfiguration
-import io.harness.cfsdk.cloud.core.model.Evaluation
 import io.harness.cfsdk.cloud.model.Target
-import io.harness.cfsdk.cloud.oksse.EventsListener
-import io.harness.cfsdk.cloud.oksse.model.StatusEvent
+import io.harness.cfsdk.cloud.sse.EventsListener
+import io.harness.cfsdk.cloud.sse.StatusEvent
 import org.json.JSONArray
 import org.json.JSONObject
-import java.lang.Exception
 import java.util.concurrent.*;
 import io.harness.cfsdk.AndroidSdkVersion.ANDROID_SDK_VERSION;
+import io.harness.cfsdk.cloud.openapi.client.model.Evaluation
+import kotlin.Exception
 
 /** FfFlutterClientSdkPlugin */
 class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
@@ -96,28 +96,33 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
 
             CfClient.getInstance().initialize(
 
-                    application,
-                    key,
-                    conf,
-                    targetInstance
+                application,
+                key,
+                conf,
+                targetInstance
 
-                ) { auth, execResult ->
-                    if (execResult.error == null) {
+            ) { auth, execResult ->
+                if (execResult.error == null) {
 
-                        postToMainThread {
-                            print(auth.environment)
+                    postToMainThread {
+                        print(auth.environment)
 
-                            Handler(Looper.getMainLooper()).post {
+                        Handler(Looper.getMainLooper()).post {
 
-                                result.success(execResult.isSuccess())
-                            }
-
+                            result.success(execResult.isSuccess())
                         }
+
                     }
-                    else {
-                        result.error("authError","Error when initializing SDK", execResult.error.localizedMessage )
-                    }
+                } else {
+                    result.error(
+                        "authError",
+                        "Error when initializing SDK",
+                        execResult.error.localizedMessage
+                    )
                 }
+            }
+
+
         }
     }
 
@@ -138,18 +143,21 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
                         hostChannel.invokeMethod("start", null)
                     }
                 }
+
                 StatusEvent.EVENT_TYPE.SSE_END -> {
                     postToMainThread {
                         hostChannel.invokeMethod("end", null)
                     }
                 }
+
                 StatusEvent.EVENT_TYPE.SSE_RESUME -> {
                     postToMainThread {
                         hostChannel.invokeMethod("resume", null)
                     }
                 }
+
                 StatusEvent.EVENT_TYPE.EVALUATION_CHANGE -> {
-                    val evaluation = it.extractPayload<Evaluation>()
+                    val evaluation = it.extractEvaluationPayload()
                     val content = evaluationToMap(evaluation)
                     postToMainThread {
                         hostChannel.invokeMethod("evaluation_change", content)
@@ -158,7 +166,7 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
 
                 StatusEvent.EVENT_TYPE.EVALUATION_RELOAD -> {
 
-                    val evaluationList = it.extractPayload<List<Evaluation>>()
+                    val evaluationList = it.extractEvaluationListPayload()
 
                     val resultList = evaluationList.map { evaluation ->
                         evaluationToMap(evaluation)
@@ -248,6 +256,7 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
             is Boolean, is Number, is String -> {
                 value
             }
+
             is ArrayList<*> -> {
                 val jsonArr = JSONArray()
                 value.forEach {
@@ -255,6 +264,7 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
                 }
                 jsonArr
             }
+
             else -> {
                 val jsonObj = JSONObject()
                 (value as HashMap<*, *>).forEach {
@@ -270,6 +280,7 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
             is Boolean, is Number, is String -> {
                 jsonElement.toString()
             }
+
             is JSONArray -> {
                 val res = ArrayList<Any?>()
                 for (i in 0 until jsonElement.length()) {
@@ -277,6 +288,7 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
                 }
                 res
             }
+
             is JSONObject -> {
                 val res = HashMap<String, Any?>()
                 jsonElement.keys().forEach {
@@ -284,6 +296,7 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
                 }
                 res
             }
+
             else -> {
                 null
             }
