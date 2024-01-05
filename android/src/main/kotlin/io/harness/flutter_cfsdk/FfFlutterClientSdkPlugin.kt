@@ -171,10 +171,14 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
                     }
                 }
 
-                StatusEvent.EVENT_TYPE.EVALUATION_REMOVE ->
-                    TODO()
+                // We don't need to notify users of internal events, as the underlying
+                // SDKs handle events like `EVALUATION_REMOVE` appropriately.
+                else -> {
+                    if (it != null) {
+                        println("internal received event ${it.eventType.name}")
+                    } else println("internal received event")
+                }
             }
-            println("internal received event ${it.eventType.name}")
         }
         CfClient.getInstance().registerEventsListener(listener)
     }
