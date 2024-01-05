@@ -94,7 +94,7 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
             val targetInstance = Target().identifier(target)
 
 
-                CfClient.getInstance().initialize(
+            CfClient.getInstance().initialize(
 
                     application,
                     key,
@@ -149,35 +149,10 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
                     }
                 }
                 StatusEvent.EVENT_TYPE.EVALUATION_CHANGE -> {
-                    // TODO - there is a bug in Android that can sometimes send the change event in an ArrayList
-                    // instead of an Evaluation. This can happen when the SDK disconnects from the stream -> a flag is toggles -> and it reconnects.
-                    // This is a temporary solution until the bug can be fixed there.
-
-                    try {
-                        val evaluation = it.extractPayload<Evaluation>()
-                        val content = evaluationToMap(evaluation)
-
-                        postToMainThread {
-                            hostChannel.invokeMethod("evaluation_change", content)
-                        }
-                    } catch (e: Exception) {
-                        // We assume the first exception is due to a type mismatch.
-                        // Attempt to extract as a list.
-                        try {
-                            val evaluationList = it.extractPayload<List<Evaluation>>()
-                            val firstEvaluation = evaluationList.firstOrNull() // Safely get the first item or null
-                            if (firstEvaluation != null) {
-                                val content = evaluationToMap(firstEvaluation)
-
-                                postToMainThread {
-                                    hostChannel.invokeMethod("evaluation_change", content)
-                                }
-                            } else {
-                                // Handle the case where the list might be empty or null
-                            }
-                        } catch (e: Exception) {
-                            // Handle other errors, possibly logging them or taking some other action.
-                        }
+                    val evaluation = it.extractPayload<Evaluation>()
+                    val content = evaluationToMap(evaluation)
+                    postToMainThread {
+                        hostChannel.invokeMethod("evaluation_change", content)
                     }
                 }
 
@@ -195,6 +170,9 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
                         hostChannel.invokeMethod("evaluation_polling", content)
                     }
                 }
+
+                StatusEvent.EVENT_TYPE.EVALUATION_REMOVE ->
+                    TODO()
             }
             println("internal received event ${it.eventType.name}")
         }
