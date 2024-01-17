@@ -3,7 +3,6 @@ package io.harness.flutter_cfsdk
 import android.app.Application
 import android.os.Handler
 import android.os.Looper
-import androidx.annotation.NonNull
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -43,7 +42,7 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
         }
     }
 
-    override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+    override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "ff_flutter_client_sdk")
         hostChannel = MethodChannel(flutterPluginBinding.binaryMessenger, "cf_flutter_host")
         application = flutterPluginBinding.applicationContext as Application
@@ -72,9 +71,9 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
         return builder
     }
 
-    private fun invokeInitialize(@NonNull call: MethodCall, @NonNull result: Result) {
+    private fun invokeInitialize(call: MethodCall, result: Result) {
 
-        println("Using Android SDK version ${ANDROID_SDK_VERSION}")
+        println("Using Android SDK version $ANDROID_SDK_VERSION")
 
         val config: Map<String, Any>? = call.argument("configuration")
         val key: String? = call.argument("apiKey")
@@ -105,7 +104,7 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
 
                         Handler(Looper.getMainLooper()).post {
 
-                            result.success(execResult.isSuccess())
+                            result.success(execResult.isSuccess)
                         }
 
                     }
@@ -125,7 +124,7 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
     private fun evaluationToMap(evaluation: Evaluation): Map<String, Any> {
         return mutableMapOf<String, Any>().apply {
             this["flag"] = evaluation.flag
-            this["value"] = evaluation.getValue()
+            this["value"] = evaluation.value
             this["kind"] = evaluation.kind
         }
     }
@@ -194,29 +193,29 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
         return Pair(flag, defaultValue)
     }
 
-    private fun invokeStringEvaluation(@NonNull call: MethodCall): String {
+    private fun invokeStringEvaluation(call: MethodCall): String {
         val args = extractEvaluationArgs(call)
         return CfClient.getInstance().stringVariation(args.first, args.second as String)
     }
 
-    private fun invokeBoolEvaluation(@NonNull call: MethodCall): Boolean {
+    private fun invokeBoolEvaluation(call: MethodCall): Boolean {
         val args = extractEvaluationArgs(call)
         return CfClient.getInstance().boolVariation(args.first, args.second as Boolean)
     }
 
-    private fun invokeNumberEvaluation(@NonNull call: MethodCall): Number {
+    private fun invokeNumberEvaluation(call: MethodCall): Number {
         val args = extractEvaluationArgs(call)
-        println("extracting number argument ${args.second ?: ""}");
+        println("extracting number argument ${args.second ?: ""}")
         val number: Number? = args.second as Number?
         return CfClient.getInstance().numberVariation(args.first, number?.toDouble() ?: 0.0)
     }
 
     private fun invokeDestroy() {
         listener = null
-        CfClient.getInstance().destroy()
+        CfClient.getInstance().close()
     }
 
-    private fun invokeJsonEvaluation(@NonNull call: MethodCall): Map<String, Any?>? {
+    private fun invokeJsonEvaluation(call: MethodCall): Map<String, Any?>? {
 
         val args = extractEvaluationArgs(call)
         return try {
@@ -299,7 +298,7 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
         }
     }
 
-    override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
+    override fun onMethodCall(call: MethodCall, result: Result) {
 
         executor.execute {
 
@@ -378,7 +377,7 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
         }
     }
 
-    override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+    override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
     }
 }
