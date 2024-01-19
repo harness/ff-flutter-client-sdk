@@ -59,6 +59,13 @@ import 'package:ff_flutter_client_sdk/CfConfiguration.dart';
 import 'package:ff_flutter_client_sdk/CfTarget.dart';
 ```
 
+### Release mode for Android applications
+In release mode, Flutter applies optimizations that can affect the behavior of native Android code, including code used by our Flutter Android plugin. 
+
+Please add the following rule to your ProGuard configuration to ensure proper functionality when running your Android app in release mode
+
+-keep class io.harness.cfsdk.** { *; } 
+
 ### SDK Installation for Flutter Web
 If you're targeting a Flutter web application:
 
