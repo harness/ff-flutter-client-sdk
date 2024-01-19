@@ -10,9 +10,6 @@ const stringFlagName = "multivariateflag";
 const numberFlagName = "numberflag";
 const jsonFlagName = "jsonflag";
 
-// The SDK API Key to use for authentication.
-// final provider.UniversalApiKeyProvider apiKeyProvider = kIsWeb ? provider() : MobileApiKeyProvider();
-
 void main() async {
   await dotenv.load(fileName: ".env");
   runApp(MyApp());
@@ -22,7 +19,21 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Harness Flutter SDK Getting Started', home: FlagState());
+      title: 'Harness Flutter SDK Getting Started',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.blue.shade700,
+          titleTextStyle: const TextStyle(color: Colors.white, fontSize: 20),
+          iconTheme: const IconThemeData(color: Colors.white),
+        ),
+        textTheme: TextTheme(
+          bodyMedium: TextStyle(color: Colors.blue.shade800),
+        ),
+      ),
+      home: FlagState(),
+    );
   }
 }
 
@@ -162,30 +173,50 @@ class _FlagState extends State<FlagState> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Harness Flutter SDK Getting Started'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/feature_flags_logo.png',
+              fit: BoxFit.cover,
+              height: 20, // Adjust the size as needed
+            ),
+            const SizedBox(width: 8), // Space between logo and title
+            const Text('Harness Flutter SDK Getting Started'),
+          ],
+        ),
+        backgroundColor: Colors.blue.shade700,
       ),
       body: Container(
+        padding: const EdgeInsets.all(10),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: Image.asset(
+                  'assets/harness_logo.png',
+                  width: 150, // Adjust the width to make the logo smaller
+                ),
+              ),
+              Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
                 child: Text("$boolFlagName : ${_flagValues[boolFlagName]}",
-                    style: const TextStyle(fontSize: 25)),
+                    style: const TextStyle(fontSize: 15)),
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
                 child: Text("$stringFlagName : ${_flagValues[stringFlagName]}",
-                    style: const TextStyle(fontSize: 25)),
+                    style: const TextStyle(fontSize: 15)),
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
                 child: Text("$numberFlagName : ${_flagValues[numberFlagName]}",
-                    style: const TextStyle(fontSize: 25)),
+                    style: const TextStyle(fontSize: 15)),
               ),
               Text("$jsonFlagName : ${_flagValues[jsonFlagName]}",
-                  style: const TextStyle(fontSize: 25)),
+                  style: const TextStyle(fontSize: 15)),
             ],
           ),
         ),
