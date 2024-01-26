@@ -308,12 +308,12 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
                     try {
                         invokeInitialize(call, result)
                       // The Android SDK only throws this if the SDK
-                      // is already initialized. We can hit this if the back button
+                      // is already initialized. We can encounter this if the back button
                       // is used to minimize/close the Flutter app, then re-opened.
                       // In this case, we know the Android SDK is already initialized so we can
                       // just return a success to the core Flutter code.
                     } catch (e: IllegalStateException) {
-                        println("Android SDK already successfully initialized. Returning positive result without initializing.")
+                        println("Android SDK already successfully initialized. Returning success result without initializing.")
                         result.success(true)
                     }
                 }
