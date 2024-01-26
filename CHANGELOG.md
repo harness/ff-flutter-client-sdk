@@ -1,3 +1,13 @@
+## 2.1.2
+
+Fixes:
+
+* Fixes Android application crash when using the back button and re-opening the app
+
+Changes:
+
+* Bump `uuid` package to ^4.3.3
+
 ## 2.1.1
 
 Changes:
