@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |ff|
   ff.name             = 'ff_flutter_client_sdk'
-  ff.version          = '1.1.3'
+  ff.version          = '1.0.3'
   ff.summary          = 'Flutter SDK for Harness Feature Flags Management'
   ff.description      = <<-DESC
 Feature Flag Management platform from Harness. Flutter SDK can be used to integrate with the platform in your Flutter applications.
@@ -16,7 +16,7 @@ Feature Flag Management platform from Harness. Flutter SDK can be used to integr
   ff.source_files = 'Classes/**/*'
 
   ff.dependency 'Flutter'
-  ff.dependency 'ff-ios-client-sdk', '1.1.2'
+  ff.dependency 'ff-ios-client-sdk', '1.1.3'
   ff.platform = :ios, '10.0'
 
   # Flutter.framework does not contain a i386 slice.
