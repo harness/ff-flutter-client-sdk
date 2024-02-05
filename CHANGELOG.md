@@ -1,3 +1,10 @@
+## 2.1.3
+
+Fixes:
+
+* Fixes `CFClient.destroy` method not returning `Future` correctly
+
+
 ## 2.1.2
 
 Fixes:
