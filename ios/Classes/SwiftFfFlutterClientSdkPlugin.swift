@@ -200,8 +200,18 @@ public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
                 }
 				}
 
-			case .destroy:
-				CfClient.sharedInstance.destroy()
+            case .destroy:
+                CfClient.sharedInstance.destroy { result in
+                    DispatchQueue.main.async {
+                        switch result {
+                        case .success:
+                            print("SDK destroyed successfully.")
+                        case .failure(let reason):
+                            print("Failed to destroy SDK: \(reason)")
+                        }
+                        result(true)
+                    }
+                }
 		}
 	}
 
