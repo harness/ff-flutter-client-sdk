@@ -201,9 +201,8 @@ public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
 				}
 
             case .destroy:
-                CfClient.sharedInstance.destroy { result in
-                    DispatchQueue.main.async {
-                        switch result {
+                CfClient.sharedInstance.destroy { destroyed in
+                        switch destroyed {
                         case .success:
                             print("SDK destroyed successfully.")
                         case .failure(let reason):
@@ -211,7 +210,7 @@ public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
                         }
                         result(true)
                     }
-                }
+
 		}
 	}
 
