@@ -16,7 +16,7 @@ Feature Flag Management platform from Harness. Flutter SDK can be used to integr
   ff.source_files = 'Classes/**/*'
 
   ff.dependency 'Flutter'
-  ff.dependency 'ff-ios-client-sdk', '1.1.2'
+  ff.dependency 'ff-ios-client-sdk', '1.1.3'
   ff.platform = :ios, '10.0'
 
   # Flutter.framework does not contain a i386 slice.
