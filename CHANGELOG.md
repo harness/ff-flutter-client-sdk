@@ -1,9 +1,11 @@
-## 2.1.3
+## 2.2.0
 
-Fixes:
+Fixes and Enhancements:
 
-* Fixes `CFClient.destroy` method not returning `Future` correctly
-
+*  Tidies up behaviour around flag deletion:   Previously, if a flag was deleted, its evaluations would remain in the SDK cache and any variation calls made to it would result in an out-of-date evaluation for your target.
+   Exposes new `EVALUATION_DETE` event you can listen for which is emitted when a flag has been deleted.
+*  Fixes an issue in iOS where if an evaluation failed, `null` would be returned instead of the default variation that was supplied
+*  Upgrades Feature Flags Android SDK to 2.0.1 
 
 ## 2.1.2
 
