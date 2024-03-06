@@ -116,7 +116,7 @@ class _FlagState extends State<FlagState> {
             // removed from the cache. We can choose to call variation again
             // which will result in falling back to the default variation, or simply
             // do nothing.
-            case EventType.EVALUATION_DELETED:
+            case EventType.EVALUATION_DELETE:
               String flag = data;
               print("Flag '$flag' has been deleted, evaluating flags again to fall back to default variation for that flag");
               flagVariations();
