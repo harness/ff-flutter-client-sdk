@@ -82,7 +82,8 @@ public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
 		case start
 		case end
 		case evaluationPolling = "evaluation_polling"
-		case evaluationChange  = "evaluation_change"
+        case evaluationChange  = "evaluation_change"
+		case evaluationDelete  = "evaluation_delete"
 	}
 
 	public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
