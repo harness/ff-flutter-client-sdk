@@ -174,8 +174,16 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
                     }
                 }
 
+                StatusEvent.EVENT_TYPE.EVALUATION_REMOVE -> {
+                    val evaluation = it.extractEvaluationPayload()
+                    val flagID = evaluation.flag
+                    postToMainThread {
+                        hostChannel.invokeMethod("evaluation_delete", flagID)
+                    }
+                }
+
                 // We don't need to notify users of internal events, as the underlying
-                // SDKs handle events like `EVALUATION_REMOVE` appropriately.
+                // SDKs handle these
                 else -> {
                     if (it != null) {
                         println("internal received event ${it.eventType.name}")
