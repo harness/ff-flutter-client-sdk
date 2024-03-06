@@ -165,19 +165,19 @@ public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
 				}
 
 			case .stringVariation:
-				CfClient.sharedInstance.stringVariation(evaluationId: args?["flag"] as! String, defaultValue: args?["value"] as? String) { (evaluation) in
+				CfClient.sharedInstance.stringVariation(evaluationId: args?["flag"] as! String, defaultValue: args?["defaultValue"] as? String) { (evaluation) in
 					guard let evaluation = evaluation else {return}
 					result(evaluation.value.stringValue)
 				}
 
 			case .boolVariation:
-				CfClient.sharedInstance.boolVariation(evaluationId: args?["flag"] as! String, defaultValue: args?["value"] as? Bool) { (evaluation) in
+				CfClient.sharedInstance.boolVariation(evaluationId: args?["flag"] as! String, defaultValue: args?["defaultValue"] as? Bool) { (evaluation) in
 					guard let evaluation = evaluation else {return}
 					result(evaluation.value.boolValue)
 				}
 
 			case .numberVariation:
-				CfClient.sharedInstance.numberVariation(evaluationId: args?["flag"] as! String, defaultValue: args?["value"] as? Int) { (evaluation) in
+				CfClient.sharedInstance.numberVariation(evaluationId: args?["flag"] as! String, defaultValue: args?["defaultValue"] as? Int) { (evaluation) in
 					guard let evaluation = evaluation else {return}
 					result(Double(evaluation.value.intValue ?? 0))
 				}
