@@ -142,14 +142,20 @@ public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
 										self.hostChannel.invokeMethod(EventTypeId.evaluationPolling.rawValue, arguments: content)
 									}
 
-								case .onEventListener(let eval):
-									guard let eval = eval else { result(nil); return }
+                                case .onEventListener(let eval):
+                                    guard let eval = eval else { result(nil); return }
 
-									let value = self.extractValue(eval.value)
-									let content = ["flag": eval.flag, "value": value ?? ""]
+                                    let value = self.extractValue(eval.value)
+                                    let content = ["flag": eval.flag, "value": value ?? ""]
 
+                                    DispatchQueue.main.async {
+                                        self.hostChannel.invokeMethod(EventTypeId.evaluationChange.rawValue, arguments: content)
+                                    }
+								case .onDelete(let flagID):
+									guard let flagID = flagID else { result(nil); return }
+                                    let content = ["flag": flagID]
 									DispatchQueue.main.async {
-										self.hostChannel.invokeMethod(EventTypeId.evaluationChange.rawValue, arguments: content)
+										self.hostChannel.invokeMethod(EventTypeId.evaluationDelete.rawValue, arguments: content)
 									}
 
 								case .onMessage(_): result("Message received");
