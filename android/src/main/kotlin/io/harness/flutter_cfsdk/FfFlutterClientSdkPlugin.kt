@@ -176,9 +176,9 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
 
                 StatusEvent.EVENT_TYPE.EVALUATION_REMOVE -> {
                     val evaluation = it.extractEvaluationPayload()
-                    val flagID = evaluation.flag
+                    val content = mapOf("flag" to evaluation.flag) // Place the flagID in a map with the key "flag"
                     postToMainThread {
-                        hostChannel.invokeMethod("evaluation_delete", flagID)
+                        hostChannel.invokeMethod("evaluation_delete", content)
                     }
                 }
 
