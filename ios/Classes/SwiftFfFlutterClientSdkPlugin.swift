@@ -1,260 +1,286 @@
 import Flutter
 import UIKit
-
 import ff_ios_client_sdk
 
 public class SwiftFfFlutterClientSdkPlugin: NSObject, FlutterPlugin {
 
-	private var channel : FlutterMethodChannel
-	private var hostChannel : FlutterMethodChannel
+  private var channel: FlutterMethodChannel
+  private var hostChannel: FlutterMethodChannel
 
-	init(channel: FlutterMethodChannel, hostChannel: FlutterMethodChannel) {
+  init(channel: FlutterMethodChannel, hostChannel: FlutterMethodChannel) {
 
-		self.channel = channel
-		self.hostChannel = hostChannel
-	}
+    self.channel = channel
+    self.hostChannel = hostChannel
+  }
 
-	public static func register(with registrar: FlutterPluginRegistrar) {
+  public static func register(with registrar: FlutterPluginRegistrar) {
 
-		let channel = FlutterMethodChannel(name: "ff_flutter_client_sdk", binaryMessenger: registrar.messenger())
-		let hostChannel = FlutterMethodChannel(name: "cf_flutter_host", binaryMessenger: registrar.messenger())
-		let instance = SwiftFfFlutterClientSdkPlugin(channel: channel, hostChannel: hostChannel)
-		registrar.addMethodCallDelegate(instance, channel: channel)
-	}
+    let channel = FlutterMethodChannel(
+      name: "ff_flutter_client_sdk", binaryMessenger: registrar.messenger())
+    let hostChannel = FlutterMethodChannel(
+      name: "cf_flutter_host", binaryMessenger: registrar.messenger())
+    let instance = SwiftFfFlutterClientSdkPlugin(channel: channel, hostChannel: hostChannel)
+    registrar.addMethodCallDelegate(instance, channel: channel)
+  }
 
-	// Extract CfConfiguration from dictionary
-	func configFrom(dict: Dictionary<String, Any?>) -> CfConfiguration {
+  // Extract CfConfiguration from dictionary
+  func configFrom(dict: [String: Any?]) -> CfConfiguration {
 
-		let configBuilder = CfConfiguration.builder()
+    let configBuilder = CfConfiguration.builder()
 
-		if let configUrl = dict["configUrl"] as? String {
-			_ = configBuilder.setConfigUrl(configUrl)
-		}
-		if let streamUrl = dict["streamUrl"] as? String {
-			_ = configBuilder.setStreamUrl(streamUrl)
-		}
-		if let eventUrl = dict["eventUrl"] as? String {
-            _ = configBuilder.setEventUrl(eventUrl)
+    if let configUrl = dict["configUrl"] as? String {
+      _ = configBuilder.setConfigUrl(configUrl)
+    }
+    if let streamUrl = dict["streamUrl"] as? String {
+      _ = configBuilder.setStreamUrl(streamUrl)
+    }
+    if let eventUrl = dict["eventUrl"] as? String {
+      _ = configBuilder.setEventUrl(eventUrl)
+    }
+    if let streamEnabled = dict["streamEnabled"] as? Bool {
+      _ = configBuilder.setStreamEnabled(streamEnabled)
+    }
+    if let analitycsEnabled = dict["analyticsEnabled"] as? Bool {
+      _ = configBuilder.setAnalyticsEnabled(analitycsEnabled)
+    }
+    if let pollingInterval = dict["pollingInterval"] as? TimeInterval {
+      _ = configBuilder.setPollingInterval(pollingInterval)
+    }
+    return configBuilder.build()
+  }
+
+  // Extract CfTarget from dictionary
+  func targetFrom(dict: [String: Any?]) -> CfTarget {
+    let targetBuilder = CfTarget.builder()
+    if let identifier = dict["identifier"] as? String {
+      _ = targetBuilder.setIdentifier(identifier)
+    }
+    if let name = dict["name"] as? String {
+      _ = targetBuilder.setName(name)
+    }
+    if let anonymous = dict["anonymous"] as? Bool {
+      _ = targetBuilder.setAnonymous(anonymous)
+    }
+    if let attributes = dict["attributes"] as? [String: String] {
+      _ = targetBuilder.setAttributes(attributes)
+    }
+    return targetBuilder.build()
+  }
+
+  enum FlutterMethodCallIdentifiers: String {
+
+    case initialize
+    case registerEventsListener
+    case stringVariation
+    case boolVariation
+    case numberVariation
+    case jsonVariation
+    case destroy
+  }
+
+  enum EventTypeId: String {
+
+    case start
+    case end
+    case evaluationPolling = "evaluation_polling"
+    case evaluationChange = "evaluation_change"
+    case evaluationDelete = "evaluation_delete"
+  }
+
+  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+
+    let args = call.arguments as? [String: Any]
+    guard let methodCallId = FlutterMethodCallIdentifiers(rawValue: call.method) else {
+
+      result(nil)
+      print("No such FlutterMethodCall exists, please check for typos.")
+      return
+    }
+
+    switch methodCallId {
+    case .initialize:
+
+      let apiKey = args?["apiKey"] as! String
+      let config = configFrom(dict: args?["configuration"] as! [String: Any])
+      let target = targetFrom(dict: args?["target"] as! [String: Any])
+
+      CfClient.sharedInstance.initialize(apiKey: apiKey, configuration: config, target: target) {
+        res in
+
+        switch res {
+        case .failure(_): result(false)
+        case .success: result(true)
         }
-		if let streamEnabled = dict["streamEnabled"] as? Bool {
-			_ = configBuilder.setStreamEnabled(streamEnabled)
-		}
-		if let analitycsEnabled = dict["analyticsEnabled"] as? Bool {
-			_ = configBuilder.setAnalyticsEnabled(analitycsEnabled)
-		}
-		if let pollingInterval = dict["pollingInterval"] as? TimeInterval {
-			_ = configBuilder.setPollingInterval(pollingInterval)
-		}
-		return configBuilder.build()
-	}
+      }
 
-	// Extract CfTarget from dictionary
-	func targetFrom(dict: Dictionary<String, Any?>) -> CfTarget {
-		let targetBuilder = CfTarget.builder()
-		if let identifier = dict["identifier"] as? String {
-			_ = targetBuilder.setIdentifier(identifier)
-		}
-		if let name = dict["name"] as? String {
-			_ = targetBuilder.setName(name)
-		}
-		if let anonymous = dict["anonymous"] as? Bool {
-			_ = targetBuilder.setAnonymous(anonymous)
-		}
-		if let attributes = dict["attributes"] as? [String:String] {
-			_ = targetBuilder.setAttributes(attributes)
-		}
-		return targetBuilder.build()
-	}
+    case .registerEventsListener:
 
-	enum FlutterMethodCallIdentifiers: String {
+      CfClient.sharedInstance.registerEventsListener { eventType in
+        switch eventType {
+        case .failure(_):
+          DispatchQueue.main.async {
+            self.hostChannel.invokeMethod(EventTypeId.end.rawValue, arguments: nil)
+          }
+        case .success(let eventType):
+          switch eventType {
+          case .onOpen:
+            DispatchQueue.main.async {
+              self.hostChannel.invokeMethod(EventTypeId.start.rawValue, arguments: nil)
+            }
+          case .onComplete:
+            DispatchQueue.main.async {
+              self.hostChannel.invokeMethod(EventTypeId.end.rawValue, arguments: nil)
+            }
+          case .onPolling(let evals):
+            guard let evals = evals else {
+              result(nil)
+              return
+            }
 
-		case initialize
-		case registerEventsListener
-		case stringVariation
-		case boolVariation
-		case numberVariation
-		case jsonVariation
-		case destroy
-	}
+            let evaluationArray = evals.map { eval -> [String: Any] in
+              let value = self.extractValue(eval.value)
+              return ["flag": eval.flag, "value": value ?? ""]
+            }
 
-	enum EventTypeId: String {
+            let content = ["evaluationData": evaluationArray]
 
-		case start
-		case end
-		case evaluationPolling = "evaluation_polling"
-                case evaluationChange  = "evaluation_change"
-		case evaluationDelete  = "evaluation_delete"
-	}
+            DispatchQueue.main.async {
+              self.hostChannel.invokeMethod(
+                EventTypeId.evaluationPolling.rawValue, arguments: content)
+            }
 
-	public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+          case .onEventListener(let eval):
+            guard let eval = eval else {
+              result(nil)
+              return
+            }
 
-		let args = call.arguments as? Dictionary<String, Any>
-		guard let methodCallId = FlutterMethodCallIdentifiers(rawValue: call.method) else {
+            let value = self.extractValue(eval.value)
+            let content = ["flag": eval.flag, "value": value ?? ""]
 
-			result(nil)
-			print("No such FlutterMethodCall exists, please check for typos.")
-			return
-		}
+            DispatchQueue.main.async {
+              self.hostChannel.invokeMethod(
+                EventTypeId.evaluationChange.rawValue, arguments: content)
+            }
+          case .onDelete(let flagID):
+            guard let flagID = flagID else {
+              result(nil)
+              return
+            }
+            let content = ["flag": flagID]
+            DispatchQueue.main.async {
+              self.hostChannel.invokeMethod(
+                EventTypeId.evaluationDelete.rawValue, arguments: content)
+            }
 
-		switch  methodCallId {
-			case .initialize:
+          case .onMessage(_): result("Message received")
+          }
+        }
+      }
 
-				let apiKey = args?["apiKey"] as! String
-				let config = configFrom(dict: args?["configuration"] as! Dictionary<String, Any>)
-				let target = targetFrom(dict: args?["target"] as! Dictionary<String, Any>)
+    case .stringVariation:
+      CfClient.sharedInstance.stringVariation(
+        evaluationId: args?["flag"] as! String, defaultValue: args?["defaultValue"] as? String
+      ) { (evaluation) in
+        guard let evaluation = evaluation else { return }
+        result(evaluation.value.stringValue)
+      }
 
-				CfClient.sharedInstance.initialize(apiKey: apiKey, configuration: config, target: target) {res in
+    case .boolVariation:
+      CfClient.sharedInstance.boolVariation(
+        evaluationId: args?["flag"] as! String, defaultValue: args?["defaultValue"] as? Bool
+      ) { (evaluation) in
+        guard let evaluation = evaluation else { return }
+        result(evaluation.value.boolValue)
+      }
 
-					switch res {
-						case .failure(_): result(false)
-						case .success: result(true)
-					}
-				}
+    case .numberVariation:
+      CfClient.sharedInstance.numberVariation(
+        evaluationId: args?["flag"] as! String, defaultValue: args?["defaultValue"] as? Int
+      ) { (evaluation) in
+        guard let evaluation = evaluation else { return }
+        result(Double(evaluation.value.intValue ?? 0))
+      }
 
-			case .registerEventsListener:
+    case .jsonVariation:
+      let val = args?["defaultValue"] as? [String: Any] ?? [:]
 
-				CfClient.sharedInstance.registerEventsListener() { eventType in
-					switch eventType {
-						case .failure(_):
-							DispatchQueue.main.async {
-								self.hostChannel.invokeMethod(EventTypeId.end.rawValue, arguments: nil);
-							}
-						case .success(let eventType):
-							switch eventType {
-								case .onOpen:
-									DispatchQueue.main.async {
-										self.hostChannel.invokeMethod(EventTypeId.start.rawValue, arguments:nil);
-									}
-								case .onComplete:
-									DispatchQueue.main.async {
-										self.hostChannel.invokeMethod(EventTypeId.end.rawValue, arguments: nil);
-									}
-								case .onPolling(let evals):
-									guard let evals = evals else { result(nil); return }
+      if let key = val.keys.first, let value = val[key] {
+        // If we have a key and value, determine its type and proceed as before
+        let valueType: ValueType = determineType(value)
 
-									let evaluationArray = evals.map { eval -> [String:Any] in
-										let value = self.extractValue(eval.value)
-										return ["flag": eval.flag, "value": value ?? ""]
-									}
+        CfClient.sharedInstance.jsonVariation(
+          evaluationId: args?["flag"] as! String, defaultValue: [key: valueType]
+        ) { (evaluation) in
+          guard let evaluation = evaluation else { return }
+          if let value = evaluation.value.stringValue {
+            result(self.parseJson(from: value))
+          }
+        }
+      } else {
+        let emptyObject: [String: ValueType] = [:]
+        CfClient.sharedInstance.jsonVariation(
+          evaluationId: args?["flag"] as! String, defaultValue: emptyObject
+        ) { (evaluation) in
+          guard let evaluation = evaluation else { return }
+          if let value = evaluation.value.stringValue {
+            result(self.parseJson(from: value))
+          }
+          // If the key is empty, you can handle it differently here, or just leave it as is.
+          // The code currently does nothing if the key is empty.
+        }
+      }
 
-									let content = ["evaluationData": evaluationArray]
+    case .destroy:
+      CfClient.sharedInstance.destroy { destroyed in
+        switch destroyed {
+        case .success:
+          print("SDK destroyed successfully.")
+        case .failure(let reason):
+          print("Failed to destroy SDK: \(reason)")
+        }
+        result(true)
+      }
 
-									DispatchQueue.main.async {
-										self.hostChannel.invokeMethod(EventTypeId.evaluationPolling.rawValue, arguments: content)
-									}
+    }
+  }
 
-                                case .onEventListener(let eval):
-                                    guard let eval = eval else { result(nil); return }
+  func determineType(_ value: Any?) -> ValueType {
+    if value is String {
+      return ValueType.string(value as! String)
+    } else if value is Bool {
+      return ValueType.bool(value as! Bool)
+    } else if value is Int {
+      return ValueType.int(value as! Int)
+    } else {
+      let subObj = value as! [String: Any]
+      let key = subObj.keys.first!
+      let subVal = subObj[key]
+      let valueType = determineType(subVal)
+      return ValueType.object([key: valueType])
+    }
+  }
 
-                                    let value = self.extractValue(eval.value)
-                                    let content = ["flag": eval.flag, "value": value ?? ""]
+  func extractValue(_ valueType: ValueType) -> Any? {
+    switch valueType {
+    case .string(let string): return string
+    case .bool(let bool): return bool
+    case .int(let int): return int
+    case .object(let object): return object
+    }
+  }
 
-                                    DispatchQueue.main.async {
-                                        self.hostChannel.invokeMethod(EventTypeId.evaluationChange.rawValue, arguments: content)
-                                    }
-								case .onDelete(let flagID):
-									guard let flagID = flagID else { result(nil); return }
-                                    let content = ["flag": flagID]
-									DispatchQueue.main.async {
-										self.hostChannel.invokeMethod(EventTypeId.evaluationDelete.rawValue, arguments: content)
-									}
-
-								case .onMessage(_): result("Message received");
-							}
-					}
-				}
-
-			case .stringVariation:
-				CfClient.sharedInstance.stringVariation(evaluationId: args?["flag"] as! String, defaultValue: args?["defaultValue"] as? String) { (evaluation) in
-					guard let evaluation = evaluation else {return}
-					result(evaluation.value.stringValue)
-				}
-
-			case .boolVariation:
-				CfClient.sharedInstance.boolVariation(evaluationId: args?["flag"] as! String, defaultValue: args?["defaultValue"] as? Bool) { (evaluation) in
-					guard let evaluation = evaluation else {return}
-					result(evaluation.value.boolValue)
-				}
-
-			case .numberVariation:
-				CfClient.sharedInstance.numberVariation(evaluationId: args?["flag"] as! String, defaultValue: args?["defaultValue"] as? Int) { (evaluation) in
-					guard let evaluation = evaluation else {return}
-					result(Double(evaluation.value.intValue ?? 0))
-				}
-
-            case .jsonVariation:
-                let val = args?["defaultValue"] as? [String: Any] ?? [:]
-
-                if let key = val.keys.first, let value = val[key] {
-                    // If we have a key and value, determine its type and proceed as before
-                    let valueType: ValueType = determineType(value)
-
-                    CfClient.sharedInstance.jsonVariation(evaluationId: args?["flag"] as! String, defaultValue: [key: valueType]) { (evaluation) in
-                        guard let evaluation = evaluation else {return}
-                        if let value = evaluation.value.stringValue {
-                            result(self.parseJson(from: value))
-                        }
-                    }
-                } else {
-                        let emptyObject: [String: ValueType] = [:]
-                    CfClient.sharedInstance.jsonVariation(evaluationId: args?["flag"] as! String, defaultValue: emptyObject) { (evaluation) in
-                        guard let evaluation = evaluation else {return}
-                        if let value = evaluation.value.stringValue {
-                            result(self.parseJson(from: value))
-                        }
-                    // If the key is empty, you can handle it differently here, or just leave it as is.
-                    // The code currently does nothing if the key is empty.
-                }
-				}
-
-            case .destroy:
-                CfClient.sharedInstance.destroy { destroyed in
-                        switch destroyed {
-                        case .success:
-                            print("SDK destroyed successfully.")
-                        case .failure(let reason):
-                            print("Failed to destroy SDK: \(reason)")
-                        }
-                        result(true)
-                    }
-
-		}
-	}
-
-	func determineType(_ value: Any?) -> ValueType {
-		if value is String {
-			return ValueType.string(value as! String)
-		} else if value is Bool {
-			return ValueType.bool(value as! Bool)
-		} else if value is Int {
-			return ValueType.int(value as! Int)
-		} else {
-			let subObj = value as! [String:Any]
-			let key = subObj.keys.first!
-			let subVal = subObj[key]
-			let valueType = determineType(subVal)
-			return ValueType.object([key:valueType])
-		}
-	}
-
-	func extractValue(_ valueType :ValueType) -> Any? {
-		switch valueType {
-			case .string(let string): return string
-			case .bool(let bool): return bool
-			case .int(let int): return int
-			case .object(let object): return object
-		}
-	}
-
-	func parseJson(from string: String) -> [String:Any] {
-		guard let data = string.data(using: .utf8, allowLossyConversion: false) else {return [:]}
-		do {
-			if let json = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String:Any] {
-				return json
-			}
-		} catch {
-			print("Not a Valid JSON")
-		}
-		return [:]
-	}
+  func parseJson(from string: String) -> [String: Any] {
+    guard let data = string.data(using: .utf8, allowLossyConversion: false) else { return [:] }
+    do {
+      if let json = try JSONSerialization.jsonObject(with: data, options: .allowFragments)
+        as? [String: Any]
+      {
+        return json
+      }
+    } catch {
+      print("Not a Valid JSON")
+    }
+    return [:]
+  }
 }
