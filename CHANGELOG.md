@@ -8,6 +8,12 @@ Fixes and Enhancements:
 *  Upgrades Feature Flags iOS SDK to 1.3.0
 *  Upgrades Feature Flags Android SDK to 2.0.2
 
+## 2.1.3
+
+Fixes:
+
+* Fixes `CFClient.destroy` method not returning `Future` correctly
+
 ## 2.1.2
 
 Fixes:
