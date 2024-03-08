@@ -6,6 +6,7 @@ Fixes and Enhancements:
    Exposes new `EVALUATION_DETE` event you can listen for which is emitted when a flag has been deleted.
 *  Fixes an issue in iOS where if an evaluation failed, `null` would be returned instead of the default variation that was supplied
 *  Upgrades Feature Flags iOS SDK to 1.3.0
+*  Upgrades Feature Flags Android SDK to 2.0.2
 
 ## 2.1.2
 
