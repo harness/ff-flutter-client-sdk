@@ -138,6 +138,9 @@ class _FlagState extends State<FlagState> {
         CfClient.getInstance().registerEventsListener(listener);
         // CfClient.getInstance().destroy();
         // CfClient.getInstance().unregisterEventsListener(listener);
+      } else {
+        print("Failed to initialize client, serving defaults");
+        flagVariations();
       }
     });
   }
