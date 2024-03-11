@@ -112,6 +112,16 @@ class _FlagState extends State<FlagState> {
               }
               break;
 
+            // A flag has been deleted which means the evaluation has been
+            // removed from the cache. We can choose to call variation again
+            // which will result in falling back to the default variation, or simply
+            // do nothing.
+            case EventType.EVALUATION_DELETE:
+              String flag = data;
+              print("Flag '$flag' has been deleted, evaluating flags again to fall back to default variation for that flag");
+              flagVariations();
+              break;
+
             // There's been an interruption in the SSE but which has since resumed, which means the
             // cache will have been updated with the latest values.
             // If we have missed any SSE events while the connection has been interrupted, we can call
@@ -128,6 +138,9 @@ class _FlagState extends State<FlagState> {
         CfClient.getInstance().registerEventsListener(listener);
         // CfClient.getInstance().destroy();
         // CfClient.getInstance().unregisterEventsListener(listener);
+      } else {
+        print("Failed to initialize client, serving defaults");
+        flagVariations();
       }
     });
   }

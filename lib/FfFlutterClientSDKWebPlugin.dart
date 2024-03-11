@@ -229,7 +229,8 @@ class FfFlutterClientSdkWebPlugin {
       Map<String, dynamic> evaluationResponse = {
         "flag": flagChange.flag,
         "kind": flagChange.kind,
-        "value": flagChange.value
+        "value": flagChange.value,
+        "deleted": flagChange.deleted
       };
       _eventController.add(
           {'event': Events.STREAMING_EVALUATION, 'data': evaluationResponse});
@@ -317,6 +318,13 @@ class FfFlutterClientSdkWebPlugin {
           }
           log.fine('Internal event received EVALUATION_CHANGE');
           final evaluationResponse = event['data'];
+
+          // If this is a delete event, emit that event
+          if (evaluationResponse['deleted'] == true) {
+            _hostChannel.invokeMethod('evaluation_delete', evaluationResponse);
+            break;
+          }
+
           _hostChannel.invokeMethod('evaluation_change', evaluationResponse);
           break;
       }

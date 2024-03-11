@@ -60,7 +60,10 @@ enum EventType {
   EVALUATION_POLLING,
 
   /// A single evaluation has been changed. The payload is an instance of [EvaluationResponse].
-  EVALUATION_CHANGE
+  EVALUATION_CHANGE,
+
+  /// A single evaluation has been deleted (e.g. flag has been deleted). The payload is the flag identifier [String].
+  EVALUATION_DELETE
 }
 
 /// Type alias used in [CfClient.registerEventsListener] to receive events from SDK. It has two parameters:
@@ -124,6 +127,10 @@ class CfClient {
 
       _listenerSet.forEach((element) {
         element(response, EventType.EVALUATION_CHANGE);
+      });
+    } else if (methodCall.method == "evaluation_delete") {
+      _listenerSet.forEach((element) {
+        element(methodCall.arguments["flag"], EventType.EVALUATION_DELETE);
       });
     } else if (methodCall.method == "evaluation_polling") {
       List list = methodCall.arguments["evaluationData"];

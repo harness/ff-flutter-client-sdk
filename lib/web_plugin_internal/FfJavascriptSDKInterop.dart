@@ -73,6 +73,7 @@ class FlagChange {
   external String get identifier;
   external String get value;
   external String get kind;
+  external String get deleted;
 }
 
 

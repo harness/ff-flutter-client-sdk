@@ -109,7 +109,8 @@ enum EventType {
     SSE_RESUME
     SSE_END,
     EVALUATION_POLLING,
-    EVALUATION_CHANGE
+    EVALUATION_CHANGE,
+    EVALUATION_DELETE
 }
 ```
 
@@ -122,7 +123,7 @@ Each type will return a corresponding value as shown in the table below.
 | SSE_END            | null                     |
 | EVALUATION_POLLING | List<EvaluationResponse> |
 | EVALUATION_CHANGE  | EvaluationResponse       |
-
+| EVALUATION_DELETE  | String                   |
 ```
 Visit [Harness Feature Flags Android SDK](https://github.com/harness/ff-android-client-sdk/blob/main/docs/further_reading.md#further-reading) for a complete list of possible types and values they provide.
 
