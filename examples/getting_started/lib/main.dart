@@ -53,7 +53,10 @@ class _FlagState extends State<FlagState> {
   @override
   void initState() {
     super.initState();
+    _initializeSdk();
+  }
 
+  Future<void> _initializeSdk() async {
     // Create Default Configuration for the SDK.  We can use this to disable streaming,
     // change the URL the client connects to etc
     var conf = CfConfigurationBuilder()
@@ -71,114 +74,104 @@ class _FlagState extends State<FlagState> {
     var apiKey = dotenv.env['FF_API_KEY'];
 
     if (apiKey == null) {
-      print("API Key missing, existing FF Sample application");
+      print("API Key missing, exiting FF Sample application");
       return;
     }
 
-    // Init the default instance of the Feature Flag Client
-    CfClient.getInstance().initialize(apiKey, conf, target).then((initResult) {
-      if (initResult.success) {
-        print("Successfully initialized client");
+    try {
+      await initialiseFFClient(apiKey, conf, target);
 
-        // Evaluate flags and set initial state
-        flagVariations();
-
-        // Setup Event Handler
-        listener(data, eventType) {
-          print("received event: ${eventType.toString()}");
-          switch (eventType) {
-            case EventType.EVALUATION_CHANGE:
-              String flag = (data as EvaluationResponse).flag;
-
-              if (_flagValues.containsKey(flag)) {
-                setState(() {
-                  print(
-                      "Flag evaluation changed via streaming event: Flag: '$flag', New Evaluation: ${data.value}");
-                  _flagValues[flag] = data.value;
-                });
-              }
-              break;
-
-            case EventType.EVALUATION_POLLING:
-              List<EvaluationResponse> evals =
-                  (data as List<EvaluationResponse>);
-
-              for (final eval in evals) {
-                if (_flagValues.containsKey(eval.flag)) {
-                  setState(() {
-                    _flagValues[eval.flag] = eval.value;
-                  });
-                }
-              }
-              break;
-
-            // A flag has been deleted which means the evaluation has been
-            // removed from the cache. We can choose to call variation again
-            // which will result in falling back to the default variation, or simply
-            // do nothing.
-            case EventType.EVALUATION_DELETE:
-              String flag = data;
-              print("Flag '$flag' has been deleted, evaluating flags again to fall back to default variation for that flag");
-              flagVariations();
-              break;
-
-            // There's been an interruption in the SSE but which has since resumed, which means the
-            // cache will have been updated with the latest values.
-            // If we have missed any SSE events while the connection has been interrupted, we can call
-            // bool variation to get the most up to date evaluation value.
-            case EventType.SSE_RESUME:
-              flagVariations();
-              break;
-
-            default:
-              break;
-          }
-        }
-
-        CfClient.getInstance().registerEventsListener(listener);
-        // CfClient.getInstance().destroy();
-        // CfClient.getInstance().unregisterEventsListener(listener);
-      } else {
-        print("Failed to initialize client, serving defaults");
-        flagVariations();
-      }
-    });
+    } catch (e) {
+      print("Initialization failed with error: $e");
+      await flagVariations();
+    }
   }
 
-  void flagVariations() {
+  void destroyFFClient() {
+    CfClient.getInstance().destroy();
+    CfClient.getInstance().unregisterEventsListener(_eventListener);
+  }
+
+  Future<void> initialiseFFClient(String apiKey, CfConfiguration conf, CfTarget target) async {
+      var initResult = await CfClient.getInstance().initialize(apiKey, conf, target);
+    if (initResult.success) {
+      print("Successfully initialized client");
+
+      // Evaluate flags and set initial state
+      await flagVariations();
+
+      // Setup Event Handler
+      CfClient.getInstance().registerEventsListener(_eventListener);
+
+    } else {
+      print("Failed to initialize client, serving defaults");
+      await flagVariations();
+    }
+  }
+
+  void _eventListener(dynamic data, EventType eventType) {
+    print("received event: ${eventType.toString()}");
+    switch (eventType) {
+      case EventType.EVALUATION_CHANGE:
+        String flag = (data as EvaluationResponse).flag;
+
+        if (_flagValues.containsKey(flag)) {
+          setState(() {
+            print(
+                "Flag evaluation changed via streaming event: Flag: '$flag', New Evaluation: ${data.value}");
+            _flagValues[flag] = data.value;
+          });
+        }
+        break;
+
+      case EventType.EVALUATION_POLLING:
+        List<EvaluationResponse> evals =
+        (data as List<EvaluationResponse>);
+
+        for (final eval in evals) {
+          if (_flagValues.containsKey(eval.flag)) {
+            setState(() {
+              _flagValues[eval.flag] = eval.value;
+            });
+          }
+        }
+        break;
+
+      case EventType.EVALUATION_DELETE:
+        String flag = data;
+        print("Flag '$flag' has been deleted, evaluating flags again to fall back to default variation for that flag");
+        flagVariations();
+        break;
+
+      case EventType.SSE_RESUME:
+        flagVariations();
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  Future<void> flagVariations() async {
     // Evaluate flag and set initial state
-    CfClient.getInstance()
-        .boolVariation(boolFlagName, false)
-        .then((variationResult) {
-      setState(() {
-        _flagValues[boolFlagName] = variationResult;
-      });
+    var boolVariation = await CfClient.getInstance().boolVariation(boolFlagName, false);
+    setState(() {
+      _flagValues[boolFlagName] = boolVariation;
     });
 
-    // Evaluate flag and set initial state
-    CfClient.getInstance()
-        .jsonVariation(jsonFlagName, {}).then((variationResult) {
-      setState(() {
-        _flagValues[jsonFlagName] = variationResult;
-      });
+    var jsonVariation = await CfClient.getInstance().jsonVariation(jsonFlagName, {});
+    setState(() {
+      _flagValues[jsonFlagName] = jsonVariation;
     });
 
-    // Evaluate flag and set initial state
-    CfClient.getInstance()
-        .stringVariation(stringFlagName, "default")
-        .then((variationResult) {
-      setState(() {
-        _flagValues[stringFlagName] = variationResult;
-      });
+    var stringVariation = await CfClient.getInstance().stringVariation(stringFlagName, "default");
+    setState(() {
+      _flagValues[stringFlagName] = stringVariation;
     });
 
-    // Evaluate flag and set initial state
-    CfClient.getInstance()
-        .numberVariation(numberFlagName, 1)
-        .then((variationResult) {
-      setState(() {
-        _flagValues[numberFlagName] = variationResult;
-      });
+    var numberVariation = await CfClient.getInstance().numberVariation(numberFlagName, 1);
+    setState(() {
+      _flagValues[numberFlagName] = numberVariation;
     });
   }
 

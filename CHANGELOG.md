@@ -1,3 +1,9 @@
+## 2.2.1
+
+Fixes and Enhancements:
+
+*  Upgrades Feature Flags Android SDK to 2.2.0
+
 ## 2.2.0
 
 Fixes and Enhancements:
