@@ -314,4 +314,13 @@ class CfClient {
     log.fine('Shutting down Harness Feature Flags SDK Client');
     return _channel.invokeMethod('destroy');
   }
+
+  /// Like [destroy] but returns a bool to indicate if the SDK succesfully
+  /// closed.
+  Future<bool> destroyWithResult() async {
+    _listenerSet.clear();
+    log.fine('Shutting down Harness Feature Flags SDK Client');
+    bool result = await _channel.invokeMethod('destroy');
+    return result;
+  }
 }
