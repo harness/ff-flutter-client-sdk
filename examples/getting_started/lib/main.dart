@@ -87,13 +87,15 @@ class _FlagState extends State<FlagState> {
     }
   }
 
-  void destroyFFClient() {
-    CfClient.getInstance().destroy();
+  Future<void> destroyFFClient() async {
+    await CfClient.getInstance().destroy();
     CfClient.getInstance().unregisterEventsListener(_eventListener);
   }
 
-  Future<void> initialiseFFClient(String apiKey, CfConfiguration conf, CfTarget target) async {
-      var initResult = await CfClient.getInstance().initialize(apiKey, conf, target);
+  Future<void> initialiseFFClient(
+      String apiKey, CfConfiguration conf, CfTarget target) async {
+    var initResult =
+        await CfClient.getInstance().initialize(apiKey, conf, target);
     if (initResult.success) {
       print("Successfully initialized client");
 
@@ -102,7 +104,6 @@ class _FlagState extends State<FlagState> {
 
       // Setup Event Handler
       CfClient.getInstance().registerEventsListener(_eventListener);
-
     } else {
       print("Failed to initialize client, serving defaults");
       await flagVariations();
@@ -125,8 +126,7 @@ class _FlagState extends State<FlagState> {
         break;
 
       case EventType.EVALUATION_POLLING:
-        List<EvaluationResponse> evals =
-        (data as List<EvaluationResponse>);
+        List<EvaluationResponse> evals = (data as List<EvaluationResponse>);
 
         for (final eval in evals) {
           if (_flagValues.containsKey(eval.flag)) {
@@ -139,7 +139,8 @@ class _FlagState extends State<FlagState> {
 
       case EventType.EVALUATION_DELETE:
         String flag = data;
-        print("Flag '$flag' has been deleted, evaluating flags again to fall back to default variation for that flag");
+        print(
+            "Flag '$flag' has been deleted, evaluating flags again to fall back to default variation for that flag");
         flagVariations();
         break;
 
@@ -154,22 +155,26 @@ class _FlagState extends State<FlagState> {
 
   Future<void> flagVariations() async {
     // Evaluate flag and set initial state
-    var boolVariation = await CfClient.getInstance().boolVariation(boolFlagName, false);
+    var boolVariation =
+        await CfClient.getInstance().boolVariation(boolFlagName, false);
     setState(() {
       _flagValues[boolFlagName] = boolVariation;
     });
 
-    var jsonVariation = await CfClient.getInstance().jsonVariation(jsonFlagName, {});
+    var jsonVariation =
+        await CfClient.getInstance().jsonVariation(jsonFlagName, {});
     setState(() {
       _flagValues[jsonFlagName] = jsonVariation;
     });
 
-    var stringVariation = await CfClient.getInstance().stringVariation(stringFlagName, "default");
+    var stringVariation =
+        await CfClient.getInstance().stringVariation(stringFlagName, "default");
     setState(() {
       _flagValues[stringFlagName] = stringVariation;
     });
 
-    var numberVariation = await CfClient.getInstance().numberVariation(numberFlagName, 1);
+    var numberVariation =
+        await CfClient.getInstance().numberVariation(numberFlagName, 1);
     setState(() {
       _flagValues[numberFlagName] = numberVariation;
     });
