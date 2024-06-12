@@ -176,7 +176,7 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
 
                 StatusEvent.EVENT_TYPE.EVALUATION_REMOVE -> {
                     val evaluation = it.extractEvaluationPayload()
-                    val content = mapOf("flag" to evaluation.flag) 
+                    val content = mapOf("flag" to evaluation.flag)
                     postToMainThread {
                         hostChannel.invokeMethod("evaluation_delete", content)
                     }
@@ -218,9 +218,24 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
         return CfClient.getInstance().numberVariation(args.first, number?.toDouble() ?: 0.0)
     }
 
-    private fun invokeDestroy() {
+    private fun invokeDestroy(result: MethodChannel.Result) {
         listener = null
-        CfClient.getInstance().close()
+        CfClient.getInstance().closeWithFuture().let { closeFuture ->
+            try {
+                val success = closeFuture.get()
+                Handler(Looper.getMainLooper()).post {
+                    if (success) {
+                        result.success(true)
+                    } else {
+                        result.error("closeError", "Failed to close SDK", null)
+                    }
+                }
+            } catch (e: Exception) {
+                Handler(Looper.getMainLooper()).post {
+                    result.error("closeError", "Failed to close SDK", e.localizedMessage)
+                }
+            }
+        }
     }
 
     private fun invokeJsonEvaluation(call: MethodCall): Map<String, Any?>? {
@@ -312,14 +327,14 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
 
             when (call.method) {
 
-                "initialize" ->  {
+                "initialize" -> {
                     try {
                         invokeInitialize(call, result)
-                      // The Android SDK only throws this if the SDK
-                      // is already initialized. We can encounter this if the back button
-                      // is used to minimize/close the Flutter app, then re-opened.
-                      // In this case, we know the Android SDK is already initialized so we can
-                      // just return a success to the core Flutter code.
+                        // The Android SDK only throws this if the SDK
+                        // is already initialized. We can encounter this if the back button
+                        // is used to minimize/close the Flutter app, then re-opened.
+                        // In this case, we know the Android SDK is already initialized so we can
+                        // just return a success to the core Flutter code.
                     } catch (e: IllegalStateException) {
                         println("Android SDK already successfully initialized. Returning success result without initializing.")
                         result.success(true)
@@ -384,12 +399,9 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
 
                 "destroy" -> {
 
-                    invokeDestroy()
+                    invokeDestroy(result)
 
-                    Handler(Looper.getMainLooper()).post {
 
-                        result.success(0)
-                    }
                 }
 
                 else -> result.notImplemented()
@@ -401,4 +413,5 @@ class FfFlutterClientSdkPlugin : FlutterPlugin, MethodCallHandler {
         channel.setMethodCallHandler(null)
     }
 }
+
 
