@@ -40,6 +40,6 @@ android {
 dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'io.harness:ff-android-client-sdk:2.2.2'
+    implementation 'io.harness:ff-android-client-sdk:2.2.1'
 
 }
