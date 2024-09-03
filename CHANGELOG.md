@@ -1,4 +1,4 @@
-## 2.2.2
+## 2.3.0
 Fixes and Enhancements:
 
 * Upgrades Feature Flags Android SDK to 2.2.3
