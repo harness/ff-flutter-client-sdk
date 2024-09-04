@@ -1,8 +1,16 @@
+## 2.3.0
+Fixes and Enhancements:
+
+* Upgrades Feature Flags Android SDK to 2.2.3
+* Upgrades Feature Flags iOS SDK to 1.3.1
+
 ## 2.2.1
 
 Fixes and Enhancements:
 
-*  Upgrades Feature Flags Android SDK to 2.2.0
+* Crash that could occur `java.lang.IllegalStateException: Reply already submitted` if the SDK was closed and re-initialised multiple times within quick succession.
+* Upgrades Feature Flags Android SDK to 2.2.1
+
 
 ## 2.2.0
 
