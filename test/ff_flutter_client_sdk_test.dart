@@ -1,3 +1,4 @@
+import 'package:ff_flutter_client_sdk/CfClient.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -42,22 +43,17 @@ void main() {
     channel.setMockMethodCallHandler(null);
   });
 
-  test('placeholder', () async {
-    expect(true, true);
+  test('initializeMethod', () async {
+    expect((await CfClient.getInstance().initialize("", CfConfigurationBuilder().build(), CfTargetBuilder().build())).success, true);
   });
 
-  // FIXME:
-  // test('initializeMethod', () async {
-  //   expect((await CfClient.initialize("", CfConfigurationBuilder().build(), CfTargetBuilder().build())).success, true);
-  // });
-  //
-  // test('stringVariation', () async {
-  //   expect((await CfClient.stringVariation("demo_first_id", "demo_value")), "first_value");
-  //   expect((await CfClient.stringVariation("demo_empty_id", "demo_value")), "demo_value");
-  // });
-  // test('boolVariation', () async {
-  //   expect((await CfClient.boolVariation("demo_first_bool_id", false)), true);
-  //   expect((await CfClient.boolVariation("demo_second_bool_id", false)), false);
-  // });
+  test('stringVariation', () async {
+    expect((await CfClient.getInstance().stringVariation("demo_first_id", "demo_value")), "first_value");
+    expect((await CfClient.getInstance().stringVariation("demo_empty_id", "demo_value")), "demo_value");
+  });
+  test('boolVariation', () async {
+    expect((await CfClient.getInstance().boolVariation("demo_first_bool_id", false)), true);
+    expect((await CfClient.getInstance().boolVariation("demo_second_bool_id", false)), false);
+  });
 
 }
